@@ -1,0 +1,181 @@
+# Use environment variables from .env.docker file
+# Copy .env.docker.example to .env.docker and configure your values
+# For local development, you can also use .env file
+
+services:  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: course-platform-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-course_platform}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./prisma/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - course-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d course_platform"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles:
+      - default
+      - development
+      - production
+
+  # Redis for session/caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: course-platform-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - course-network
+    command: redis-server --appendonly yes
+    profiles:
+      - default
+      - development
+      - production
+  # Course Platform API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: course-platform-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      DATABASE_URL: ${DATABASE_URL_PROD:-postgresql://postgres:postgres123@postgres:5432/course_platform}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      PORT: ${PORT:-3000}
+      REDIS_URL: redis://redis:6379
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      # AWS S3 Configuration
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+      AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
+      AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
+      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - course-network
+    volumes:
+      - ./uploads:/app/uploads
+    profiles:
+      - production
+  # Development service (use this for development)
+  api-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: course-platform-api-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres123@postgres:5432/course_platform_dev}
+      JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
+      PORT: ${PORT:-3000}
+      REDIS_URL: redis://redis:6379
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_example_stripe_key_for_development}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_example_stripe_key_for_development}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_test_placeholder}
+      # AWS S3 Configuration
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-}
+      AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
+      AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
+      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - course-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./uploads:/app/uploads
+    command: ["pnpm", "run", "dev"]
+    profiles:
+      - development
+
+  # Prisma Studio (Database GUI) - Production DB
+  prisma-studio:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: course-platform-studio
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/course_platform
+    ports:
+      - "5555:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - course-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["pnpm", "exec", "prisma", "studio", "--port", "5555", "--hostname", "0.0.0.0"]
+    profiles:
+      - development
+
+  # Prisma Studio Dev (Database GUI) - Development DB
+  prisma-studio-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: course-platform-studio-dev
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/course_platform_dev
+    ports:
+      - "5556:5555"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - course-network
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["pnpm", "exec", "prisma", "studio", "--port", "5555", "--hostname", "0.0.0.0"]
+    profiles:
+      - development
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  course-network:
+    driver: bridge

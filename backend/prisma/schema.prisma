@@ -1,0 +1,237 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(STUDENT)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  courses     Course[]        @relation("InstructorCourses")
+  enrollments Enrollment[]
+  comments    LessonComment[]
+  payments    Payment[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  courses Course[]
+
+  @@map("categories")
+}
+
+model Course {
+  id              String      @id @default(cuid())
+  title           String
+  description     String?
+  imageUrl        String?
+  price           Float       @default(0)
+  isPublished     Boolean     @default(false)
+  instructorId    String
+  categoryId      String?
+  paymentType     PaymentType @default(ONE_TIME)
+  stripeProductId String?     @unique
+  stripePriceId   String?     @unique
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  // Relations
+  instructor  User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  modules     Module[]
+  lessons     Lesson[]
+  enrollments Enrollment[]
+  payments    Payment[]
+
+  @@index([instructorId])
+  @@index([categoryId])
+  @@index([isPublished])
+  @@map("courses")
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  order       Int      @default(0)
+  courseId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+  @@index([order])
+  @@map("modules")
+}
+
+model Lesson {
+  id          String     @id @default(cuid())
+  title       String
+  content     String
+  description String?
+  videoUrl    String?
+  duration    Int?
+  order       Int        @default(0)
+  moduleId    String?
+  courseId    String
+  type        LessonType @default(VIDEO)
+  isPreview   Boolean    @default(false)
+  isLocked    Boolean    @default(false)
+  isCompleted Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  // Relations
+  module   Module?         @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  course   Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  comments LessonComment[]
+
+  @@index([moduleId])
+  @@index([courseId])
+  @@index([order])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id          String    @id @default(cuid())
+  userId      String
+  courseId    String
+  enrolledAt  DateTime  @default(now())
+  completedAt DateTime?
+  progress    Float     @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model LessonComment {
+  id        String   @id @default(cuid())
+  content   String
+  userId    String
+  lessonId  String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson  Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  parent  LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies LessonComment[] @relation("CommentReplies")
+
+  @@index([userId])
+  @@index([lessonId])
+  @@index([parentId])
+  @@map("lesson_comments")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum PaymentType {
+  ONE_TIME
+  SUBSCRIPTION
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+}
+
+enum LessonType {
+  VIDEO
+  TEXT
+  QUIZ
+  ASSIGNMENT
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  userId          String
+  courseId        String
+  stripePaymentId String        @unique
+  amount          Float
+  currency        String        @default("usd")
+  status          PaymentStatus @default(PENDING)
+  paymentType     PaymentType
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  subscription Subscription?
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@map("payments")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  paymentId            String             @unique
+  stripeSubscriptionId String             @unique
+  stripeCustomerId     String
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  cancelledAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  // Relations
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([stripeSubscriptionId])
+  @@index([stripeCustomerId])
+  @@index([status])
+  @@map("subscriptions")
+}

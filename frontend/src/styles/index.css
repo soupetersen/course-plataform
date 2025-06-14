@@ -1,0 +1,10 @@
+/* Main styles entry point */
+@import './base/reset.css';
+@import './base/tokens.css';
+@import './base/globals.css';
+@import './components/ui.css';
+@import './utilities/animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

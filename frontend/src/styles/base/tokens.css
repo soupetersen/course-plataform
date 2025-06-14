@@ -1,0 +1,62 @@
+/* Design tokens and CSS custom properties */
+@layer base {
+  :root {
+    /* Color tokens */
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 338 100% 56%; /* FF204E */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 332 79% 36%; /* A0153E */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 338 100% 56%; /* FF204E */
+    
+    /* Spacing and sizing */
+    --radius: 0.5rem;
+    
+    /* Chart colors */
+    --chart-1: 338 100% 56%; /* FF204E */
+    --chart-2: 332 79% 36%; /* A0153E */
+    --chart-3: 318 65% 32%; /* 5D0E41 */
+    --chart-4: 217 100% 15%; /* 00224D */
+    --chart-5: 173 58% 39%;
+  }
+
+  .dark {
+    --background: 217 100% 15%; /* 00224D */
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 338 100% 56%; /* FF204E */
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 332 79% 36%; /* A0153E */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 338 100% 56%; /* FF204E */
+    --chart-1: 338 100% 56%; /* FF204E */
+    --chart-2: 332 79% 36%; /* A0153E */
+    --chart-3: 318 65% 32%; /* 5D0E41 */
+    --chart-4: 217 100% 15%; /* 00224D */
+    --chart-5: 173 58% 39%;
+  }
+}
