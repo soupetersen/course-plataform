@@ -47,18 +47,22 @@ export const CourseHeader = ({
 
   return (
     <div className="space-y-4 animate-slide-in-left">
+      {" "}
       <div className="flex items-center space-x-2">
         <Badge className={getLevelColor(course.level)}>
           {getLevelText(course.level)}
         </Badge>
-        <span className="text-sm text-gray-600">•</span>
-        <span className="text-sm text-gray-600">{course.category.name}</span>
+        {course.category && (
+          <>
+            <span className="text-sm text-gray-600">•</span>
+            <span className="text-sm text-gray-600">
+              {course.category.name}
+            </span>
+          </>
+        )}
       </div>
-
       <h1 className="text-4xl font-bold text-gray-900">{course.title}</h1>
-
       <p className="text-xl text-gray-600">{course.description}</p>
-
       <div className="flex items-center space-x-6 text-sm text-gray-600">
         <div className="flex items-center">
           <Users className="h-4 w-4 mr-1" />
@@ -76,16 +80,23 @@ export const CourseHeader = ({
           <Star className="h-4 w-4 mr-1" />
           4.8 (234 avaliações)
         </div>
-      </div>
-
+      </div>{" "}
       <div className="flex items-center space-x-4">
-        <img
-          src={course.instructor.avatar || "/default-avatar.png"}
-          alt={course.instructor.name}
-          className="w-12 h-12 rounded-full object-cover"
-        />
+        {course.instructor?.avatar ? (
+          <img
+            src={course.instructor.avatar}
+            alt={course.instructor.name}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
+            {course.instructor?.name?.charAt(0).toUpperCase() || "I"}
+          </div>
+        )}
         <div>
-          <p className="font-medium text-gray-900">{course.instructor.name}</p>
+          <p className="font-medium text-gray-900">
+            {course.instructor?.name || "Instrutor"}
+          </p>
           <p className="text-sm text-gray-600">Instrutor</p>
         </div>
       </div>

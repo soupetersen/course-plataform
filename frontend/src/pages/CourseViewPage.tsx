@@ -25,13 +25,30 @@ export const CourseViewPage = () => {
       </div>
     );
   }
-
   const isInstructor = user?.id === course.instructorId;
   const levelLabels = {
     BEGINNER: "Iniciante",
     INTERMEDIATE: "Intermediário",
     ADVANCED: "Avançado",
   };
+
+  const totalLessons =
+    course.modules?.reduce(
+      (acc, module) => acc + (module.lessons?.length || 0),
+      0
+    ) || 0;
+  const totalDuration =
+    course.modules?.reduce(
+      (acc, module) =>
+        acc +
+        (module.lessons?.reduce(
+          (lessonAcc, lesson) => lessonAcc + (lesson.duration || 0),
+          0
+        ) || 0),
+      0
+    ) || 0;
+  const totalDurationHours = Math.floor(totalDuration / 3600);
+  const totalDurationMinutes = Math.floor((totalDuration % 3600) / 60);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,13 +80,10 @@ export const CourseViewPage = () => {
                   {course.status === "PUBLISHED" ? "Publicado" : "Rascunho"}
                 </Badge>
               </div>
-
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {course.title}
               </h1>
-
-              <p className="text-gray-600 text-lg mb-4">{course.description}</p>
-
+              <p className="text-gray-600 text-lg mb-4">{course.description}</p>{" "}
               <div className="flex items-center space-x-6 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
@@ -80,8 +94,15 @@ export const CourseViewPage = () => {
                   {course.modules?.length || 0} módulos
                 </div>
                 <div className="flex items-center">
+                  <Play className="w-4 h-4 mr-1" />
+                  {totalLessons} aulas
+                </div>
+                <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {course.duration || 0}h de conteúdo
+                  {totalDurationHours > 0
+                    ? `${totalDurationHours}h ${totalDurationMinutes}m`
+                    : `${totalDurationMinutes}m`}{" "}
+                  de conteúdo
                 </div>
                 <div className="flex items-center">
                   <Star className="w-4 h-4 mr-1" />
@@ -140,7 +161,6 @@ export const CourseViewPage = () => {
                 </CardContent>
               </Card>
             )}
-
             <Card>
               <CardHeader>
                 <CardTitle>Sobre este curso</CardTitle>
@@ -150,8 +170,7 @@ export const CourseViewPage = () => {
                   {course.description || "Nenhuma descrição disponível."}
                 </p>
               </CardContent>
-            </Card>
-
+            </Card>{" "}
             <Card>
               <CardHeader>
                 <CardTitle>Conteúdo do Curso</CardTitle>
@@ -162,21 +181,107 @@ export const CourseViewPage = () => {
                     {course.modules.map((module, index) => (
                       <div
                         key={module.id}
-                        className="border border-gray-200 rounded-lg p-4"
+                        className="border border-gray-200 rounded-lg overflow-hidden"
                       >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h3 className="font-medium text-gray-900">
-                              {index + 1}. {module.title}
-                            </h3>
-                            <p className="text-sm text-gray-500 mt-1">
-                              {module.description}
+                        <div className="bg-gray-50 p-4 border-b">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-medium text-gray-900 text-lg">
+                                {index + 1}. {module.title}
+                              </h3>
+                              {module.description && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {module.description}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">
+                                {module.lessons?.length || 0} aulas
+                              </Badge>
+                              <Badge variant="outline">
+                                {module.lessons?.reduce(
+                                  (acc, lesson) => acc + (lesson.duration || 0),
+                                  0
+                                )}{" "}
+                                min
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Lista de aulas do módulo */}
+                        {module.lessons && module.lessons.length > 0 && (
+                          <div className="divide-y divide-gray-100">
+                            {module.lessons.map((lesson, lessonIndex) => (
+                              <div
+                                key={lesson.id}
+                                className="p-4 hover:bg-gray-50 transition-colors"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className="w-8 h-8 bg-[#FF204E] text-white rounded-full flex items-center justify-center text-sm font-medium">
+                                      {lessonIndex + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                      <div className="flex items-center space-x-2">
+                                        <h4 className="font-medium text-gray-900">
+                                          {lesson.title}
+                                        </h4>
+                                        {lesson.isPreview && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-green-600 border-green-600"
+                                          >
+                                            Preview
+                                          </Badge>
+                                        )}
+                                        {lesson.isLocked && (
+                                          <Badge
+                                            variant="outline"
+                                            className="text-orange-600 border-orange-600"
+                                          >
+                                            Bloqueada
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      {lesson.description && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                          {lesson.description}
+                                        </p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                    <div className="flex items-center">
+                                      <Play className="w-4 h-4 mr-1" />
+                                      {lesson.type || "Vídeo"}
+                                    </div>
+                                    {lesson.duration && (
+                                      <div className="flex items-center">
+                                        <Clock className="w-4 h-4 mr-1" />
+                                        {Math.floor(lesson.duration / 60)}:
+                                        {(lesson.duration % 60)
+                                          .toString()
+                                          .padStart(2, "0")}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Caso não tenha aulas */}
+                        {(!module.lessons || module.lessons.length === 0) && (
+                          <div className="p-4 text-center text-gray-500">
+                            <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                            <p className="text-sm">
+                              Este módulo ainda não possui aulas.
                             </p>
                           </div>
-                          <Badge variant="outline">
-                            {module.lessons?.length || 0} aulas
-                          </Badge>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -220,7 +325,7 @@ export const CourseViewPage = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Estatísticas</CardTitle>
-              </CardHeader>
+              </CardHeader>{" "}
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Alunos inscritos</span>
@@ -235,8 +340,16 @@ export const CourseViewPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-gray-600">Total de aulas</span>
+                  <span className="font-medium">{totalLessons}</span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-gray-600">Duração total</span>
-                  <span className="font-medium">{course.duration || 0}h</span>
+                  <span className="font-medium">
+                    {totalDurationHours > 0
+                      ? `${totalDurationHours}h ${totalDurationMinutes}m`
+                      : `${totalDurationMinutes}m`}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Criado em</span>
