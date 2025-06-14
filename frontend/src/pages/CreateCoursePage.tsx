@@ -71,7 +71,6 @@ export const CreateCoursePage = () => {
           uploadedImageUrl = uploadResult.url;
         } catch (error) {
           console.error("Error uploading image:", error);
-          
         } finally {
           setIsUploadingImage(false);
         }
@@ -116,28 +115,31 @@ export const CreateCoursePage = () => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Voltar ao Dashboard
         </Link>
-
-        <h1 className="text-3xl font-bold text-gray-900">Criar Novo Curso</h1>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Criar Novo Curso
+        </h1>{" "}
         <p className="text-gray-600 mt-2">
-          Preencha as informaÃ§Ãµes bÃ¡sicas do seu curso. VocÃª poderÃ¡ adicionar
-          mÃ³dulos e aulas depois.
+          Preencha as informações básicas do seu curso. Você poderá adicionar
+          módulos e aulas depois.
         </p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <Card>
           <CardHeader>
+            {" "}
             <CardTitle className="flex items-center">
               <Plus className="w-5 h-5 mr-2" />
-              InformaÃ§Ãµes BÃ¡sicas
+              Informações Básicas
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
+            {" "}
             <div>
-              <Label htmlFor="title">TÃ­tulo do Curso*</Label>
+              <Label htmlFor="title">Título do Curso*</Label>
               <Input
                 id="title"
-                {...register("title", { required: "TÃ­tulo Ã© obrigatÃ³rio" })}
+                {...register("title", { required: "Título é obrigatório" })}
                 placeholder="Ex: Desenvolvimento Web Completo"
                 className={errors.title ? "border-red-500" : ""}
               />
@@ -147,15 +149,14 @@ export const CreateCoursePage = () => {
                 </p>
               )}
             </div>
-
             <div>
-              <Label htmlFor="description">DescriÃ§Ã£o*</Label>
+              <Label htmlFor="description">Descrição*</Label>
               <Textarea
                 id="description"
                 {...register("description", {
-                  required: "DescriÃ§Ã£o Ã© obrigatÃ³ria",
+                  required: "Descrição é obrigatória",
                 })}
-                placeholder="Descreva o que os alunos aprenderÃ£o neste curso..."
+                placeholder="Descreva o que os alunos aprenderão neste curso..."
                 rows={4}
                 className={errors.description ? "border-red-500" : ""}
               />
@@ -165,7 +166,6 @@ export const CreateCoursePage = () => {
                 </p>
               )}
             </div>
-
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="categoryId">Categoria*</Label>
@@ -190,10 +190,9 @@ export const CreateCoursePage = () => {
                     {errors.categoryId.message}
                   </p>
                 )}
-              </div>
-
+              </div>{" "}
               <div>
-                <Label htmlFor="level">NÃ­vel*</Label>
+                <Label htmlFor="level">Nível*</Label>
                 <Select
                   onValueChange={(value: string) =>
                     setValue(
@@ -203,12 +202,12 @@ export const CreateCoursePage = () => {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecione o nÃ­vel" />
+                    <SelectValue placeholder="Selecione o nível" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="BEGINNER">Iniciante</SelectItem>
-                    <SelectItem value="INTERMEDIATE">IntermediÃ¡rio</SelectItem>
-                    <SelectItem value="ADVANCED">AvanÃ§ado</SelectItem>
+                    <SelectItem value="INTERMEDIATE">Intermediário</SelectItem>
+                    <SelectItem value="ADVANCED">Avançado</SelectItem>
                   </SelectContent>
                 </Select>
                 {errors.level && (
@@ -218,19 +217,18 @@ export const CreateCoursePage = () => {
                 )}
               </div>
             </div>
-
             <div>
-              <Label htmlFor="price">PreÃ§o (R$)*</Label>
+              <Label htmlFor="price">Preço (R$)*</Label>
               <Input
                 id="price"
                 type="number"
                 step="0.01"
                 min="0"
                 {...register("price", {
-                  required: "PreÃ§o Ã© obrigatÃ³rio",
+                  required: "Preço é obrigatório",
                   min: {
                     value: 0,
-                    message: "PreÃ§o deve ser maior ou igual a 0",
+                    message: "Preço deve ser maior ou igual a 0",
                   },
                 })}
                 placeholder="0.00"
@@ -245,7 +243,6 @@ export const CreateCoursePage = () => {
                 Digite 0 para curso gratuito
               </p>
             </div>
-
             <div>
               <Label htmlFor="image">Imagem de Capa</Label>
               <div className="mt-2">
@@ -285,9 +282,9 @@ export const CreateCoursePage = () => {
                           <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
                           <p className="text-gray-600">
                             Clique para fazer upload da imagem
-                          </p>
+                          </p>{" "}
                           <p className="text-gray-400 text-sm">
-                            PNG, JPG atÃ© 5MB
+                            PNG, JPG até 5MB
                           </p>
                         </>
                       )}

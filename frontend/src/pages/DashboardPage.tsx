@@ -40,11 +40,11 @@ export const DashboardPage = () => {
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="student" className="flex items-center gap-2">
               <GraduationCap className="w-4 h-4" />
-              Ãrea do Aluno
+              Área do Aluno
             </TabsTrigger>
             <TabsTrigger value="instructor" className="flex items-center gap-2">
               <BookOpen className="w-4 h-4" />
-              Ãrea do Instrutor
+              Área do Instrutor
             </TabsTrigger>
           </TabsList>
 

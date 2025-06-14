@@ -29,8 +29,8 @@ export const CourseViewPage = () => {
   const isInstructor = user?.id === course.instructorId;
   const levelLabels = {
     BEGINNER: "Iniciante",
-    INTERMEDIATE: "IntermediÃ¡rio",
-    ADVANCED: "AvanÃ§ado",
+    INTERMEDIATE: "Intermediário",
+    ADVANCED: "Avançado",
   };
 
   return (
@@ -77,15 +77,15 @@ export const CourseViewPage = () => {
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="w-4 h-4 mr-1" />
-                  {course.modules?.length || 0} mÃ³dulos
+                  {course.modules?.length || 0} módulos
                 </div>
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
-                  {course.duration || 0}h de conteÃºdo
+                  {course.duration || 0}h de conteúdo
                 </div>
                 <div className="flex items-center">
                   <Star className="w-4 h-4 mr-1" />
-                  4.8 (324 avaliaÃ§Ãµes)
+                  4.8 (324 avaliações)
                 </div>
               </div>
             </div>
@@ -147,14 +147,14 @@ export const CourseViewPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  {course.description || "Nenhuma descriÃ§Ã£o disponÃ­vel."}
+                  {course.description || "Nenhuma descrição disponível."}
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>ConteÃºdo do Curso</CardTitle>
+                <CardTitle>Conteúdo do Curso</CardTitle>
               </CardHeader>
               <CardContent>
                 {course.modules && course.modules.length > 0 ? (
@@ -183,7 +183,7 @@ export const CourseViewPage = () => {
                 ) : (
                   <div className="text-center py-8 text-gray-500">
                     <BookOpen className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>Este curso ainda nÃ£o possui mÃ³dulos.</p>
+                    <p>Este curso ainda não possui módulos.</p>
                   </div>
                 )}
               </CardContent>
@@ -219,7 +219,7 @@ export const CourseViewPage = () => {
             {}
             <Card>
               <CardHeader>
-                <CardTitle>EstatÃ­sticas</CardTitle>
+                <CardTitle>Estatísticas</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -229,13 +229,13 @@ export const CourseViewPage = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">MÃ³dulos</span>
+                  <span className="text-gray-600">Módulos</span>
                   <span className="font-medium">
                     {course.modules?.length || 0}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">DuraÃ§Ã£o total</span>
+                  <span className="text-gray-600">Duração total</span>
                   <span className="font-medium">{course.duration || 0}h</span>
                 </div>
                 <div className="flex justify-between">
@@ -255,9 +255,9 @@ export const CourseViewPage = () => {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2 text-sm text-gray-600">
-                  <li>â€¢ Conhecimento bÃ¡sico de informÃ¡tica</li>
-                  <li>â€¢ Acesso Ã  internet</li>
-                  <li>â€¢ DedicaÃ§Ã£o para estudar</li>
+                  <li>• Conhecimento básico de informática</li>
+                  <li>• Acesso à internet</li>
+                  <li>• Dedicação para estudar</li>
                 </ul>
               </CardContent>
             </Card>

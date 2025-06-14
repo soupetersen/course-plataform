@@ -81,8 +81,7 @@ services:  # PostgreSQL Database
     volumes:
       - ./uploads:/app/uploads
     profiles:
-      - production
-  # Development service (use this for development)
+      - production  # Development service (use this for development)
   api-dev:
     build:
       context: .
@@ -106,7 +105,7 @@ services:  # PostgreSQL Database
       AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-}
       AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
       AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
-      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
+      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}   
     ports:
       - "3000:3000"
     depends_on:
@@ -129,7 +128,7 @@ services:  # PostgreSQL Database
     build:
       context: .
       dockerfile: Dockerfile.dev
-    container_name: course-platform-studio
+    container_name: course-platform-studio0
     restart: "no"
     environment:
       DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/course_platform

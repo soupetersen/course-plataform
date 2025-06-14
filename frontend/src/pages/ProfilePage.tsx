@@ -96,14 +96,14 @@ export const ProfilePage = () => {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile">Perfil</TabsTrigger>
           <TabsTrigger value="courses">Meus Cursos</TabsTrigger>
-          <TabsTrigger value="settings">ConfiguraÃ§Ãµes</TabsTrigger>
+          <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
           <Card className="animate-slide-in-left">
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>InformaÃ§Ãµes Pessoais</CardTitle>
+                <CardTitle>Informações Pessoais</CardTitle>
                 {!isEditing ? (
                   <Button variant="outline" onClick={() => setIsEditing(true)}>
                     Editar
@@ -159,7 +159,7 @@ export const ProfilePage = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Tipo de UsuÃ¡rio</Label>
+                  <Label>Tipo de Usuário</Label>
                   <Badge className={getRoleColor(user.role)}>
                     {getRoleText(user.role)}
                   </Badge>
@@ -222,7 +222,7 @@ export const ProfilePage = () => {
                     <h3 className="text-2xl font-bold text-gray-900">
                       {stats.averageProgress}%
                     </h3>
-                    <p className="text-gray-600">Progresso MÃ©dio</p>
+                    <p className="text-gray-600">Progresso Médio</p>
                   </>
                 )}
               </CardContent>
@@ -235,7 +235,7 @@ export const ProfilePage = () => {
             <CardHeader>
               <CardTitle>Meus Cursos</CardTitle>
               <CardDescription>
-                Cursos nos quais vocÃª estÃ¡ inscrito
+                Cursos nos quais você está inscrito
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -248,7 +248,7 @@ export const ProfilePage = () => {
                 <div className="text-center py-12">
                   <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-600">
-                    VocÃª ainda nÃ£o estÃ¡ inscrito em nenhum curso.
+                    Você ainda não está inscrito em nenhum curso.
                   </p>
                   <Button className="mt-4">Explorar Cursos</Button>
                 </div>
@@ -262,10 +262,10 @@ export const ProfilePage = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold text-lg">
-                            {enrollment.course?.title || "Curso sem tÃ­tulo"}
+                            {enrollment.course?.title || "Curso sem título"}
                           </h3>
                           <p className="text-gray-600 text-sm mt-1">
-                            {enrollment.course?.description || "Sem descriÃ§Ã£o"}
+                            {enrollment.course?.description || "Sem descrição"}
                           </p>
                           <div className="flex items-center gap-4 mt-2">
                             <div className="flex items-center gap-2">
@@ -284,7 +284,7 @@ export const ProfilePage = () => {
                                 variant="outline"
                                 className="bg-green-100 text-green-800"
                               >
-                                ConcluÃ­do
+                                Concluído
                               </Badge>
                             )}
                             {!enrollment.isActive && (
@@ -314,30 +314,30 @@ export const ProfilePage = () => {
         <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>ConfiguraÃ§Ãµes da Conta</CardTitle>
+              {" "}
+              <CardTitle>Configurações da Conta</CardTitle>
               <CardDescription>
-                Gerencie suas preferÃªncias e configuraÃ§Ãµes
+                Gerencie suas preferências e configurações
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              {" "}
               <div className="space-y-2">
-                <Label>NotificaÃ§Ãµes por E-mail</Label>
+                <Label>Notificações por E-mail</Label>
                 <div className="flex items-center space-x-2">
                   <input type="checkbox" id="notifications" defaultChecked />
                   <Label htmlFor="notifications" className="text-sm">
-                    Receber notificaÃ§Ãµes sobre novos cursos e atualizaÃ§Ãµes
+                    Receber notificações sobre novos cursos e atualizações
                   </Label>
                 </div>
               </div>
-
               <div className="space-y-2">
                 <Label>Idioma</Label>
                 <select className="w-full p-2 border rounded-md">
-                  <option value="pt-BR">PortuguÃªs (Brasil)</option>
+                  <option value="pt-BR">Português (Brasil)</option>
                   <option value="en-US">English (US)</option>
                 </select>
               </div>
-
               <div className="pt-4">
                 <Button variant="destructive">Excluir Conta</Button>
               </div>

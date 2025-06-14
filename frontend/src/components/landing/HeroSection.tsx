@@ -7,21 +7,19 @@ export const HeroSection = () => {
   return (
     <section className="section-padding hero-gradient">
       <div className="container text-center">
+        {" "}
         <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 fade-in">
-          ðŸš€ Mais de 10.000 alunos jÃ¡ transformaram suas carreiras
+          🚀 Mais de 10.000 alunos já transformaram suas carreiras
         </Badge>
-
         <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 fade-in-up">
           Transforme sua carreira com
           <span className="gradient-text"> cursos online</span>
-        </h1>
-
+        </h1>{" "}
         <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto fade-in-up">
           Aprenda as tecnologias mais demandadas do mercado com instrutores
-          especialistas. Do bÃ¡sico ao avanÃ§ado, com certificados e suporte
+          especialistas. Do básico ao avançado, com certificados e suporte
           completo.
         </p>
-
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 fade-in-up">
           <Link to="/courses">
             <Button size="lg" className="btn-gradient px-8 py-6 text-lg">
@@ -40,7 +38,6 @@ export const HeroSection = () => {
             Aula Gratuita
           </Button>
         </div>
-
         {}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto fade-in-up">
           <div className="text-center">
@@ -50,14 +47,14 @@ export const HeroSection = () => {
           <div className="text-center">
             <div className="text-3xl font-bold text-primary">50+</div>
             <div className="text-muted-foreground">Cursos</div>
-          </div>
+          </div>{" "}
           <div className="text-center">
-            <div className="text-3xl font-bold text-primary">4.8â˜…</div>
-            <div className="text-muted-foreground">AvaliaÃ§Ã£o</div>
+            <div className="text-3xl font-bold text-primary">4.8⭐</div>
+            <div className="text-muted-foreground">Avaliação</div>
           </div>
           <div className="text-center">
             <div className="text-3xl font-bold text-primary">95%</div>
-            <div className="text-muted-foreground">SatisfaÃ§Ã£o</div>
+            <div className="text-muted-foreground">Satisfação</div>
           </div>
         </div>
       </div>

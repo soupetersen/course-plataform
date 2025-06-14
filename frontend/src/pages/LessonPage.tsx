@@ -20,10 +20,10 @@ export function LessonPage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Aula nÃ£o encontrada
+          Aula não encontrada
         </h2>
         <p className="text-gray-600">
-          A aula que vocÃª estÃ¡ procurando nÃ£o existe.
+          A aula que você está procurando não existe.
         </p>
       </div>
     );
@@ -55,7 +55,7 @@ export function LessonPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="prose max-w-none">
-              <h2>ConteÃºdo da Aula</h2>
+              <h2>Conteúdo da Aula</h2>
 
               {lesson.content && (
                 <div dangerouslySetInnerHTML={{ __html: lesson.content }} />
