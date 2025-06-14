@@ -110,13 +110,42 @@ export class CourseController {
       });
     }
   }
-
   async findById(request: FastifyRequest<{ Params: CourseParams }>, reply: FastifyReply) {
     try {
       const { id } = request.params;
       
-      const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
-      const course = await courseRepository.findById(id);
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+
+      const course = await prisma.course.findUnique({
+        where: { id },
+        include: {
+          instructor: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              role: true
+            }
+          },
+          category: {
+            select: {
+              id: true,
+              name: true,
+              description: true
+            }
+          },
+          modules: {
+            include: {
+              lessons: {
+                orderBy: { order: 'asc' }
+              }
+            },
+            orderBy: { order: 'asc' }
+          },
+          enrollments: true
+        }
+      });
 
       if (!course) {
         return reply.status(404).send({
@@ -125,9 +154,31 @@ export class CourseController {
         });
       }
 
+      const transformedCourse = {
+        id: course.id,
+        title: course.title,
+        description: course.description || '',
+        imageUrl: course.imageUrl || undefined,
+        price: course.price,
+        level: 'BEGINNER',
+        duration: 0,
+        status: course.isPublished ? 'PUBLISHED' : 'DRAFT',
+        isActive: true,
+        instructorId: course.instructorId,
+        instructor: course.instructor,
+        categoryId: course.categoryId || '',
+        category: course.category,
+        modules: course.modules || [],
+        enrollments: course.enrollments || [],
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      };
+
+      await prisma.$disconnect();
+
       reply.send({
         success: true,
-        data: course
+        data: transformedCourse
       });
     } catch (error) {
       reply.status(500).send({
