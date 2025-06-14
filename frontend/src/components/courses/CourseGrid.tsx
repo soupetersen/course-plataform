@@ -151,7 +151,7 @@ export const CourseGrid = ({
                 </span>
               </div>
 
-              <Link to={`/courses/${course.id}`}>
+              <Link to={`/course/${course.id}`}>
                 <Button className="w-full group-hover:scale-105 transition-transform">
                   Ver curso
                 </Button>
