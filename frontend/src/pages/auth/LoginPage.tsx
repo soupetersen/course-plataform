@@ -34,7 +34,7 @@ export function LoginPage() {
         navigate(redirectPath);
       },
       onError: (error: Error) => {
-        setErrorMessage(error?.message || "Email ou senha invÃ¡lidos");
+        setErrorMessage(error?.message || "Email ou senha inválidos");
         console.error("Login error:", error);
       },
     });
@@ -46,7 +46,6 @@ export function LoginPage() {
       [e.target.name]: e.target.value,
     }));
 
-    
     if (errorMessage) {
       setErrorMessage("");
     }

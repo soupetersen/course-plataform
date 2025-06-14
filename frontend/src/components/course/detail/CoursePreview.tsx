@@ -27,7 +27,7 @@ export const CoursePreview = ({ imageUrl, title }: CoursePreviewProps) => {
         </div>
         <div className="absolute bottom-4 left-4 text-white">
           <p className="text-sm opacity-80">Preview do curso</p>
-          <p className="font-medium">Veja uma prÃ©via gratuita</p>
+          <p className="font-medium">Veja uma prévia gratuita</p>
         </div>
       </div>
     </div>

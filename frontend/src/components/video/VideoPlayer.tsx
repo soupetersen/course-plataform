@@ -1,5 +1,13 @@
-﻿import React, { useRef, useState, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Maximize, RotateCcw, RotateCw } from 'lucide-react';
+﻿import React, { useRef, useState, useEffect } from "react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  RotateCcw,
+  RotateCw,
+} from "lucide-react";
 
 interface VideoPlayerProps {
   src?: string;
@@ -28,7 +36,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   const togglePlay = () => {
@@ -106,24 +114,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       }
     };
 
-    video.addEventListener('play', handlePlay);
-    video.addEventListener('pause', handlePause);
-    video.addEventListener('ended', handleEnded);
-    video.addEventListener('timeupdate', handleTimeUpdateInternal);
-    video.addEventListener('loadedmetadata', handleLoadedMetadata);
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("timeupdate", handleTimeUpdateInternal);
+    video.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     return () => {
-      video.removeEventListener('play', handlePlay);
-      video.removeEventListener('pause', handlePause);
-      video.removeEventListener('ended', handleEnded);
-      video.removeEventListener('timeupdate', handleTimeUpdateInternal);
-      video.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("timeupdate", handleTimeUpdateInternal);
+      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, [onEnded, onTimeUpdate]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    
+
     const resetTimeout = () => {
       clearTimeout(timeout);
       setShowControls(true);
@@ -149,9 +157,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         <div className="text-center text-white">
           <div className="w-16 h-16 mx-auto mb-4 bg-gray-700 rounded-full flex items-center justify-center">
             <Play className="w-8 h-8" />
-          </div>
-          <p className="text-lg font-medium">Nenhum vÃ­deo disponÃ­vel</p>
-          <p className="text-sm text-gray-400">Este conteÃºdo ainda nÃ£o possui vÃ­deo</p>
+          </div>{" "}
+          <p className="text-lg font-medium">Nenhum vídeo disponível</p>
+          <p className="text-sm text-gray-400">
+            Este conteúdo ainda não possui vídeo
+          </p>
         </div>
       </div>
     );
@@ -178,7 +188,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       {}
       <div
         className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
-          showControls || !isPlaying ? 'opacity-100' : 'opacity-0'
+          showControls || !isPlaying ? "opacity-100" : "opacity-0"
         }`}
       >
         {}
@@ -210,7 +220,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           >
             <div
               className="h-full bg-[#FF204E] rounded-full transition-all duration-100 group-hover/progress:h-3 relative"
-              style={{ width: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+              style={{
+                width: `${duration ? (currentTime / duration) * 100 : 0}%`,
+              }}
             >
               <div className="absolute right-0 top-1/2 transform translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-[#FF204E] rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity"></div>
             </div>
@@ -223,7 +235,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 onClick={togglePlay}
                 className="text-white hover:text-[#FF204E] transition-colors"
               >
-                {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                {isPlaying ? (
+                  <Pause className="w-6 h-6" />
+                ) : (
+                  <Play className="w-6 h-6" />
+                )}
               </button>
 
               <button

@@ -10,7 +10,7 @@ export const CourseStats = ({ course }: CourseStatsProps) => {
   const stats = [
     {
       icon: Clock,
-      label: "DuraÃ§Ã£o",
+      label: "Duração",
       value: `${course.duration}h`,
       color: "text-blue-600",
     },
@@ -22,13 +22,13 @@ export const CourseStats = ({ course }: CourseStatsProps) => {
     },
     {
       icon: Star,
-      label: "AvaliaÃ§Ã£o",
+      label: "Avaliação",
       value: course.average_rating?.toFixed(1) || "0.0",
       color: "text-yellow-600",
     },
     {
       icon: Award,
-      label: "NÃ­vel",
+      label: "Nível",
       value: course.level,
       color: "text-purple-600",
     },

@@ -12,12 +12,12 @@ export const FeaturesSection = () => {
     {
       icon: BookOpen,
       title: "Cursos Completos",
-      description: "Aprenda com conteÃºdo estruturado e didÃ¡tico",
+      description: "Aprenda com conteúdo estruturado e didático",
     },
     {
       icon: Users,
       title: "Instrutores Experientes",
-      description: "Professores especializados em suas Ã¡reas",
+      description: "Professores especializados em suas áreas",
     },
     {
       icon: Award,
@@ -27,7 +27,7 @@ export const FeaturesSection = () => {
     {
       icon: Clock,
       title: "Aprenda no Seu Ritmo",
-      description: "Acesso vitalÃ­cio ao conteÃºdo",
+      description: "Acesso vitalício ao conteúdo",
     },
   ];
 
@@ -37,9 +37,9 @@ export const FeaturesSection = () => {
         <div className="text-center mb-16 fade-in">
           <h2 className="text-4xl font-bold text-foreground mb-4">
             Por que escolher nossa plataforma?
-          </h2>
+          </h2>{" "}
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Oferecemos a melhor experiÃªncia de aprendizado online com recursos
+            Oferecemos a melhor experiência de aprendizado online com recursos
             exclusivos
           </p>
         </div>

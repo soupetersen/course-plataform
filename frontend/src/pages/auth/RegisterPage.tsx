@@ -34,23 +34,23 @@ export const RegisterPage = () => {
     const newErrors: string[] = [];
 
     if (!formData.name.trim()) {
-      newErrors.push("Nome Ã© obrigatÃ³rio");
+      newErrors.push("Nome é obrigatório");
     }
 
     if (!formData.email.trim()) {
-      newErrors.push("Email Ã© obrigatÃ³rio");
+      newErrors.push("Email é obrigatório");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.push("Email invÃ¡lido");
+      newErrors.push("Email inválido");
     }
 
     if (!formData.password) {
-      newErrors.push("Senha Ã© obrigatÃ³ria");
+      newErrors.push("Senha é obrigatória");
     } else if (formData.password.length < 6) {
       newErrors.push("Senha deve ter pelo menos 6 caracteres");
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.push("Senhas nÃ£o coincidem");
+      newErrors.push("Senhas não coincidem");
     }
 
     setErrors(newErrors);
@@ -72,7 +72,7 @@ export const RegisterPage = () => {
       {
         onSuccess: () => {
           setIsSuccess(true);
-          
+
           setTimeout(() => {
             navigate("/login");
           }, 2000);
@@ -89,7 +89,7 @@ export const RegisterPage = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
-    
+
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -103,21 +103,22 @@ export const RegisterPage = () => {
             <CardTitle className="text-3xl font-bold text-quaternary">
               Criar Conta
             </CardTitle>
-            <CardDescription className="text-gray-600">
-              Junte-se Ã  nossa plataforma de cursos
+            <CardDescription>
+              Junte-se à nossa plataforma de cursos
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {isSuccess && (
                 <Alert className="fade-in bg-green-50 border-green-200 text-green-800">
+                  {" "}
                   <AlertDescription className="flex items-center justify-center">
                     <div className="text-center">
                       <div className="text-lg font-semibold mb-1">
-                        âœ… Conta criada com sucesso!
+                        ✅ Conta criada com sucesso!
                       </div>
                       <div className="text-sm">
-                        Redirecionando para a pÃ¡gina de login...
+                        Redirecionando para a página de login...
                       </div>
                     </div>
                   </AlertDescription>
@@ -127,9 +128,10 @@ export const RegisterPage = () => {
               {errors.length > 0 && !isSuccess && (
                 <Alert variant="destructive" className="fade-in">
                   <AlertDescription>
+                    {" "}
                     <ul className="space-y-1">
                       {errors.map((error, index) => (
-                        <li key={index}>â€¢ {error}</li>
+                        <li key={index}>• {error}</li>
                       ))}
                     </ul>
                   </AlertDescription>
@@ -201,11 +203,12 @@ export const RegisterPage = () => {
               <div className="space-y-2">
                 <Label htmlFor="password">Senha</Label>
                 <div className="relative">
+                  {" "}
                   <Input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     value={formData.password}
                     onChange={handleChange}
                     className="pr-10 transition-all duration-200 focus:scale-105"
@@ -228,11 +231,12 @@ export const RegisterPage = () => {
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirmar senha</Label>
                 <div className="relative">
+                  {" "}
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                    placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="pr-10 transition-all duration-200 focus:scale-105"
@@ -273,7 +277,7 @@ export const RegisterPage = () => {
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                JÃ¡ tem uma conta?{" "}
+                Já tem uma conta?{" "}
                 <Link
                   to="/login"
                   className="text-primary hover:underline font-medium transition-colors"

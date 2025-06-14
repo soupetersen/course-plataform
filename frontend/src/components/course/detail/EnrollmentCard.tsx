@@ -47,7 +47,7 @@ export const EnrollmentCard = ({
             {isEnrolling ? (
               "Processando..."
             ) : isEnrolled ? (
-              "JÃ¡ matriculado"
+              "Já matriculado"
             ) : !user ? (
               <>
                 <Lock className="mr-2 h-5 w-5" />
@@ -72,7 +72,7 @@ export const EnrollmentCard = ({
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500" />
               <span className="text-sm">
-                {course.average_rating?.toFixed(1) || "0.0"} de avaliaÃ§Ã£o
+                {course.average_rating?.toFixed(1) || "0.0"} de avaliação
               </span>
             </div>
 
@@ -85,10 +85,11 @@ export const EnrollmentCard = ({
           <div className="pt-4 border-t">
             <h4 className="font-semibold mb-2">Inclui:</h4>
             <ul className="space-y-1 text-sm text-gray-600">
-              <li>â€¢ Acesso vitalÃ­cio ao curso</li>
-              <li>â€¢ Certificado de conclusÃ£o</li>
-              <li>â€¢ Suporte do instrutor</li>
-              <li>â€¢ Acesso em dispositivos mÃ³veis</li>
+              {" "}
+              <li>• Acesso vitalício ao curso</li>
+              <li>• Certificado de conclusão</li>
+              <li>• Suporte do instrutor</li>
+              <li>• Acesso em dispositivos móveis</li>
             </ul>
           </div>
 

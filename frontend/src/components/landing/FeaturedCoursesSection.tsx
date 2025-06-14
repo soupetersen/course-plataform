@@ -12,7 +12,6 @@ export const FeaturedCoursesSection = () => {
     status: "PUBLISHED",
   });
 
-  
   const courses = coursesData?.data ?? [];
 
   return (
@@ -29,8 +28,7 @@ export const FeaturedCoursesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading
-            ? 
-              Array.from({ length: 3 }).map((_, index) => (
+            ? Array.from({ length: 3 }).map((_, index) => (
                 <Card
                   key={index}
                   className="course-card fade-in-up animate-pulse"
@@ -65,8 +63,8 @@ export const FeaturedCoursesSection = () => {
                       {course.level === "BEGINNER"
                         ? "Iniciante"
                         : course.level === "INTERMEDIATE"
-                        ? "IntermediÃ¡rio"
-                        : "AvanÃ§ado"}
+                        ? "Intermediário"
+                        : "Avançado"}
                     </Badge>
                     {course.price > 0 && (
                       <Badge className="absolute top-4 right-4 bg-green-500 text-white">

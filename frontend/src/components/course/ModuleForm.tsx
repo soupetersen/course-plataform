@@ -46,7 +46,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
   const onSubmit = async (data: ModuleFormData) => {
     try {
       if (module) {
-        
         await updateModule.mutateAsync({
           id: module.id,
           data: {
@@ -56,7 +55,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           },
         });
       } else {
-        
         const moduleData: CreateModuleInput = {
           title: data.title,
           description: data.description,
@@ -79,44 +77,43 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
           <AlertDescription>
             {createModule.error?.message ||
               updateModule.error?.message ||
-              "Erro ao salvar mÃ³dulo"}
+              "Erro ao salvar módulo"}
           </AlertDescription>
         </Alert>
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {}
+        {}{" "}
         <div>
-          <Label htmlFor="title">TÃ­tulo do MÃ³dulo*</Label>
+          <Label htmlFor="title">Título do Módulo*</Label>
           <Input
             id="title"
             {...register("title", {
-              required: "TÃ­tulo Ã© obrigatÃ³rio",
+              required: "Título é obrigatório",
               minLength: {
                 value: 3,
-                message: "TÃ­tulo deve ter pelo menos 3 caracteres",
+                message: "Título deve ter pelo menos 3 caracteres",
               },
             })}
-            placeholder="Ex: IntroduÃ§Ã£o ao React"
+            placeholder="Ex: Introdução ao React"
             className={errors.title ? "border-red-500" : ""}
           />
           {errors.title && (
             <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
           )}
         </div>
-
-        {}
+        {}{" "}
         <div>
-          <Label htmlFor="description">DescriÃ§Ã£o</Label>
+          <Label htmlFor="description">Descrição</Label>
           <Textarea
             id="description"
             {...register("description", {
               minLength: {
                 value: 10,
-                message: "DescriÃ§Ã£o deve ter pelo menos 10 caracteres",
+                message: "Descrição deve ter pelo menos 10 caracteres",
               },
             })}
-            placeholder="Descreva o que serÃ¡ abordado neste mÃ³dulo..."
+            placeholder="Descreva o que será abordado neste módulo..."
             rows={3}
             className={errors.description ? "border-red-500" : ""}
           />
@@ -126,7 +123,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
             </p>
           )}
         </div>
-
         {}
         <div>
           <Label htmlFor="order">Ordem</Label>
@@ -135,7 +131,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
             type="number"
             min="1"
             {...register("order", {
-              required: "Ordem Ã© obrigatÃ³ria",
+              required: "Ordem é obrigatória",
               min: { value: 1, message: "Ordem deve ser maior que 0" },
               valueAsNumber: true,
             })}
@@ -146,7 +142,6 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
             <p className="text-red-500 text-sm mt-1">{errors.order.message}</p>
           )}
         </div>
-
         {}
         <div className="flex justify-end space-x-3 pt-4">
           <Button
@@ -163,7 +158,7 @@ export const ModuleForm: React.FC<ModuleFormProps> = ({
             className="bg-[#FF204E] hover:bg-[#E01D4A]"
           >
             {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {module ? "Atualizar" : "Criar"} MÃ³dulo
+            {module ? "Atualizar" : "Criar"} Módulo
           </Button>
         </div>
       </form>

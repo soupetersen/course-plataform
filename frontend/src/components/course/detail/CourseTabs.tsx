@@ -22,9 +22,10 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
     <div className="animate-slide-in-left">
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">VisÃ£o Geral</TabsTrigger>
-          <TabsTrigger value="curriculum">ConteÃºdo</TabsTrigger>
-          <TabsTrigger value="reviews">AvaliaÃ§Ãµes</TabsTrigger>
+          {" "}
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="curriculum">Conteúdo</TabsTrigger>
+          <TabsTrigger value="reviews">Avaliações</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
@@ -45,22 +46,22 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>InformaÃ§Ãµes do curso</CardTitle>
+                <CardTitle>Informações do curso</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">
-                    DuraÃ§Ã£o: {course.duration} horas
+                    Duração: {course.duration} horas
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">NÃ­vel: {course.level}</span>
+                  <span className="text-sm">Nível: {course.level}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">Certificado de conclusÃ£o</span>
+                  <span className="text-sm">Certificado de conclusão</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-gray-500" />
@@ -73,7 +74,7 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
 
             <Card>
               <CardHeader>
-                <CardTitle>O que vocÃª vai aprender</CardTitle>
+                <CardTitle>O que você vai aprender</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -86,7 +87,7 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
                     )
                   ) || (
                     <li className="text-sm text-gray-500">
-                      Objetivos nÃ£o especificados
+                      Objetivos não especificados
                     </li>
                   )}
                 </ul>
@@ -101,7 +102,7 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>
-                    MÃ³dulo {module.order}: {module.title}
+                    Módulo {module.order}: {module.title}
                   </span>
                   <Badge variant="outline">
                     {module.lessons?.length || 0} aulas
@@ -144,12 +145,12 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>AvaliaÃ§Ãµes dos alunos</span>
+                <span>Avaliações dos alunos</span>
                 <div className="flex items-center gap-2">
                   <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                   <span className="font-bold">{avgRating.toFixed(1)}</span>
                   <span className="text-gray-500">
-                    ({reviews.length} avaliaÃ§Ãµes)
+                    ({reviews.length} avaliações)
                   </span>
                 </div>
               </CardTitle>
@@ -192,7 +193,7 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center py-8">
-                  Ainda nÃ£o hÃ¡ avaliaÃ§Ãµes para este curso.
+                  Ainda não há avaliações para este curso.
                 </p>
               )}
             </CardContent>

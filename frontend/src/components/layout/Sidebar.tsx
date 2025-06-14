@@ -38,7 +38,7 @@ export const Sidebar = () => {
       href: "/profile",
     },
     {
-      title: "ConfiguraÃ§Ãµes",
+      title: "Configurações",
       icon: Settings,
       href: "/settings",
     },

@@ -1,28 +1,28 @@
-﻿import React, { useState } from 'react';
-import { 
-  Plus, 
-  Edit, 
-  GripVertical, 
-  Video, 
-  FileText, 
-  HelpCircle, 
+﻿import React, { useState } from "react";
+import {
+  Plus,
+  Edit,
+  GripVertical,
+  Video,
+  FileText,
+  HelpCircle,
   ClipboardList,
   Play,
   Lock,
-  Eye
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
-} from '@/components/ui/dialog';
-import { ModuleForm } from './ModuleForm';
-import { LessonForm } from './LessonForm';
-import type { Module, Lesson } from '@/types/api';
+  Eye,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ModuleForm } from "./ModuleForm";
+import { LessonForm } from "./LessonForm";
+import type { Module, Lesson } from "@/types/api";
 
 interface ModuleLessonManagerProps {
   courseId: string;
@@ -38,16 +38,16 @@ const lessonTypeIcons = {
 };
 
 const lessonTypeColors = {
-  VIDEO: 'bg-blue-100 text-blue-800',
-  TEXT: 'bg-green-100 text-green-800',
-  QUIZ: 'bg-yellow-100 text-yellow-800',
-  ASSIGNMENT: 'bg-purple-100 text-purple-800',
+  VIDEO: "bg-blue-100 text-blue-800",
+  TEXT: "bg-green-100 text-green-800",
+  QUIZ: "bg-yellow-100 text-yellow-800",
+  ASSIGNMENT: "bg-purple-100 text-purple-800",
 };
 
 export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
   courseId,
   modules,
-  onRefresh, 
+  onRefresh,
 }) => {
   const [selectedModule, setSelectedModule] = useState<Module | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
@@ -66,13 +66,13 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
 
   const handleCreateLesson = (moduleId: string) => {
     setSelectedLesson(null);
-    setSelectedModule(modules.find(m => m.id === moduleId) || null);
+    setSelectedModule(modules.find((m) => m.id === moduleId) || null);
     setIsLessonDialogOpen(true);
   };
 
   const handleEditLesson = (lesson: Lesson, moduleId: string) => {
     setSelectedLesson(lesson);
-    setSelectedModule(modules.find(m => m.id === moduleId) || null);
+    setSelectedModule(modules.find((m) => m.id === moduleId) || null);
     setIsLessonDialogOpen(true);
   };
 
@@ -90,10 +90,10 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
   };
 
   const formatDuration = (seconds?: number) => {
-    if (!seconds) return 'N/A';
+    if (!seconds) return "N/A";
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -101,12 +101,16 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
       {}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-[#00224D]">MÃ³dulos e Aulas</h2>
-          <p className="text-gray-600">Gerencie o conteÃºdo do seu curso</p>
+          {" "}
+          <h2 className="text-2xl font-bold text-[#00224D]">Módulos e Aulas</h2>
+          <p className="text-gray-600">Gerencie o conteúdo do seu curso</p>
         </div>
-        <Button onClick={handleCreateModule} className="bg-[#FF204E] hover:bg-[#E01D4A]">
+        <Button
+          onClick={handleCreateModule}
+          className="bg-[#FF204E] hover:bg-[#E01D4A]"
+        >
           <Plus className="w-4 h-4 mr-2" />
-          Novo MÃ³dulo
+          Novo Módulo
         </Button>
       </div>
 
@@ -119,14 +123,17 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                 <ClipboardList className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum mÃ³dulo criado
+                Nenhum módulo criado
               </h3>
               <p className="text-gray-600 mb-4">
-                Crie seu primeiro mÃ³dulo para comeÃ§ar a organizar o conteÃºdo
+                Crie seu primeiro módulo para começar a organizar o conteúdo
               </p>
-              <Button onClick={handleCreateModule} className="bg-[#FF204E] hover:bg-[#E01D4A]">
+              <Button
+                onClick={handleCreateModule}
+                className="bg-[#FF204E] hover:bg-[#E01D4A]"
+              >
                 <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro MÃ³dulo
+                Criar Primeiro Módulo
               </Button>
             </CardContent>
           </Card>
@@ -136,10 +143,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div
-                      className="cursor-move"
-                      draggable
-                    >
+                    <div className="cursor-move" draggable>
                       <GripVertical className="w-4 h-4 text-gray-400" />
                     </div>
                     <div>
@@ -154,9 +158,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge variant="secondary">
-                      Ordem {module.order}
-                    </Badge>
+                    <Badge variant="secondary">Ordem {module.order}</Badge>
                     <Badge variant="secondary">
                       {module.lessons?.length || 0} aulas
                     </Badge>
@@ -182,19 +184,19 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
 
               {}
               {module.lessons && module.lessons.length > 0 && (
-                <CardContent className="pt-0">                  <div className="space-y-2">
+                <CardContent className="pt-0">
+                  {" "}
+                  <div className="space-y-2">
                     {module.lessons.map((lesson) => {
-                      const IconComponent = lessonTypeIcons[lesson.type || 'VIDEO'];
+                      const IconComponent =
+                        lessonTypeIcons[lesson.type || "VIDEO"];
                       return (
                         <div
                           key={lesson.id}
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
                         >
                           <div className="flex items-center space-x-3">
-                            <div
-                              className="cursor-move"
-                              draggable
-                            >
+                            <div className="cursor-move" draggable>
                               <GripVertical className="w-4 h-4 text-gray-400" />
                             </div>
                             <IconComponent className="w-4 h-4 text-gray-600" />
@@ -202,20 +204,29 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                               <div className="flex items-center space-x-2">
                                 <h4 className="font-medium text-gray-900">
                                   {lesson.title}
-                                </h4>                                <Badge 
-                                  className={lessonTypeColors[lesson.type || 'VIDEO']}
+                                </h4>{" "}
+                                <Badge
+                                  className={
+                                    lessonTypeColors[lesson.type || "VIDEO"]
+                                  }
                                   variant="secondary"
                                 >
-                                  {lesson.type || 'VIDEO'}
+                                  {lesson.type || "VIDEO"}
                                 </Badge>
                                 {lesson.isPreview && (
-                                  <Badge variant="outline" className="text-green-600 border-green-600">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-green-600 border-green-600"
+                                  >
                                     <Eye className="w-3 h-3 mr-1" />
                                     Preview
                                   </Badge>
                                 )}
                                 {lesson.isLocked && (
-                                  <Badge variant="outline" className="text-orange-600 border-orange-600">
+                                  <Badge
+                                    variant="outline"
+                                    className="text-orange-600 border-orange-600"
+                                  >
                                     <Lock className="w-3 h-3 mr-1" />
                                     Bloqueada
                                   </Badge>
@@ -223,15 +234,15 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                               </div>
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
                                 <span>Ordem {lesson.order}</span>
-                                {lesson.type === 'VIDEO' && (
+                                {lesson.type === "VIDEO" && (
                                   <span>
                                     <Play className="w-3 h-3 inline mr-1" />
                                     {formatDuration(lesson.duration)}
                                   </span>
-                                )}
+                                )}{" "}
                                 {lesson.videoUrl && (
                                   <span className="text-green-600">
-                                    VÃ­deo disponÃ­vel
+                                    Vídeo disponível
                                   </span>
                                 )}
                               </div>
@@ -241,7 +252,9 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEditLesson(lesson, module.id)}
+                              onClick={() =>
+                                handleEditLesson(lesson, module.id)
+                              }
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -257,9 +270,9 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
               {(!module.lessons || module.lessons.length === 0) && (
                 <CardContent className="pt-0">
                   <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
-                    <Video className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <Video className="w-8 h-8 mx-auto text-gray-400 mb-2" />{" "}
                     <p className="text-gray-600 text-sm">
-                      Nenhuma aula criada neste mÃ³dulo
+                      Nenhuma aula criada neste módulo
                     </p>
                     <Button
                       variant="outline"
@@ -283,7 +296,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {selectedModule ? 'Editar MÃ³dulo' : 'Novo MÃ³dulo'}
+              {selectedModule ? "Editar Módulo" : "Novo Módulo"}
             </DialogTitle>
           </DialogHeader>
           <div className="p-4">
@@ -302,13 +315,13 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {selectedLesson ? 'Editar Aula' : 'Nova Aula'}
+              {selectedLesson ? "Editar Aula" : "Nova Aula"}
             </DialogTitle>
           </DialogHeader>
           <div className="p-4">
             <LessonForm
               courseId={courseId}
-              moduleId={selectedModule?.id || ''}
+              moduleId={selectedModule?.id || ""}
               lesson={selectedLesson}
               onSuccess={handleLessonSuccess}
               onCancel={() => setIsLessonDialogOpen(false)}

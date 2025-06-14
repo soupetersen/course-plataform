@@ -87,7 +87,7 @@ export const RecommendedCourses = ({
                     </div>
                     <div className="flex items-center">
                       <BookOpen className="h-4 w-4 mr-1" />
-                      {course.modules?.length || 0} mÃ³dulos
+                      {course.modules?.length || 0} módulos
                     </div>
                   </div>
 

@@ -13,7 +13,7 @@ export const Footer = () => {
               <span className="text-xl font-bold">EduPlatform</span>
             </div>
             <p className="text-gray-300">
-              Transformando vidas atravÃ©s da educaÃ§Ã£o online de qualidade.
+              Transformando vidas através da educação online de qualidade.
             </p>
           </div>
 
@@ -84,7 +84,7 @@ export const Footer = () => {
               </li>
               <li>
                 <a href="#" className="hover:text-primary transition-colors">
-                  PolÃ­tica de Privacidade
+                  Política de Privacidade
                 </a>
               </li>
             </ul>

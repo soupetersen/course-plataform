@@ -66,7 +66,7 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                   </div>
                   <div className="flex items-center">
                     <BookOpen className="h-4 w-4 mr-1" />
-                    {enrollment.course.modules?.length || 0} mÃ³dulos
+                    {enrollment.course.modules?.length || 0} módulos
                   </div>
                 </div>
 

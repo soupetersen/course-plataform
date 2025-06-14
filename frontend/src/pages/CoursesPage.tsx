@@ -76,7 +76,7 @@ export const CoursesPage = () => {
           className="inline-flex items-center text-gray-600 hover:text-[#FF204E] transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Voltar para inÃ­cio
+          Voltar para início
         </Link>
       </div>
 

@@ -31,9 +31,9 @@ export const CourseHeader = ({
       case "BEGINNER":
         return "Iniciante";
       case "INTERMEDIATE":
-        return "IntermediÃ¡rio";
+        return "Intermediário";
       case "ADVANCED":
-        return "AvanÃ§ado";
+        return "Avançado";
       default:
         return level;
     }
@@ -51,7 +51,7 @@ export const CourseHeader = ({
         <Badge className={getLevelColor(course.level)}>
           {getLevelText(course.level)}
         </Badge>
-        <span className="text-sm text-gray-600">â€¢</span>
+        <span className="text-sm text-gray-600">•</span>
         <span className="text-sm text-gray-600">{course.category.name}</span>
       </div>
 
@@ -74,7 +74,7 @@ export const CourseHeader = ({
         </div>
         <div className="flex items-center">
           <Star className="h-4 w-4 mr-1" />
-          4.8 (234 avaliaÃ§Ãµes)
+          4.8 (234 avaliações)
         </div>
       </div>
 

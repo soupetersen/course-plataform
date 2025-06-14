@@ -30,7 +30,7 @@ export const StatsGrid = ({ enrollments }: StatsGridProps) => {
       bgColor: "bg-tertiary/10",
     },
     {
-      title: "Progresso MÃ©dio",
+      title: "Progresso Médio",
       value: `${Math.round(
         enrollments.reduce((acc, e) => acc + e.progress, 0) /
           enrollments.length || 0

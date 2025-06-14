@@ -42,9 +42,9 @@ export const CourseGrid = ({
       case "BEGINNER":
         return "Iniciante";
       case "INTERMEDIATE":
-        return "IntermediÃ¡rio";
+        return "Intermediário";
       case "ADVANCED":
-        return "AvanÃ§ado";
+        return "Avançado";
       default:
         return level;
     }
@@ -140,14 +140,14 @@ export const CourseGrid = ({
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="h-4 w-4 mr-1" />
-                  {course.modules?.length || 0} mÃ³dulos
+                  {course.modules?.length || 0} módulos
                 </div>
               </div>
 
               <div className="flex items-center text-sm text-gray-600">
                 <span className="font-medium">Instrutor:</span>
                 <span className="ml-1">
-                  {course.instructor?.name || "Instrutor nÃ£o informado"}
+                  {course.instructor?.name || "Instrutor não informado"}
                 </span>
               </div>
 
