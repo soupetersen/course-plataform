@@ -8,20 +8,24 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String
-  password  String
-  role      Role     @default(STUDENT)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  courses     Course[]        @relation("InstructorCourses")
-  enrollments Enrollment[]
-  comments    LessonComment[]
-  payments    Payment[]
+  id               String            @id @default(cuid())
+  email            String            @unique
+  name             String
+  password         String
+  role             Role              @default(STUDENT)
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  courses          Course[]          @relation("InstructorCourses")
+  enrollments      Enrollment[]
+  comments         LessonComment[]
+  payments         Payment[]
+  reviews          Review[]
+  couponsUsed      CouponUsage[]
+  couponsCreated   Coupon[]          @relation("CouponCreator")
+  settingsUpdated  PlatformSetting[]
+  refundRequests   RefundRequest[]
+  refundsProcessed RefundRequest[]   @relation("RefundProcessor")
 
   @@map("users")
 }
@@ -32,35 +36,33 @@ model Category {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
-  courses Course[]
+  courses     Course[]
 
   @@map("categories")
 }
 
 model Course {
-  id              String      @id @default(cuid())
+  id              String       @id @default(cuid())
   title           String
   description     String?
   imageUrl        String?
-  price           Float       @default(0)
-  isPublished     Boolean     @default(false)
+  price           Float        @default(0)
+  isPublished     Boolean      @default(false)
   instructorId    String
   categoryId      String?
-  paymentType     PaymentType @default(ONE_TIME)
-  stripeProductId String?     @unique
-  stripePriceId   String?     @unique
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  // Relations
-  instructor  User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
-  category    Category?    @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  modules     Module[]
-  lessons     Lesson[]
-  enrollments Enrollment[]
-  payments    Payment[]
+  paymentType     PaymentType  @default(ONE_TIME)
+  stripeProductId String?      @unique
+  stripePriceId   String?      @unique
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  category        Category?    @relation(fields: [categoryId], references: [id])
+  instructor      User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  enrollments     Enrollment[]
+  lessons         Lesson[]
+  modules         Module[]
+  payments        Payment[]
+  reviews         Review[]
+  coupons         Coupon[]
 
   @@index([instructorId])
   @@index([categoryId])
@@ -76,10 +78,8 @@ model Module {
   courseId    String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  // Relations
-  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  lessons Lesson[]
+  lessons     Lesson[]
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
   @@index([order])
@@ -87,26 +87,24 @@ model Module {
 }
 
 model Lesson {
-  id          String     @id @default(cuid())
+  id          String          @id @default(cuid())
   title       String
   content     String
-  description String?
   videoUrl    String?
   duration    Int?
-  order       Int        @default(0)
+  order       Int             @default(0)
   moduleId    String?
+  isCompleted Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   courseId    String
-  type        LessonType @default(VIDEO)
-  isPreview   Boolean    @default(false)
-  isLocked    Boolean    @default(false)
-  isCompleted Boolean    @default(false)
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-
-  // Relations
-  module   Module?         @relation(fields: [moduleId], references: [id], onDelete: SetNull)
-  course   Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  comments LessonComment[]
+  description String?
+  isLocked    Boolean         @default(false)
+  isPreview   Boolean         @default(false)
+  type        LessonType      @default(VIDEO)
+  comments    LessonComment[]
+  course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module      Module?         @relation(fields: [moduleId], references: [id])
 
   @@index([moduleId])
   @@index([courseId])
@@ -124,10 +122,8 @@ model Enrollment {
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
-  // Relations
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([userId])
@@ -136,24 +132,166 @@ model Enrollment {
 }
 
 model LessonComment {
-  id        String   @id @default(cuid())
+  id        String          @id @default(cuid())
   content   String
   userId    String
   lessonId  String
   parentId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson  Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  parent  LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies LessonComment[] @relation("CommentReplies")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  lesson    Lesson          @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  parent    LessonComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   LessonComment[] @relation("CommentReplies")
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([lessonId])
   @@index([parentId])
   @@map("lesson_comments")
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  userId          String
+  courseId        String
+  stripePaymentId String          @unique
+  amount          Float
+  currency        String          @default("usd")
+  status          PaymentStatus   @default(PENDING)
+  paymentType     PaymentType
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  course          Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription    Subscription?
+  couponUsages    CouponUsage[]
+  refundRequests  RefundRequest[]
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+  @@index([stripePaymentId])
+  @@map("payments")
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  paymentId            String             @unique
+  stripeSubscriptionId String             @unique
+  stripeCustomerId     String
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  cancelledAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  payment              Payment            @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@index([stripeSubscriptionId])
+  @@index([stripeCustomerId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([rating])
+  @@map("reviews")
+}
+
+model Coupon {
+  id            String        @id @default(cuid())
+  code          String        @unique
+  description   String?
+  discountType  DiscountType  @default(PERCENTAGE)
+  discountValue Float
+  maxUses       Int?
+  usedCount     Int           @default(0)
+  validFrom     DateTime      @default(now())
+  validUntil    DateTime?
+  isActive      Boolean       @default(true)
+  courseId      String?
+  createdById   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  course        Course?       @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  createdBy     User          @relation("CouponCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  usages        CouponUsage[]
+
+  @@index([code])
+  @@index([isActive])
+  @@index([courseId])
+  @@index([createdById])
+  @@map("coupons")
+}
+
+model CouponUsage {
+  id             String   @id @default(cuid())
+  couponId       String
+  userId         String
+  paymentId      String
+  discountAmount Float
+  usedAt         DateTime @default(now())
+  coupon         Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payment        Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  @@unique([couponId, userId])
+  @@index([couponId])
+  @@index([userId])
+  @@index([paymentId])
+  @@map("coupon_usages")
+}
+
+model PlatformSetting {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  value       String
+  type        SettingType @default(STRING)
+  description String?
+  updatedBy   String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  updater     User        @relation(fields: [updatedBy], references: [id], onDelete: Cascade)
+
+  @@index([key])
+  @@map("platform_settings")
+}
+
+model RefundRequest {
+  id             String       @id @default(cuid())
+  paymentId      String
+  userId         String
+  reason         String?
+  amount         Float
+  status         RefundStatus @default(PENDING)
+  stripeRefundId String?
+  processedAt    DateTime?
+  processedBy    String?
+  notes          String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  payment        Payment      @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  processor      User?        @relation("RefundProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
+
+  @@index([paymentId])
+  @@index([userId])
+  @@index([status])
+  @@map("refund_requests")
 }
 
 enum Role {
@@ -190,48 +328,22 @@ enum LessonType {
   ASSIGNMENT
 }
 
-model Payment {
-  id              String        @id @default(cuid())
-  userId          String
-  courseId        String
-  stripePaymentId String        @unique
-  amount          Float
-  currency        String        @default("usd")
-  status          PaymentStatus @default(PENDING)
-  paymentType     PaymentType
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-
-  // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course       Course        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  subscription Subscription?
-
-  @@index([userId])
-  @@index([courseId])
-  @@index([status])
-  @@index([stripePaymentId])
-  @@map("payments")
+enum DiscountType {
+  PERCENTAGE
+  FLAT_RATE
 }
 
-model Subscription {
-  id                   String             @id @default(cuid())
-  paymentId            String             @unique
-  stripeSubscriptionId String             @unique
-  stripeCustomerId     String
-  status               SubscriptionStatus @default(ACTIVE)
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean            @default(false)
-  cancelledAt          DateTime?
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+enum SettingType {
+  STRING
+  NUMBER
+  BOOLEAN
+}
 
-  // Relations
-  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
-
-  @@index([stripeSubscriptionId])
-  @@index([stripeCustomerId])
-  @@index([status])
-  @@map("subscriptions")
+enum RefundStatus {
+  PENDING
+  PROCESSED
+  FAILED
+  CANCELLED
+  APPROVED
+  REJECTED
 }
