@@ -9,6 +9,12 @@ import { lessonRoutes } from './routes/lessonRoutes';
 import { enrollmentRoutes } from './routes/enrollmentRoutes';
 import { paymentRoutes } from './routes/paymentRoutes';
 import { categoryRoutes } from './routes/categoryRoutes';
+import { reviewRoutes } from './routes/reviewRoutes';
+import { adminCouponRoutes } from './routes/adminCouponRoutes';
+import { adminPlatformSettingsRoutes } from './routes/adminPlatformSettingsRoutes';
+import { instructorCouponRoutes } from './routes/instructorCouponRoutes';
+import { instructorAnalyticsRoutes } from './routes/instructorAnalyticsRoutes';
+import { studentCouponRoutes } from './routes/studentCouponRoutes';
 import { createUploadRoutes } from './routes/uploadRoutes';
 import { UploadController } from './controllers/UploadController';
 import { S3Service } from './services/S3Service';
@@ -21,7 +27,6 @@ async function buildApp() {
     }
   });
 
-  // Add basic security headers
   await fastify.addHook('onSend', async (request, reply) => {
     reply.header('X-Content-Type-Options', 'nosniff');
     reply.header('X-Frame-Options', 'DENY');
@@ -32,12 +37,10 @@ async function buildApp() {
     }
   });
 
-  // Register CORS
   await fastify.register(cors, {
     origin: [
       process.env.FRONTEND_URL || 'http://localhost:5173',
       'http://localhost:3000',
-      'http://localhost:3001',
       'http://localhost:5173',
       'http://localhost:5174'
     ],
@@ -46,39 +49,39 @@ async function buildApp() {
     allowedHeaders: ['Content-Type', 'Authorization']
   });
 
-  // Register multipart plugin for file uploads
   await fastify.register(multipart, {
     limits: {
-      fieldNameSize: 100, // Max field name size in bytes
-      fieldSize: 1000000, // Max field value size in bytes (1MB)
-      fields: 10, // Max number of non-file fields
-      fileSize: 10000000, // Max file size (10MB)
-      files: 1, // Max number of file fields
-      headerPairs: 2000 // Max number of header key=>value pairs
+      fieldNameSize: 100,
+      fieldSize: 1000000, 
+      fields: 10,
+      fileSize: 10000000, 
+      files: 1, 
+      headerPairs: 2000 
     }
   });
-  // Setup dependency injection container
   const container = setupDependencies();
   (fastify as any).decorate('diContainer', container);
 
-  // Register error handler
   fastify.setErrorHandler(ErrorHandler.handle);
 
-  // Register API routes
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   await fastify.register(courseRoutes, { prefix: '/api/courses' });
   await fastify.register(moduleRoutes, { prefix: '/api/modules' });
-  await fastify.register(lessonRoutes, { prefix: '/api/lessons' });
-  await fastify.register(enrollmentRoutes, { prefix: '/api/enrollments' });
-  await fastify.register(paymentRoutes, { prefix: '/api/payments' });
-  await fastify.register(categoryRoutes, { prefix: '/api/categories' });
+  await fastify.register(lessonRoutes, { prefix: '/api/lessons' });  
+  await fastify.register(enrollmentRoutes, { prefix: '/api/enrollments' });  
+  await fastify.register(paymentRoutes, { prefix: '/api/payments' });  
+  await fastify.register(categoryRoutes, { prefix: '/api/categories' });  
+  await fastify.register(reviewRoutes, { prefix: '/api' });
+  await fastify.register(adminCouponRoutes, { prefix: '/api/admin/coupons' }); 
+  await fastify.register(adminPlatformSettingsRoutes, { prefix: '/api/admin/settings' });  
+  await fastify.register(instructorCouponRoutes, { prefix: '/api' });
+  await fastify.register(instructorAnalyticsRoutes, { prefix: '/api/instructor/analytics' });
+  await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });
   
-  // Enable upload routes with S3 service
   const s3Service = container.resolve<S3Service>('S3Service');
   const uploadController = new UploadController(s3Service);
   await fastify.register(createUploadRoutes(uploadController), { prefix: '/api/uploads' });
 
-  // Health check endpoint
   fastify.get('/health', async () => {
     const uptime = process.uptime();
     const memoryUsage = process.memoryUsage();
@@ -95,13 +98,11 @@ async function buildApp() {
     };
   });
 
-  // API info endpoint
   fastify.get('/api', async () => {
     return {
       name: 'Course Platform API',
       version: '1.0.0',
-      description: 'A comprehensive course platform backend with user management, course creation, and payment processing',
-      endpoints: {
+      description: 'A comprehensive course platform backend with user management, course creation, and payment processing',      endpoints: {
         auth: '/api/auth',
         courses: '/api/courses',
         modules: '/api/modules',
@@ -109,7 +110,14 @@ async function buildApp() {
         enrollments: '/api/enrollments',
         payments: '/api/payments',
         categories: '/api/categories',
-        uploads: '/api/uploads',
+        uploads: '/api/uploads',        admin: {
+          coupons: '/api/admin/coupons',
+          settings: '/api/admin/settings'
+        },
+        instructor: {
+          coupons: '/api/instructor/coupons',
+          courses: '/api/instructor/courses'
+        },
         health: '/health'
       }
     };
@@ -121,7 +129,7 @@ async function buildApp() {
 async function start() {
   try {
     const app = await buildApp();
-    const port = parseInt(process.env.PORT || '3001');
+    const port = parseInt(process.env.PORT || '3000');
     const host = process.env.HOST || '0.0.0.0';
 
     await app.listen({ port, host });
@@ -134,7 +142,6 @@ async function start() {
   }
 }
 
-// Graceful shutdown handlers
 process.on('SIGINT', async () => {
   console.log('📡 Received SIGINT, shutting down gracefully...');
   process.exit(0);
@@ -145,7 +152,6 @@ process.on('SIGTERM', async () => {
   process.exit(0);
 });
 
-// Start server if this file is run directly
 if (require.main === module) {
   start();
 }

@@ -1,8 +1,4 @@
-# Use environment variables from .env.docker file
-# Copy .env.docker.example to .env.docker and configure your values
-# For local development, you can also use .env file
-
-services:  # PostgreSQL Database
+﻿services:  
   postgres:
     image: postgres:15-alpine
     container_name: course-platform-db
@@ -28,7 +24,6 @@ services:  # PostgreSQL Database
       - development
       - production
 
-  # Redis for session/caching (optional)
   redis:
     image: redis:7-alpine
     container_name: course-platform-redis
@@ -44,7 +39,7 @@ services:  # PostgreSQL Database
       - default
       - development
       - production
-  # Course Platform API
+
   api:
     build:
       context: .
@@ -53,7 +48,7 @@ services:  # PostgreSQL Database
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-production}
-      DATABASE_URL: ${DATABASE_URL_PROD:-postgresql://postgres:postgres123@postgres:5432/course_platform}
+      DATABASE_URL: ${DATABASE_URL_PROD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
@@ -61,7 +56,6 @@ services:  # PostgreSQL Database
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      # AWS S3 Configuration
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-1}
@@ -81,7 +75,7 @@ services:  # PostgreSQL Database
     volumes:
       - ./uploads:/app/uploads
     profiles:
-      - production  # Development service (use this for development)
+      - production  
   api-dev:
     build:
       context: .
@@ -90,7 +84,7 @@ services:  # PostgreSQL Database
     restart: unless-stopped
     environment:
       NODE_ENV: ${NODE_ENV:-development}
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres123@postgres:5432/course_platform_dev}
+      DATABASE_URL: ${DATABASE_URL}
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-key}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
@@ -98,7 +92,6 @@ services:  # PostgreSQL Database
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_example_stripe_key_for_development}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_example_stripe_key_for_development}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_test_placeholder}
-      # AWS S3 Configuration
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_REGION: ${AWS_REGION:-us-east-1}
@@ -107,7 +100,7 @@ services:  # PostgreSQL Database
       AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
       AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}   
     ports:
-      - "3000:3000"
+      - "3000:3000"      
     depends_on:
       postgres:
         condition: service_healthy
@@ -116,22 +109,22 @@ services:  # PostgreSQL Database
     networks:
       - course-network
     volumes:
-      - .:/app
-      - /app/node_modules
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
       - ./uploads:/app/uploads
-    command: ["pnpm", "run", "dev"]
     profiles:
       - development
 
-  # Prisma Studio (Database GUI) - Production DB
   prisma-studio:
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    container_name: course-platform-studio0
+      dockerfile: Dockerfile
+    container_name: course-platform-studio
     restart: "no"
     environment:
-      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/course_platform
+      DATABASE_URL: ${DATABASE_URL_PROD}
     ports:
       - "5555:5555"
     depends_on:
@@ -146,7 +139,6 @@ services:  # PostgreSQL Database
     profiles:
       - development
 
-  # Prisma Studio Dev (Database GUI) - Development DB
   prisma-studio-dev:
     build:
       context: .
@@ -154,7 +146,7 @@ services:  # PostgreSQL Database
     container_name: course-platform-studio-dev
     restart: "no"
     environment:
-      DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/course_platform_dev
+      DATABASE_URL: ${DATABASE_URL}
     ports:
       - "5556:5555"
     depends_on:
@@ -173,6 +165,8 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  api_dev_node_modules:
     driver: local
 
 networks:

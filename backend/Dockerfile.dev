@@ -3,6 +3,7 @@ FROM node:24-slim
 RUN apt-get update && apt-get install -y \
   openssl \
   ca-certificates \
+  netcat-traditional \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -11,13 +12,10 @@ RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml* ./
 COPY pnpm-workspace.yaml* ./
-COPY .pnpmrc ./
 
 RUN pnpm install
 
-COPY . .
-
-RUN pnpm db:generate
+COPY prisma ./prisma/
 
 RUN mkdir -p /app/uploads
 
@@ -27,4 +25,15 @@ EXPOSE 5555
 ENV NODE_ENV=development
 ENV PORT=3000
 
-CMD ["pnpm", "dev"]
+COPY <<EOF /app/start.sh
+#!/bin/sh
+set -e
+echo "Generating Prisma Client..."
+pnpm exec prisma generate
+echo "Prisma Client generated successfully!"
+echo "Starting development server..."
+exec pnpm dev
+EOF
+RUN chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]

@@ -9,7 +9,6 @@ RUN apt-get update && apt-get install -y \
 RUN npm install -g pnpm
 
 COPY package.json pnpm-lock.yaml* ./
-COPY .pnpmrc ./
 
 RUN pnpm install --frozen-lockfile --prod=false
 
