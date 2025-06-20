@@ -10,13 +10,17 @@ import {
 import { Badge } from "../components/ui/badge";
 import { useCourse } from "../hooks/useCourses";
 import { useCurrentUser } from "../hooks/useAuth";
+import { useReviewsByCourse, useCourseRatingStats } from "../hooks/useReviews";
 
 export const CourseViewPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: courseData } = useCourse(id!);
   const { data: user } = useCurrentUser();
+  const { data: reviewsData } = useReviewsByCourse(id!);
+  const { data: ratingStatsData } = useCourseRatingStats(id!);
 
   const course = courseData?.data;
+  const ratingStats = ratingStatsData?.data;
 
   if (!course) {
     return (
@@ -103,10 +107,14 @@ export const CourseViewPage = () => {
                     ? `${totalDurationHours}h ${totalDurationMinutes}m`
                     : `${totalDurationMinutes}m`}{" "}
                   de conteúdo
-                </div>
+                </div>{" "}
                 <div className="flex items-center">
                   <Star className="w-4 h-4 mr-1" />
-                  4.8 (324 avaliações)
+                  {ratingStats
+                    ? `${ratingStats.averageRating.toFixed(1)} (${
+                        ratingStats.totalReviews
+                      } avaliações)`
+                    : "Sem avaliações"}
                 </div>
               </div>
             </div>
@@ -146,17 +154,8 @@ export const CourseViewPage = () => {
                     <img
                       src={course.imageUrl}
                       alt={course.title}
-                      className="w-full h-full object-cover rounded-lg"
+                      className="w-full h-full object-contain rounded-lg"
                     />
-                    <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center rounded-lg">
-                      <Button
-                        size="lg"
-                        className="bg-white/20 hover:bg-white/30 text-white border-white/50"
-                      >
-                        <Play className="w-6 h-6 mr-2" />
-                        Assistir Preview
-                      </Button>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -207,10 +206,9 @@ export const CourseViewPage = () => {
                                 min
                               </Badge>
                             </div>
-                          </div>
+                          </div>{" "}
                         </div>
 
-                        {/* Lista de aulas do módulo */}
                         {module.lessons && module.lessons.length > 0 && (
                           <div className="divide-y divide-gray-100">
                             {module.lessons.map((lesson, lessonIndex) => (
@@ -273,7 +271,6 @@ export const CourseViewPage = () => {
                           </div>
                         )}
 
-                        {/* Caso não tenha aulas */}
                         {(!module.lessons || module.lessons.length === 0) && (
                           <div className="p-4 text-center text-gray-500">
                             <BookOpen className="w-8 h-8 mx-auto mb-2 text-gray-300" />

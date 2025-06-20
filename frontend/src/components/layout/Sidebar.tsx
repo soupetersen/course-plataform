@@ -8,13 +8,16 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
+  Shield,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
+import { useAuth } from "../../hooks/useAuth";
 
 export const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
 
   const menuItems = [
     {
@@ -37,6 +40,15 @@ export const Sidebar = () => {
       icon: User,
       href: "/profile",
     },
+    ...(user?.role === "ADMIN"
+      ? [
+          {
+            title: "Admin",
+            icon: Shield,
+            href: "/admin",
+          },
+        ]
+      : []),
     {
       title: "Configurações",
       icon: Settings,

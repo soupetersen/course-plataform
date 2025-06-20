@@ -7,7 +7,7 @@
 } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
-import { BookOpen, Users } from "lucide-react";
+import { BookOpen, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Course } from "../../types/api";
 
@@ -133,6 +133,7 @@ export const CourseGrid = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
+              {" "}
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-1" />
@@ -143,14 +144,25 @@ export const CourseGrid = ({
                   {course.modules?.length || 0} módulos
                 </div>
               </div>
-
+              {course.averageRating && course.averageRating > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <div className="flex items-center text-yellow-600">
+                    <Star className="h-4 w-4 mr-1 fill-current" />
+                    <span className="font-medium">
+                      {course.averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500 ml-1">
+                      ({course.reviewCount || 0} avaliações)
+                    </span>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center text-sm text-gray-600">
                 <span className="font-medium">Instrutor:</span>
                 <span className="ml-1">
                   {course.instructor?.name || "Instrutor não informado"}
                 </span>
               </div>
-
               <Link to={`/course/${course.id}`}>
                 <Button className="w-full group-hover:scale-105 transition-transform">
                   Ver curso

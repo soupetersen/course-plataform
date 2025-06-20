@@ -13,6 +13,11 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { CreateCoursePage } from "@/pages/CreateCoursePage";
 import { EditCoursePage } from "@/pages/EditCoursePage";
 import { CourseViewPage } from "@/pages/CourseViewPage";
+import { AdminDashboard } from "@/pages/AdminDashboard";
+import { UserDashboard } from "@/pages/UserDashboard";
+import { CheckoutPage } from "@/pages/CheckoutPage";
+import { InstructorDashboard } from "@/pages/InstructorDashboard";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -82,6 +87,46 @@ export const router = createBrowserRouter([
       {
         path: "course/:id",
         element: <CourseViewPage />,
+      },
+      {
+        path: "checkout/:courseId",
+        element: (
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin",
+        element: (
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "my-dashboard",
+        element: (
+          <ProtectedRoute>
+            <UserDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "instructor-dashboard",
+        element: (
+          <ProtectedRoute requiredRole="INSTRUCTOR">
+            <InstructorDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "settings",
+        element: (
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

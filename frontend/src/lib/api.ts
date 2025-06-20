@@ -2,9 +2,8 @@ import axios from 'axios';
 import type { AxiosInstance } from 'axios';
 import type { AxiosRequestConfig, AxiosResponse } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// Create axios instance
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
@@ -13,7 +12,6 @@ export const api: AxiosInstance = axios.create({
   },
 });
 
-// Request interceptor to add auth token
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
@@ -27,7 +25,6 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor to handle common errors
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
@@ -45,12 +42,10 @@ api.interceptors.response.use(
       }
     }
     
-    // Handle 403 forbidden
     if (error.response?.status === 403) {
       console.error('Access forbidden:', error.response.data);
     }
     
-    // Handle network errors
     if (!error.response) {
       console.error('Network error:', error.message);
     }
@@ -59,12 +54,11 @@ api.interceptors.response.use(
   }
 );
 
-// API response types
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
   message?: string;
-  errors?: any[];
+  errors?: unknown[];
 }
 
 export interface PaginatedResponse<T> {
@@ -78,7 +72,6 @@ export interface PaginatedResponse<T> {
   };
 }
 
-// Generic API request function
 export const apiRequest = async <T = any>(
   config: AxiosRequestConfig
 ): Promise<T> => {
@@ -86,7 +79,6 @@ export const apiRequest = async <T = any>(
     const response = await api(config);
     return response.data;
   } catch (error: any) {
-    // Extract error message from response
     const message = 
       error.response?.data?.message || 
       error.message || 

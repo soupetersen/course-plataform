@@ -79,29 +79,25 @@ export const FeaturedCoursesSection = () => {
                         <Clock className="h-3 w-3 mr-1" />
                         {course.duration ? `${course.duration}h` : "N/A"}
                       </Badge>
-                      {course.average_rating && (
+                      {course.averageRating && (
                         <div className="flex items-center">
                           <Star className="h-4 w-4 text-yellow-400 fill-current" />
                           <span className="text-sm text-muted-foreground ml-1">
-                            {course.average_rating.toFixed(1)}
+                            {course.averageRating.toFixed(1)}
                           </span>
                         </div>
                       )}
                     </div>
-
                     <h3 className="text-lg font-semibold text-foreground mb-2">
                       {course.title}
-                    </h3>
-
+                    </h3>{" "}
                     <p className="text-muted-foreground text-sm mb-4">
-                      Por {course.instructor.name}
+                      Por {course.instructor?.name || "Instrutor não informado"}
                     </p>
-
                     <div className="flex items-center text-sm text-muted-foreground mb-4">
                       <Users className="h-4 w-4 mr-1" />
                       {course.enrollments_count || 0} alunos
                     </div>
-
                     <div className="flex items-center justify-between">
                       <div>
                         {course.price > 0 ? (

@@ -4,6 +4,8 @@ import { Badge } from "../../ui/badge";
 import { ShoppingCart, Users, Star, TrendingUp, Lock } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { PaymentModal } from "../../payment/PaymentModal";
+import { useState } from "react";
 import type { Course } from "../../../types/api";
 
 interface EnrollmentCardProps {
@@ -21,12 +23,24 @@ export const EnrollmentCard = ({
 }: EnrollmentCardProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const handleEnrollClick = () => {
     if (!user) {
       navigate(`/login?redirect=/courses/${course.id}`);
       return;
     }
+
+    if (course.price === 0) {
+      onEnroll();
+      return;
+    }
+
+    setShowPaymentModal(true);
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentModal(false);
     onEnroll();
   };
 
@@ -60,7 +74,6 @@ export const EnrollmentCard = ({
               </>
             )}
           </Button>
-
           <div className="space-y-3 pt-4 border-t">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-gray-500" />
@@ -72,7 +85,7 @@ export const EnrollmentCard = ({
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500" />
               <span className="text-sm">
-                {course.average_rating?.toFixed(1) || "0.0"} de avaliação
+                {course.averageRating?.toFixed(1) || "0.0"} de avaliação
               </span>
             </div>
 
@@ -81,7 +94,6 @@ export const EnrollmentCard = ({
               <span className="text-sm">Atualizado recentemente</span>
             </div>
           </div>
-
           <div className="pt-4 border-t">
             <h4 className="font-semibold mb-2">Inclui:</h4>
             <ul className="space-y-1 text-sm text-gray-600">
@@ -91,14 +103,21 @@ export const EnrollmentCard = ({
               <li>• Suporte do instrutor</li>
               <li>• Acesso em dispositivos móveis</li>
             </ul>
-          </div>
-
+          </div>{" "}
           <div className="pt-4 border-t">
             <Badge variant="outline" className="w-full justify-center">
               Garantia de 30 dias
             </Badge>
           </div>
         </CardContent>
+
+        <PaymentModal
+          course={course}
+          isOpen={showPaymentModal}
+          onClose={() => setShowPaymentModal(false)}
+          onSuccess={handlePaymentSuccess}
+          paymentType="ONE_TIME"
+        />
       </Card>
     </div>
   );

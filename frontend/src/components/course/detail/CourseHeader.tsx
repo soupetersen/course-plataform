@@ -1,17 +1,19 @@
 ﻿import { Badge } from "../../ui/badge";
 import { BookOpen, Clock, Users, Star } from "lucide-react";
-import type { Course } from "../../../types/api";
+import type { Course, CourseRatingStats } from "../../../types/api";
 
 interface CourseHeaderProps {
   course: Course;
   totalLessons: number;
   totalDuration: number;
+  ratingStats?: CourseRatingStats;
 }
 
 export const CourseHeader = ({
   course,
   totalLessons,
   totalDuration,
+  ratingStats,
 }: CourseHeaderProps) => {
   const getLevelColor = (level: string) => {
     switch (level) {
@@ -75,10 +77,17 @@ export const CourseHeader = ({
         <div className="flex items-center">
           <Clock className="h-4 w-4 mr-1" />
           {formatDuration(totalDuration)}
-        </div>
+        </div>{" "}
         <div className="flex items-center">
           <Star className="h-4 w-4 mr-1" />
-          4.8 (234 avaliações)
+          {ratingStats ? (
+            <>
+              {ratingStats.averageRating.toFixed(1)} ({ratingStats.totalReviews}{" "}
+              avaliações)
+            </>
+          ) : (
+            "Sem avaliações"
+          )}
         </div>
       </div>{" "}
       <div className="flex items-center space-x-4">

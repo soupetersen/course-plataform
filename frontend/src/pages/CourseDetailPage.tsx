@@ -2,6 +2,7 @@
 import { useCourse } from "../hooks/useCourses";
 import { useModulesByCourse } from "../hooks/useModulesAndLessons";
 import { useAuth } from "../hooks/useAuth";
+import { useMyEnrollments } from "../hooks/useCategoriesAndEnrollments";
 import { CourseHeader } from "../components/course/detail/CourseHeader";
 import { CoursePreview } from "../components/course/detail/CoursePreview";
 import { CourseTabs } from "../components/course/detail/CourseTabs";
@@ -9,13 +10,18 @@ import { EnrollmentCard } from "../components/course/detail/EnrollmentCard";
 import { CourseStats } from "../components/course/detail/CourseStats";
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import type { Review } from "../types/api";
+import { useReviewsByCourse, useCourseRatingStats } from "../hooks/useReviews";
 
 export const CourseDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const { data: courseData, isLoading } = useCourse(id!);
   const { data: modulesData } = useModulesByCourse(id!);
+  const { data: reviewsData } = useReviewsByCourse(id!);
+  const { data: ratingStatsData } = useCourseRatingStats(id!);
+
+  const { data: enrollmentsData } = useMyEnrollments();
+
   const [isEnrolling, setIsEnrolling] = useState(false);
 
   if (isLoading) {
@@ -50,11 +56,15 @@ export const CourseDetailPage = () => {
       </div>
     );
   }
-
   const course = courseData.data;
   const modules = modulesData?.data || [];
-  const reviews: Review[] = [];
-  const isEnrolled = false;
+  const reviews = reviewsData?.data || [];
+  const ratingStats = ratingStatsData?.data;
+
+  const enrollments = enrollmentsData?.data || [];
+  const isEnrolled = enrollments.some(
+    (enrollment) => enrollment.courseId === course.id
+  );
 
   const totalLessons = modules.reduce(
     (acc, module) => acc + (module.lessons?.length || 0),
@@ -98,16 +108,23 @@ export const CourseDetailPage = () => {
       </div>
 
       <div className="space-y-8">
+        {" "}
         <CourseHeader
           course={course}
           totalLessons={totalLessons}
           totalDuration={totalDuration}
+          ratingStats={ratingStats}
         />
         <CourseStats course={course} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <CoursePreview imageUrl={course.imageUrl} title={course.title} />
-            <CourseTabs course={course} modules={modules} reviews={reviews} />
+            <CourseTabs
+              course={course}
+              modules={modules}
+              reviews={reviews}
+              isEnrolled={isEnrolled}
+            />
           </div>
 
           <div className="lg:col-span-1">

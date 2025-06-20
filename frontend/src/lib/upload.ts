@@ -8,7 +8,7 @@ export const uploadImage = async (file: File): Promise<UploadResult> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/uploads/images`, {
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/uploads/images`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -29,7 +29,7 @@ export const uploadVideo = async (file: File): Promise<UploadResult> => {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/uploads/videos`, {
+  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/uploads/videos`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${localStorage.getItem('authToken')}`,

@@ -23,7 +23,7 @@ export const CourseStats = ({ course }: CourseStatsProps) => {
     {
       icon: Star,
       label: "Avaliação",
-      value: course.average_rating?.toFixed(1) || "0.0",
+      value: course.averageRating?.toFixed(1) || "0.0",
       color: "text-yellow-600",
     },
     {

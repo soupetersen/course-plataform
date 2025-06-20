@@ -1,22 +1,56 @@
 ﻿import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Badge } from "../../ui/badge";
-import { Clock, Users, Award, BookOpen, User, Star } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
+import { Clock, Users, Award, BookOpen, User } from "lucide-react";
 import type { Course, Module, Review } from "../../../types/api";
+import {
+  ReviewList,
+  CourseRatingStatsComponent,
+  ReviewForm,
+} from "../../reviews";
+import { useCourseRatingStats } from "../../../hooks/useReviews";
+import { useCurrentUser } from "../../../hooks/useAuth";
+import { useCreateReview } from "../../../hooks/useReviews";
+import { useState } from "react";
 
 interface CourseTabsProps {
   course: Course;
   modules: Module[];
   reviews: Review[];
+  isEnrolled?: boolean;
 }
 
-export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
-  const avgRating =
-    reviews.length > 0
-      ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
-      : 0;
+export const CourseTabs = ({
+  course,
+  modules,
+  reviews,
+  isEnrolled = false,
+}: CourseTabsProps) => {
+  const { data: ratingStatsData } = useCourseRatingStats(course.id);
+  const { data: user } = useCurrentUser();
+  const createReview = useCreateReview();
+  const [showReviewForm, setShowReviewForm] = useState(false);
+
+  const ratingStats = ratingStatsData?.data;
+
+  const userReview = reviews.find((review) => review.userId === user?.id);
+  const canCreateReview = isEnrolled && user && !userReview;
+
+  const handleCreateReview = async (data: {
+    rating: number;
+    comment: string;
+  }) => {
+    try {
+      await createReview.mutateAsync({
+        courseId: course.id,
+        rating: data.rating,
+        comment: data.comment,
+      });
+      setShowReviewForm(false);
+    } catch (error) {
+      console.error("Error creating review:", error);
+    }
+  };
 
   return (
     <div className="animate-slide-in-left">
@@ -27,7 +61,6 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
           <TabsTrigger value="curriculum">Conteúdo</TabsTrigger>
           <TabsTrigger value="reviews">Avaliações</TabsTrigger>
         </TabsList>
-
         <TabsContent value="overview" className="space-y-6">
           <Card>
             <CardHeader>
@@ -95,7 +128,6 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="curriculum" className="space-y-4">
           {modules.map((module) => (
             <Card key={module.id} className="animate-slide-in-up">
@@ -139,65 +171,39 @@ export const CourseTabs = ({ course, modules, reviews }: CourseTabsProps) => {
               </CardContent>
             </Card>
           ))}
-        </TabsContent>
-
+        </TabsContent>{" "}
         <TabsContent value="reviews" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span>Avaliações dos alunos</span>
-                <div className="flex items-center gap-2">
-                  <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                  <span className="font-bold">{avgRating.toFixed(1)}</span>
-                  <span className="text-gray-500">
-                    ({reviews.length} avaliações)
-                  </span>
-                </div>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {reviews.length > 0 ? (
-                reviews.map((review) => (
-                  <div
-                    key={review.id}
-                    className="border-b pb-4 last:border-b-0"
+          {ratingStats && <CourseRatingStatsComponent stats={ratingStats} />}
+
+          {canCreateReview && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Avaliar este curso</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!showReviewForm ? (
+                  <button
+                    onClick={() => setShowReviewForm(true)}
+                    className="w-full p-4 border border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-primary hover:text-primary transition-colors"
                   >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 bg-[#A0153E] text-white rounded-full flex items-center justify-center text-sm font-medium">
-                        {review.user.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{review.user.name}</p>
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star
-                              key={star}
-                              className={`h-4 w-4 ${
-                                star <= review.rating
-                                  ? "fill-yellow-400 text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            />
-                          ))}
-                          <span className="text-sm text-gray-500 ml-2">
-                            {formatDistanceToNow(new Date(review.created_at), {
-                              addSuffix: true,
-                              locale: ptBR,
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-gray-600">{review.comment}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500 text-center py-8">
-                  Ainda não há avaliações para este curso.
-                </p>
-              )}
-            </CardContent>
-          </Card>
+                    Clique aqui para avaliar este curso
+                  </button>
+                ) : (
+                  <ReviewForm
+                    onSubmit={handleCreateReview}
+                    onCancel={() => setShowReviewForm(false)}
+                    isLoading={createReview.isPending}
+                  />
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          <ReviewList
+            reviews={reviews}
+            isLoading={false}
+            currentUserId={user?.id}
+          />
         </TabsContent>
       </Tabs>
     </div>

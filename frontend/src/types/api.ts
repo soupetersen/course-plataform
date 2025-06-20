@@ -25,12 +25,12 @@ export interface Course {
   instructorId: string;
   instructor: User;
   categoryId: string;
-  category: Category;
-  modules: Module[];
+  category: Category;  modules: Module[];
   enrollments: Enrollment[];
   duration?: number;
   enrollments_count?: number; 
-  average_rating?: number; 
+  averageRating: number;
+  reviewCount: number;
   objectives?: string[]; 
   createdAt: string;
   updatedAt: string;
@@ -106,6 +106,7 @@ export interface CreateLessonInput {
 }
 
 export interface UpdateLessonInput extends Partial<CreateLessonInput> {
+  id?: string;
 }
 
 export interface LessonComment {
@@ -204,17 +205,34 @@ export interface Review {
   id: string;
   courseId: string;
   userId: string;
-  user: User;
+  user?: User;
   rating: number;
-  comment: string;
-  created_at: string;
-  updated_at: string;
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateReviewInput {
   courseId: string;
   rating: number;
   comment: string;
+}
+
+export interface UpdateReviewInput {
+  rating?: number;
+  comment?: string;
+}
+
+export interface CourseRatingStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    1: number;
+    2: number;
+    3: number;
+    4: number;
+    5: number;
+  };
 }
 
 export interface PaginationParams {
@@ -265,9 +283,15 @@ export const queryKeys = {
   enrollment: (id: string) => ['enrollment', id] as const,
   enrollmentsByUser: (userId: string) => ['enrollments', 'user', userId] as const,
   enrollmentsByCourse: (courseId: string) => ['enrollments', 'course', courseId] as const,
-  
-  // Payments
+    // Payments
   payments: ['payments'] as const,
   payment: (id: string) => ['payment', id] as const,
   paymentsByUser: (userId: string) => ['payments', 'user', userId] as const,
+  
+  // Reviews
+  reviews: ['reviews'] as const,
+  review: (id: string) => ['review', id] as const,
+  reviewsByCourse: (courseId: string) => ['reviews', 'course', courseId] as const,
+  reviewsByUser: (userId: string) => ['reviews', 'user', userId] as const,
+  courseRatingStats: (courseId: string) => ['course', courseId, 'rating-stats'] as const,
 } as const;
