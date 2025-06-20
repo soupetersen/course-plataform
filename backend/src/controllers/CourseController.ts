@@ -48,14 +48,26 @@ export class CourseController {
         message: error instanceof Error ? error.message : 'Failed to create course'
       });
     }
-  }
-
+  }  
+  
   async findAll(request: FastifyRequest, reply: FastifyReply) {
     try {
       const { PrismaClient } = require('@prisma/client');
-      const prisma = new PrismaClient();
+      const prisma = new PrismaClient();      const query = request.query as any;
+      const where: any = {};
+      
+      if (query.status) {
+        where.isPublished = query.status === 'PUBLISHED';
+      }
+
+      const page = parseInt(query.page) || 1;
+      const limit = parseInt(query.limit) || 10;
+      const skip = (page - 1) * limit;
 
       const courses = await prisma.course.findMany({
+        where,
+        skip,
+        take: limit,
         include: {
           instructor: {
             select: {
@@ -69,33 +81,41 @@ export class CourseController {
             select: {
               id: true,
               name: true,
-              description: true
-            }
+              description: true            }
           },
-          modules: true,
-          enrollments: true
+          enrollments: true,
+          reviews: {
+            select: {
+              rating: true
+            }
+          }
         }
+      });      const transformedCourses = courses.map((course: any) => {
+        const averageRating = course.reviews.length > 0 
+          ? course.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / course.reviews.length
+          : 0;
+        
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description || '',
+          imageUrl: course.imageUrl || undefined,
+          price: course.price,
+          level: 'BEGINNER',
+          duration: 0,
+          status: course.isPublished ? 'PUBLISHED' : 'DRAFT',
+          isActive: true,
+          instructorId: course.instructorId,
+          instructor: course.instructor,
+          categoryId: course.categoryId || '',
+          category: course.category,
+          enrollments_count: course.enrollments.length,
+          averageRating: Math.round(averageRating * 10) / 10,
+          reviewCount: course.reviews.length,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
+        };
       });
-
-      const transformedCourses = courses.map((course: any) => ({
-        id: course.id,
-        title: course.title,
-        description: course.description || '',
-        imageUrl: course.imageUrl || undefined,
-        price: course.price,
-        level: 'BEGINNER',
-        duration: 0,
-        status: course.isPublished ? 'PUBLISHED' : 'DRAFT',
-        isActive: true,
-        instructorId: course.instructorId,
-        instructor: course.instructor,
-        categoryId: course.categoryId || '',
-        category: course.category,
-        modules: course.modules || [],
-        enrollments: course.enrollments || [],
-        createdAt: course.createdAt,
-        updatedAt: course.updatedAt,
-      }));
 
       await prisma.$disconnect();
 
@@ -110,6 +130,7 @@ export class CourseController {
       });
     }
   }
+
   async findById(request: FastifyRequest<{ Params: CourseParams }>, reply: FastifyReply) {
     try {
       const { id } = request.params;
@@ -141,9 +162,13 @@ export class CourseController {
                 orderBy: { order: 'asc' }
               }
             },
-            orderBy: { order: 'asc' }
-          },
-          enrollments: true
+            orderBy: { order: 'asc' }          },
+          enrollments: true,
+          reviews: {
+            select: {
+              rating: true
+            }
+          }
         }
       });
 
@@ -151,8 +176,11 @@ export class CourseController {
         return reply.status(404).send({
           success: false,
           message: 'Course not found'
-        });
-      }
+        });      }
+
+      const averageRating = course.reviews.length > 0 
+        ? course.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / course.reviews.length
+        : 0;
 
       const transformedCourse = {
         id: course.id,
@@ -170,6 +198,8 @@ export class CourseController {
         category: course.category,
         modules: course.modules || [],
         enrollments: course.enrollments || [],
+        averageRating: Math.round(averageRating * 10) / 10,
+        reviewCount: course.reviews.length,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
       };
@@ -216,29 +246,42 @@ export class CourseController {
             }
           },
           modules: true,
-          enrollments: true
+          enrollments: true,
+          reviews: {
+            select: {
+              rating: true
+            }
+          }
         }
       });
 
-      const transformedCourses = courses.map((course: any) => ({
-        id: course.id,
-        title: course.title,
-        description: course.description || '',
-        imageUrl: course.imageUrl || undefined,
-        price: course.price,
-        level: 'BEGINNER',
-        duration: 0,
-        status: course.isPublished ? 'PUBLISHED' : 'DRAFT',
-        isActive: true,
-        instructorId: course.instructorId,
-        instructor: course.instructor,
-        categoryId: course.categoryId || '',
-        category: course.category,
-        modules: course.modules || [],
-        enrollments: course.enrollments || [],
-        createdAt: course.createdAt,
-        updatedAt: course.updatedAt,
-      }));
+      const transformedCourses = courses.map((course: any) => {
+        const averageRating = course.reviews.length > 0 
+          ? course.reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / course.reviews.length
+          : 0;
+        
+        return {
+          id: course.id,
+          title: course.title,
+          description: course.description || '',
+          imageUrl: course.imageUrl || undefined,
+          price: course.price,
+          level: 'BEGINNER',
+          duration: 0,
+          status: course.isPublished ? 'PUBLISHED' : 'DRAFT',
+          isActive: true,
+          instructorId: course.instructorId,
+          instructor: course.instructor,
+          categoryId: course.categoryId || '',
+          category: course.category,
+          modules: course.modules || [],
+          enrollments: course.enrollments || [],
+          averageRating: Math.round(averageRating * 10) / 10, 
+          reviewCount: course.reviews.length,
+          createdAt: course.createdAt,
+          updatedAt: course.updatedAt,
+        };
+      });
 
       await prisma.$disconnect();
 

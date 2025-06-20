@@ -2,6 +2,9 @@
 import { CreateOneTimePaymentUseCase } from '@/use-cases/CreateOneTimePaymentUseCase';
 import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscriptionPaymentUseCase';
 import { ProcessStripeWebhookUseCase } from '@/use-cases/ProcessStripeWebhookUseCase';
+import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
+import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
+import { CreateRefundRequestUseCase } from '@/use-cases/CreateRefundRequestUseCase';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 
 export class PaymentController {
@@ -9,13 +12,20 @@ export class PaymentController {
     private createOneTimePaymentUseCase: CreateOneTimePaymentUseCase,
     private createSubscriptionPaymentUseCase: CreateSubscriptionPaymentUseCase,
     private processStripeWebhookUseCase: ProcessStripeWebhookUseCase,
+    private validateCouponUseCase: ValidateCouponUseCase,
+    private calculateFeesUseCase: CalculateFeesUseCase,
+    private createRefundRequestUseCase: CreateRefundRequestUseCase,
     private paymentRepository: PaymentRepository
   ) {}
-
   async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId, currency } = req.body as any;
-      const userId = (req as any).user.id; 
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
 
       const result = await this.createOneTimePaymentUseCase.execute({
         userId,
@@ -40,11 +50,15 @@ export class PaymentController {
       });
     }
   }
-
   async createSubscriptionPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId } = req.body as any;
-      const userId = (req as any).user.id; 
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
 
       const result = await this.createSubscriptionPaymentUseCase.execute({
         userId,
@@ -86,37 +100,51 @@ export class PaymentController {
       });
     }
   }
-
   async getPaymentHistory(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = (req as any).user.id; 
-      const payments = await this.paymentRepository.findByUserId(userId);
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({
+          success: false,
+          error: 'User not authenticated',
+        });
+        return;
+      }
 
-      reply.status(200).send({
+      const userId = userInfo.userId; 
+      const payments = await this.paymentRepository.findByUserId(userId);reply.status(200).send({
         success: true,
-        data: payments.map(payment => ({
-          id: payment.id,
-          courseId: payment.courseId,
-          amount: payment.amount,
-          currency: payment.currency,
-          status: payment.status,
-          paymentType: payment.paymentType,
-          createdAt: payment.createdAt,
-        })),
-      });
-    } catch (error) {
+        data: { 
+          payments: payments.map(payment => ({
+            id: payment.id,
+            courseId: payment.courseId,
+            courseName: `Course ${payment.courseId}`,
+            amount: payment.amount,
+            currency: payment.currency,
+            status: payment.status,
+            paymentType: payment.paymentType,
+            createdAt: payment.createdAt.toISOString(),
+            refundRequests: [] 
+          }))
+        }
+      });    } catch (error) {
       req.log.error('Error fetching payment history:', error);
+      console.error('Payment history error details:', error);
       reply.status(500).send({
         success: false,
         error: 'Failed to fetch payment history',
       });
     }
   }
-
   async getPaymentStatus(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { paymentId } = req.params as any;
-      const userId = (req as any).user.id; 
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
 
       const payment = await this.paymentRepository.findById(paymentId);
       if (!payment) {
@@ -148,10 +176,158 @@ export class PaymentController {
         },
       });
     } catch (error) {
-      req.log.error('Error fetching payment status:', error);
-      reply.status(500).send({
+      req.log.error('Error fetching payment status:', error);      reply.status(500).send({
         success: false,
         error: 'Failed to fetch payment status',
+      });
+    }
+  }
+  async validateCoupon(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { code, coursePrice } = req.body as { code: string; coursePrice: number };
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
+
+      const result = await this.validateCouponUseCase.execute({
+        code,
+        userId,
+        originalAmount: coursePrice
+      });
+
+      if (!result.isValid) {
+        reply.status(400).send({
+          success: false,
+          error: result.error
+        });
+        return;
+      }
+
+      reply.status(200).send({
+        success: true,
+        data: {
+          couponId: result.coupon?.id,
+          discountAmount: result.discountAmount,
+          finalAmount: result.finalAmount,
+          discountType: result.coupon?.discountType,
+          discountValue: result.coupon?.discountValue
+        }
+      });
+    } catch (error) {
+      req.log.error('Error validating coupon:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Failed to validate coupon'
+      });
+    }
+  }
+
+  async calculateFees(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { coursePrice, discountAmount } = req.body as { 
+        coursePrice: number; 
+        discountAmount?: number 
+      };
+
+      const result = await this.calculateFeesUseCase.execute({
+        coursePrice,
+        discountAmount
+      });
+
+      reply.status(200).send({
+        success: true,
+        data: result
+      });
+    } catch (error) {
+      req.log.error('Error calculating fees:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Failed to calculate fees'
+      });
+    }
+  }
+
+  async createRefundRequest(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {      const { paymentId, reason } = req.body as { 
+        paymentId: string; 
+        reason: string 
+      };
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
+
+      const result = await this.createRefundRequestUseCase.execute({
+        paymentId,
+        userId,
+        reason
+      });
+
+      if (!result.success) {
+        reply.status(400).send({
+          success: false,
+          error: result.error
+        });
+        return;
+      }
+
+      reply.status(201).send({
+        success: true,
+        data: {
+          refundRequestId: result.refundRequest?.id,
+          status: result.refundRequest?.status,
+          amount: result.refundRequest?.amount
+        }
+      });
+    } catch (error) {
+      req.log.error('Error creating refund request:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Failed to create refund request'
+      });
+    }
+  }
+
+  async requestRefund(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    return this.createRefundRequest(req, reply);
+  }
+  async getRefundRequests(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const userInfo = (req as any).userInfo;
+      if (!userInfo) {
+        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        return;
+      }
+      const userId = userInfo.userId;
+      
+      const payments = await this.paymentRepository.findByUserId(userId);
+      
+      const refundRequests = payments
+        .filter(payment => payment.status === 'REFUNDED')
+        .map(payment => ({
+          id: `refund_${payment.id}`,
+          paymentId: payment.id,
+          amount: payment.amount,
+          status: 'PROCESSED',
+          reason: 'Customer request',
+          createdAt: payment.updatedAt,
+          courseName: `Course ${payment.courseId}` 
+        }));
+
+      reply.status(200).send({
+        success: true,
+        data: { refundRequests }
+      });
+    } catch (error) {
+      req.log.error('Error fetching refund requests:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Failed to fetch refund requests'
       });
     }
   }
