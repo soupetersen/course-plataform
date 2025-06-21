@@ -44,19 +44,19 @@ export function Header() {
                   to="/courses"
                   className="text-gray-600 hover:text-quaternary-500 transition-colors"
                 >
-                  Courses
+                  Cursos
                 </Link>
                 <Link
                   to="/explore"
                   className="text-gray-600 hover:text-quaternary-500 transition-colors"
                 >
-                  Explore
+                  Explorar
                 </Link>
                 <Link
                   to="/my-learning"
                   className="text-gray-600 hover:text-quaternary-500 transition-colors"
                 >
-                  My Learning
+                  Meu Aprendizado
                 </Link>
               </nav>
             )}
@@ -87,16 +87,16 @@ export function Header() {
                     <p className="text-sm font-medium">{user.name || "User"}</p>
                     <p className="text-xs text-gray-500">{user.email || ""}</p>
                   </div>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator />{" "}
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    Profile
+                    Perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    Settings
+                    Configurações
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    Log out
+                    Sair
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
