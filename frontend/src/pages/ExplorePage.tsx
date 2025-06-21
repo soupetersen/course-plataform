@@ -203,13 +203,15 @@ export function ExplorePage() {
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       <span>{course.averageRating.toFixed(1)}</span>
-                    </div>
-
+                    </div>{" "}
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      <span>{course.enrollments_count || 0}</span>
+                      <span>
+                        {(course.enrollments_count || 0) > 0
+                          ? course.enrollments_count
+                          : "Sem inscrições"}
+                      </span>
                     </div>
-
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />
                       <span>{formatDuration(course.duration)}</span>

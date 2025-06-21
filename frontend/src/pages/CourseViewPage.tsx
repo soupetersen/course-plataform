@@ -91,11 +91,15 @@ export const CourseViewPage = () => {
               <div className="flex items-center space-x-6 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
-                  {course.enrollments?.length || 0} alunos
+                  {(course.enrollments?.length || 0) > 0
+                    ? `${course.enrollments.length} alunos`
+                    : "Sem alunos"}
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="w-4 h-4 mr-1" />
-                  {course.modules?.length || 0} módulos
+                  {(course.modules?.length || 0) > 0
+                    ? `${course.modules.length} módulos`
+                    : "Sem módulos"}
                 </div>
                 <div className="flex items-center">
                   <Play className="w-4 h-4 mr-1" />
@@ -327,13 +331,17 @@ export const CourseViewPage = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Alunos inscritos</span>
                   <span className="font-medium">
-                    {course.enrollments?.length || 0}
+                    {(course.enrollments?.length || 0) > 0
+                      ? course.enrollments.length
+                      : "Nenhum"}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Módulos</span>
                   <span className="font-medium">
-                    {course.modules?.length || 0}
+                    {(course.modules?.length || 0) > 0
+                      ? course.modules.length
+                      : "Nenhum"}
                   </span>
                 </div>
                 <div className="flex justify-between">

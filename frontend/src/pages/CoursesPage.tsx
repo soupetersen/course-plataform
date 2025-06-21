@@ -14,6 +14,7 @@ export const CoursesPage = () => {
     page: 1,
     limit: 12,
     search: "",
+    status: "PUBLISHED",
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");

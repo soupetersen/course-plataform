@@ -3,8 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CouponManagement } from "@/components/admin/CouponManagement";
 import { PlatformSettings } from "@/components/admin/PlatformSettings";
 import { Settings, Tag } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AdminDashboard() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "ADMIN";
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex items-center gap-2">
@@ -12,21 +16,30 @@ export function AdminDashboard() {
         <h1 className="text-3xl font-bold">Painel Administrativo</h1>
       </div>
 
-      <Tabs defaultValue="coupons" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="coupons" className="flex items-center gap-2">
-            <Tag className="w-4 h-4" />
-            Cupons
-          </TabsTrigger>
+      <Tabs
+        defaultValue={isAdmin ? "coupons" : "settings"}
+        className="space-y-6"
+      >
+        <TabsList
+          className={`grid w-full ${isAdmin ? "grid-cols-2" : "grid-cols-1"}`}
+        >
+          {isAdmin && (
+            <TabsTrigger value="coupons" className="flex items-center gap-2">
+              <Tag className="w-4 h-4" />
+              Cupons
+            </TabsTrigger>
+          )}
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="w-4 h-4" />
             Configurações
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="coupons">
-          <CouponManagement />
-        </TabsContent>
+        {isAdmin && (
+          <TabsContent value="coupons">
+            <CouponManagement />
+          </TabsContent>
+        )}
 
         <TabsContent value="settings">
           <PlatformSettings />

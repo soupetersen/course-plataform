@@ -24,6 +24,7 @@ export const DashboardPage = () => {
   const { user } = useAuth();
   const { data: coursesData, isLoading: coursesLoading } = useCourses({
     limit: 4,
+    status: "PUBLISHED",
   });
   const { data: enrollmentsData } = useEnrollmentsByUser(user?.id || "");
   const { data: instructorCoursesData } = useCoursesByInstructor(

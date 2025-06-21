@@ -10,108 +10,145 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/hooks/useAuth";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { loginMutation } = useAuth();
+  const { handleError, handleSuccess } = useErrorHandler();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const redirectPath = searchParams.get("redirect") || "/dashboard";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage("");
+
+    // Validação básica
+    if (!formData.email || !formData.password) {
+      handleError("Por favor, preencha todos os campos", {
+        title: "Campos obrigatórios",
+      });
+      return;
+    }
+
+    if (!formData.email.includes("@")) {
+      handleError("Por favor, insira um email válido", {
+        title: "Email inválido",
+      });
+      return;
+    }
 
     loginMutation.mutate(formData, {
       onSuccess: () => {
-        navigate(redirectPath);
+        handleSuccess("Login realizado com sucesso! Redirecionando...");
+        setTimeout(() => navigate(redirectPath), 1000);
       },
-      onError: (error: Error) => {
-        setErrorMessage(error?.message || "Email ou senha inválidos");
-        console.error("Login error:", error);
+      onError: (error) => {
+        handleError(error, {
+          title: "Falha no login",
+        });
       },
     });
   };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
     }));
-
-    if (errorMessage) {
-      setErrorMessage("");
-    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md animate-fade-in">
+        {" "}
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold text-quaternary-500">
-            Welcome Back
+            Bem-vindo de volta
           </CardTitle>
           <CardDescription>
-            Sign in to your account to continue learning
+            Entre na sua conta para continuar aprendendo
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {" "}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="animate-slide-in-left"
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="seuemail@exemplo.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="pl-10 animate-slide-in-left"
+                  disabled={loginMutation.isPending}
+                />
+              </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="animate-slide-in-right"
-              />
+              <Label htmlFor="password">Senha</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  className="pl-10 pr-10 animate-slide-in-right"
+                  disabled={loginMutation.isPending}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                  disabled={loginMutation.isPending}
+                  tabIndex={-1}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <Button
               type="submit"
               className="w-full bg-primary-500 hover:bg-primary-600 text-white fade-in-up"
               disabled={loginMutation.isPending}
             >
-              {loginMutation.isPending ? "Signing in..." : "Sign In"}
+              {loginMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Entrando...
+                </>
+              ) : (
+                "Entrar"
+              )}
             </Button>
-
-            {errorMessage && (
-              <Alert variant="destructive" className="fade-in">
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            )}
-          </form>
+          </form>{" "}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Não tem uma conta?{" "}
               <Link
                 to="/register"
                 className="text-primary-500 hover:text-primary-600 font-medium"
               >
-                Sign up
+                Cadastre-se
               </Link>
             </p>
           </div>
