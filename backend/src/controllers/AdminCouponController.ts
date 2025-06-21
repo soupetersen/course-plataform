@@ -69,7 +69,7 @@ export class AdminCouponController {
       req.log.error('Error creating coupon:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to create coupon'
+        error: 'Falha ao criar cupom'
       });
     }
   }

@@ -45,7 +45,7 @@ export class CourseController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create course'
+        message: error instanceof Error ? error.message : 'Falha ao criar curso'
       });
     }
   }  

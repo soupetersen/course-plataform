@@ -16,7 +16,7 @@ export class InstructorCouponController {
       if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
-          error: 'Access denied. Only instructors can create coupons.'
+          error: 'Acesso negado. Apenas instrutores podem criar cupons.'
         });
         return;
       }
@@ -55,7 +55,7 @@ export class InstructorCouponController {
         if (!course) {
           reply.status(403).send({
             success: false,
-            error: 'You can only create coupons for your own courses.'
+            error: 'Você só pode criar cupons para seus próprios cursos.'
           });
           return;
         }
@@ -104,7 +104,7 @@ export class InstructorCouponController {
       req.log.error('Error creating instructor coupon:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to create coupon'
+        error: 'Falha ao criar o cupom'
       });
     }
   }
