@@ -13,7 +13,7 @@ export class InstructorCouponController {
 
   async createCoupon(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'INSTRUCTOR') {
+      if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
           error: 'Access denied. Only instructors can create coupons.'
@@ -111,7 +111,7 @@ export class InstructorCouponController {
 
   async getMyCoupons(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'INSTRUCTOR') {
+      if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
           error: 'Access denied. Only instructors can view their coupons.'
@@ -181,7 +181,7 @@ export class InstructorCouponController {
 
   async updateMyCoupon(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'INSTRUCTOR') {
+      if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
           error: 'Access denied. Only instructors can update their coupons.'
@@ -280,7 +280,7 @@ export class InstructorCouponController {
 
   async deleteMyCoupon(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'INSTRUCTOR') {
+      if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
           error: 'Access denied. Only instructors can delete their coupons.'
@@ -335,7 +335,7 @@ export class InstructorCouponController {
 
   async getMyCourses(req: AuthenticatedRequest, reply: FastifyReply): Promise<void> {
     try {
-      if (!req.user || req.user.role !== 'INSTRUCTOR') {
+      if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
           error: 'Access denied. Only instructors can view their courses.'
