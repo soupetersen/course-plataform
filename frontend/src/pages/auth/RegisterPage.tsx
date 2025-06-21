@@ -75,7 +75,7 @@ export const RegisterPage = () => {
 
           setTimeout(() => {
             navigate("/login");
-          }, 2000);
+          }, 4000);
         },
         onError: (error: Error) => {
           setErrors([error.message || "Erro ao criar conta"]);

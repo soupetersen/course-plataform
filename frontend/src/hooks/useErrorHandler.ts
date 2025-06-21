@@ -27,7 +27,7 @@ export function useErrorHandler() {
 
       // Extrair mensagem de erro
       let errorMessage = "Ocorreu um erro inesperado";
-      let errorTitle = options?.title || "Erro";
+      let errorTitle = options?.title || "❌ Erro";
 
       // Type guards para diferentes tipos de erro
       const apiError = error as ApiError;
@@ -45,48 +45,48 @@ export function useErrorHandler() {
       if (apiError?.response?.status) {
         switch (apiError.response.status) {
           case 400:
-            errorTitle = "Dados inválidos";
+            errorTitle = "❌ Dados inválidos";
             break;
           case 401:
-            errorTitle = "Não autorizado";
+            errorTitle = "🔒 Não autorizado";
             errorMessage = "Credenciais inválidas ou sessão expirada";
             break;
           case 403:
-            errorTitle = "Acesso negado";
+            errorTitle = "🚫 Acesso negado";
             errorMessage = "Você não tem permissão para realizar esta ação";
             break;
           case 404:
-            errorTitle = "Não encontrado";
+            errorTitle = "🔍 Não encontrado";
             errorMessage = "O recurso solicitado não foi encontrado";
             break;
           case 409:
-            errorTitle = "Conflito";
+            errorTitle = "⚠️ Conflito";
             break;
           case 422:
-            errorTitle = "Dados inválidos";
+            errorTitle = "❌ Dados inválidos";
             break;
           case 429:
-            errorTitle = "Muitas tentativas";
+            errorTitle = "⏰ Muitas tentativas";
             errorMessage = "Aguarde um momento antes de tentar novamente";
             break;
           case 500:
-            errorTitle = "Erro do servidor";
+            errorTitle = "🔧 Erro do servidor";
             errorMessage = "Erro interno do servidor. Tente novamente mais tarde";
             break;
           case 502:
           case 503:
           case 504:
-            errorTitle = "Serviço indisponível";
+            errorTitle = "🌐 Serviço indisponível";
             errorMessage = "O serviço está temporariamente indisponível";
             break;
           default:
-            errorTitle = "Erro de conexão";
+            errorTitle = "🌐 Erro de conexão";
         }
       }
 
       // Verificar se é erro de rede
       if (apiError?.code === "NETWORK_ERROR" || standardError?.message?.includes("Network Error")) {
-        errorTitle = "Erro de conexão";
+        errorTitle = "🌐 Erro de conexão";
         errorMessage = "Verifique sua conexão com a internet e tente novamente";
       }
 
@@ -103,10 +103,10 @@ export function useErrorHandler() {
   const handleSuccess = useCallback(
     (message: string, title?: string) => {
       toast({
-        title: title || "Sucesso",
+        title: title || "✅ Sucesso",
         description: message,
-        variant: "default",
-        duration: 3000,
+        variant: "success",
+        duration: 4000,
       });
     },
     [toast]
@@ -115,10 +115,10 @@ export function useErrorHandler() {
   const handleWarning = useCallback(
     (message: string, title?: string) => {
       toast({
-        title: title || "Atenção",
+        title: title || "⚠️ Atenção",
         description: message,
         variant: "default",
-        duration: 4000,
+        duration: 5000,
       });
     },
     [toast]
@@ -127,10 +127,10 @@ export function useErrorHandler() {
   const handleInfo = useCallback(
     (message: string, title?: string) => {
       toast({
-        title: title || "Informação",
+        title: title || "ℹ️ Informação",
         description: message,
         variant: "default",
-        duration: 3000,
+        duration: 4000,
       });
     },
     [toast]

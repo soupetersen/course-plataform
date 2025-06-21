@@ -8,7 +8,6 @@ import { ContinueLearning } from "../components/dashboard/ContinueLearning";
 import { RecommendedCourses } from "../components/dashboard/RecommendedCourses";
 import { InstructorSection } from "../components/dashboard/InstructorSection";
 import { UserPaymentHistory } from "../components/dashboard/UserPaymentHistory";
-import { StudentCoupons } from "../components/dashboard/StudentCoupons";
 import { InstructorCouponManagement } from "../components/instructor/InstructorCouponManagement";
 import { CouponManagement } from "../components/admin/CouponManagement";
 import {
@@ -76,7 +75,21 @@ export const DashboardPage = () => {
                 <CouponManagement />
               </div>
             ) : (
-              <StudentCoupons />
+              <div className="bg-white rounded-lg border p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  📧 Cupons por Email
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Os cupons de desconto serão enviados diretamente para seu
+                  email quando disponíveis.
+                </p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 text-sm">
+                    💡 <strong>Dica:</strong> Mantenha-se atento ao seu email
+                    para não perder nenhuma promoção especial!
+                  </p>
+                </div>
+              </div>
             )}
           </TabsContent>
           <TabsContent value="instructor" className="space-y-8 mt-8">
@@ -99,7 +112,6 @@ export const DashboardPage = () => {
         <div className="space-y-8">
           <StatsGrid enrollments={enrollments} />
           <ContinueLearning enrollments={enrollments} />
-          <StudentCoupons />
           <RecommendedCourses courses={courses} isLoading={coursesLoading} />
         </div>
       )}

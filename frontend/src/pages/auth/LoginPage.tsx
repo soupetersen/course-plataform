@@ -30,7 +30,6 @@ export function LoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validação básica
     if (!formData.email || !formData.password) {
       handleError("Por favor, preencha todos os campos", {
         title: "Campos obrigatórios",
@@ -47,7 +46,7 @@ export function LoginPage() {
 
     loginMutation.mutate(formData, {
       onSuccess: () => {
-        handleSuccess("Login realizado com sucesso! Redirecionando...");
+        handleSuccess("Login realizado com sucesso!");
         setTimeout(() => navigate(redirectPath), 1000);
       },
       onError: (error) => {
