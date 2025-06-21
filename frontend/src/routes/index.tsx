@@ -6,6 +6,7 @@ import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LessonPage } from "../pages/LessonPage";
 import { ExplorePage } from "../pages/ExplorePage";
+import { MyLearningPage } from "../pages/MyLearningPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CoursesPage } from "@/pages/CoursesPage";
 import { CourseDetailPage } from "@/pages/CourseDetailPage";
@@ -51,6 +52,14 @@ export const router = createBrowserRouter([
       {
         path: "explore",
         element: <ExplorePage />,
+      },
+      {
+        path: "my-learning",
+        element: (
+          <ProtectedRoute>
+            <MyLearningPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "courses/:id",
