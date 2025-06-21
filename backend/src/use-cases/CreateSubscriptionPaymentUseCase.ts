@@ -28,20 +28,19 @@ export class CreateSubscriptionPaymentUseCase {
   ) {}
 
   async execute(request: CreateSubscriptionPaymentRequest): Promise<CreateSubscriptionPaymentResponse> {
-    
-    const user = await this.userRepository.findById(request.userId);
+      const user = await this.userRepository.findById(request.userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Usuário não encontrado. Verifique se você está logado corretamente.');
     }
 
     
     const course = await this.courseRepository.findById(request.courseId);
     if (!course) {
-      throw new Error('Course not found');
+      throw new Error('Curso não encontrado. O curso pode ter sido removido.');
     }
 
     if (!course.isPublished()) {
-      throw new Error('Course is not published');
+      throw new Error('Este curso não está disponível para assinatura no momento.');
     }
 
     
@@ -58,7 +57,7 @@ export class CreateSubscriptionPaymentUseCase {
       if (payment.isSubscription() && payment.isCompleted()) {
         const subscription = await this.subscriptionRepository.findByPaymentId(payment.id);
         if (subscription && subscription.isActive()) {
-          throw new Error('User already has an active subscription for this course');
+          throw new Error('Você já possui uma assinatura ativa para este curso.');
         }
       }
     }
@@ -88,7 +87,7 @@ export class CreateSubscriptionPaymentUseCase {
     const paymentIntent = latestInvoice?.payment_intent;
 
     if (!paymentIntent) {
-      throw new Error('Failed to create payment intent for subscription');
+      throw new Error('Não foi possível processar o pagamento da assinatura. Tente novamente.');
     }
 
     

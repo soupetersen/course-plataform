@@ -17,11 +17,10 @@ export class CategoryController {
 
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
-      const userInfo = (request as any).userInfo;
-      if (!userInfo) {
+      const userInfo = (request as any).userInfo;      if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para criar uma categoria.'
         });
       }
 
@@ -29,7 +28,7 @@ export class CategoryController {
       if (userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'Only administrators can create categories'
+          message: 'Apenas administradores podem criar categorias.'
         });
       }
 
@@ -105,11 +104,10 @@ export class CategoryController {
 
   async update(request: FastifyRequest<{ Params: CategoryParams }>, reply: FastifyReply) {
     try {
-      const userInfo = (request as any).userInfo;
-      if (!userInfo) {
+      const userInfo = (request as any).userInfo;      if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para atualizar uma categoria.'
         });
       }
 
@@ -117,7 +115,7 @@ export class CategoryController {
       if (userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'Only administrators can update categories'
+          message: 'Apenas administradores podem atualizar categorias.'
         });
       }
 
@@ -150,11 +148,10 @@ export class CategoryController {
 
   async delete(request: FastifyRequest<{ Params: CategoryParams }>, reply: FastifyReply) {
     try {
-      const userInfo = (request as any).userInfo;
-      if (!userInfo) {
+      const userInfo = (request as any).userInfo;      if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para excluir uma categoria.'
         });
       }
 
@@ -162,7 +159,7 @@ export class CategoryController {
       if (userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'Only administrators can delete categories'
+          message: 'Apenas administradores podem excluir categorias.'
         });
       }
 

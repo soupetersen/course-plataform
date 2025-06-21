@@ -25,20 +25,19 @@ export class CreateOneTimePaymentUseCase {
   ) {}
 
   async execute(request: CreateOneTimePaymentRequest): Promise<CreateOneTimePaymentResponse> {
-    
-    const user = await this.userRepository.findById(request.userId);
+      const user = await this.userRepository.findById(request.userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Usuário não encontrado. Verifique se você está logado corretamente.');
     }
 
     
     const course = await this.courseRepository.findById(request.courseId);
     if (!course) {
-      throw new Error('Course not found');
+      throw new Error('Curso não encontrado. O curso pode ter sido removido.');
     }
 
     if (!course.isPublished()) {
-      throw new Error('Course is not published');
+      throw new Error('Este curso não está disponível para compra no momento.');
     }
 
     

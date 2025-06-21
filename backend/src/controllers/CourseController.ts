@@ -1,4 +1,4 @@
-﻿import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { CreateCourseUseCase } from '@/use-cases/CreateCourseUseCase';
 import { CourseRepository } from '@/interfaces/CourseRepository';
@@ -14,14 +14,13 @@ export class CourseController {
   constructor(container: DIContainer) {
     this.container = container;
   }
-
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para criar um curso.'
         });
       }
 
@@ -126,7 +125,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch courses'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar courses. Tente novamente.'
       });
     }
   }
@@ -213,7 +212,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch course'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar course. Tente novamente.'
       });
     }
   }
@@ -292,7 +291,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch instructor courses'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar instructor courses. Tente novamente.'
       });
     }
   }
@@ -303,7 +302,7 @@ export class CourseController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar cursos.'
         });
       }
 
@@ -337,7 +336,7 @@ export class CourseController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update course'
+        message: error instanceof Error ? error.message : 'Não foi possível atualizar course. Tente novamente.'
       });
     }
   }
@@ -348,7 +347,7 @@ export class CourseController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar cursos.'
         });
       }
 
@@ -380,7 +379,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete course'
+        message: error instanceof Error ? error.message : 'Não foi possível excluir course. Tente novamente.'
       });
     }
   }
@@ -390,7 +389,7 @@ export class CourseController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar cursos.'
         });
       }
 
@@ -423,7 +422,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to publish course'
+        message: error instanceof Error ? error.message : 'Não foi possível publicar o curso. Tente novamente.'
       });
     }
   }
@@ -434,7 +433,7 @@ export class CourseController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar cursos.'
         });
       }
 
@@ -467,7 +466,7 @@ export class CourseController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to unpublish course'
+        message: error instanceof Error ? error.message : 'Não foi possível despublicar o curso. Tente novamente.'
       });
     }
   }

@@ -1,4 +1,4 @@
-﻿import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { CreateOneTimePaymentUseCase } from '@/use-cases/CreateOneTimePaymentUseCase';
 import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscriptionPaymentUseCase';
 import { ProcessStripeWebhookUseCase } from '@/use-cases/ProcessStripeWebhookUseCase';
@@ -16,13 +16,12 @@ export class PaymentController {
     private calculateFeesUseCase: CalculateFeesUseCase,
     private createRefundRequestUseCase: CreateRefundRequestUseCase,
     private paymentRepository: PaymentRepository
-  ) {}
-  async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  ) {}  async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId, currency } = req.body as any;
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Voc� precisa estar logado para realizar um pagamento.' });
         return;
       }
       const userId = userInfo.userId;
@@ -41,21 +40,19 @@ export class PaymentController {
           amount: result.payment.amount,
           currency: result.payment.currency,
         },
-      });
-    } catch (error) {
+      });    } catch (error) {
       req.log.error('Error creating one-time payment:', error);
       reply.status(400).send({
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create payment',
+        error: error instanceof Error ? error.message : 'N�o foi poss�vel processar o pagamento. Tente novamente.',
       });
     }
-  }
-  async createSubscriptionPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  }  async createSubscriptionPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId } = req.body as any;
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Voc� precisa estar logado para criar uma assinatura.' });
         return;
       }
       const userId = userInfo.userId;
@@ -74,12 +71,11 @@ export class PaymentController {
           amount: result.payment.amount,
           currency: result.payment.currency,
         },
-      });
-    } catch (error) {
+      });    } catch (error) {
       req.log.error('Error creating subscription payment:', error);
       reply.status(400).send({
         success: false,
-        error: error instanceof Error ? error.message : 'Failed to create subscription',
+        error: error instanceof Error ? error.message : 'N�o foi poss�vel criar a assinatura. Tente novamente.',
       });
     }
   }
@@ -91,12 +87,11 @@ export class PaymentController {
 
       await this.processStripeWebhookUseCase.execute(payload, signature);
 
-      reply.status(200).send({ received: true });
-    } catch (error) {
+      reply.status(200).send({ received: true });    } catch (error) {
       req.log.error('Error processing webhook:', error);
       reply.status(400).send({
         success: false,
-        error: 'Webhook processing failed',
+        error: 'Erro ao processar notifica��o de pagamento.',
       });
     }
   }
@@ -106,7 +101,7 @@ export class PaymentController {
       if (!userInfo) {
         reply.status(401).send({
           success: false,
-          error: 'User not authenticated',
+          error: 'Você precisa estar logado para realizar pagamentos.',
         });
         return;
       }
@@ -132,7 +127,7 @@ export class PaymentController {
       console.error('Payment history error details:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to fetch payment history',
+        error: 'Não foi possível carregar payment history. Tente novamente.',
       });
     }
   }
@@ -141,7 +136,7 @@ export class PaymentController {
       const { paymentId } = req.params as any;
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Você precisa estar logado para realizar pagamentos.' });
         return;
       }
       const userId = userInfo.userId;
@@ -178,7 +173,7 @@ export class PaymentController {
     } catch (error) {
       req.log.error('Error fetching payment status:', error);      reply.status(500).send({
         success: false,
-        error: 'Failed to fetch payment status',
+        error: 'Não foi possível carregar payment status. Tente novamente.',
       });
     }
   }
@@ -187,7 +182,7 @@ export class PaymentController {
       const { code, coursePrice } = req.body as { code: string; coursePrice: number };
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Você precisa estar logado para realizar pagamentos.' });
         return;
       }
       const userId = userInfo.userId;
@@ -257,7 +252,7 @@ export class PaymentController {
       };
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Você precisa estar logado para realizar pagamentos.' });
         return;
       }
       const userId = userInfo.userId;
@@ -288,7 +283,7 @@ export class PaymentController {
       req.log.error('Error creating refund request:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to create refund request'
+        error: 'Não foi possível criar refund request. Tente novamente.'
       });
     }
   }
@@ -300,7 +295,7 @@ export class PaymentController {
     try {
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
-        reply.status(401).send({ success: false, error: 'User not authenticated' });
+        reply.status(401).send({ success: false, error: 'Você precisa estar logado para realizar pagamentos.' });
         return;
       }
       const userId = userInfo.userId;
@@ -327,7 +322,7 @@ export class PaymentController {
       req.log.error('Error fetching refund requests:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to fetch refund requests'
+        error: 'Não foi possível carregar refund requests. Tente novamente.'
       });
     }
   }

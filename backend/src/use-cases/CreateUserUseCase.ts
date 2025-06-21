@@ -9,10 +9,9 @@ export class CreateUserUseCase {
     private passwordService: PasswordService
   ) {}
 
-  async execute(data: CreateUserDto): Promise<User> {
-    const existingUser = await this.userRepository.findByEmail(data.email);
+  async execute(data: CreateUserDto): Promise<User> {    const existingUser = await this.userRepository.findByEmail(data.email);
     if (existingUser) {
-      throw new Error('User with this email already exists');
+      throw new Error('Já existe uma conta cadastrada com este email. Tente fazer login ou use outro email.');
     }
 
     const hashedPassword = await this.passwordService.hashPassword(data.password);

@@ -1,4 +1,4 @@
-﻿import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { EnrollInCourseUseCase } from '@/use-cases/EnrollInCourseUseCase';
 import { EnrollmentRepository } from '@/interfaces/EnrollmentRepository';
@@ -17,14 +17,13 @@ export class EnrollmentController {
   constructor(container: DIContainer) {
     this.container = container;
   }
-
   async enroll(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para se inscrever em um curso.'
         });
       }
 
@@ -36,22 +35,20 @@ export class EnrollmentController {
       reply.status(201).send({
         success: true,
         data: enrollment
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to enroll in course'
+        message: error instanceof Error ? error.message : 'N�o foi poss�vel realizar a inscri��o no curso. Tente novamente.'
       });
     }
   }
-
   async getUserEnrollments(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para ver suas inscri��es.'
         });
       }
 
@@ -61,22 +58,20 @@ export class EnrollmentController {
       reply.send({
         success: true,
         data: enrollments
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch enrollments'
+        message: error instanceof Error ? error.message : 'N�o foi poss�vel carregar suas inscri��es. Tente novamente.'
       });
     }
   }
 
   async getUserEnrollmentsByUserId(request: FastifyRequest<{ Params: { userId: string } }>, reply: FastifyReply) {
     try {
-      const userInfo = (request as any).userInfo;
-      if (!userInfo) {
+      const userInfo = (request as any).userInfo;      if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para acessar essas informa��es.'
         });
       }
 
@@ -86,7 +81,7 @@ export class EnrollmentController {
       if (userInfo.userId !== userId && userInfo.role !== 'INSTRUCTOR' && userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'Not authorized to view this user\'s enrollments'
+          message: 'Voc� n�o tem permiss�o para ver as inscri��es deste usu�rio.'
         });
       }
 
@@ -100,18 +95,17 @@ export class EnrollmentController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch user enrollments'
+        message: error instanceof Error ? error.message : 'N�o foi poss�vel carregar as inscri��es do usu�rio.'
       });
     }
   }
-
   async getCourseEnrollments(request: FastifyRequest<{ Params: { courseId: string } }>, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para ver as inscri��es do curso.'
         });
       }
 
@@ -127,7 +121,7 @@ export class EnrollmentController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch course enrollments'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar course enrollments. Tente novamente.'
       });
     }
   }
@@ -138,7 +132,7 @@ export class EnrollmentController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar inscrições.'
         });
       }
 
@@ -172,7 +166,7 @@ export class EnrollmentController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update enrollment progress'
+        message: error instanceof Error ? error.message : 'Não foi possível atualizar enrollment progress. Tente novamente.'
       });
     }
   }
@@ -183,7 +177,7 @@ export class EnrollmentController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar inscrições.'
         });
       }
 

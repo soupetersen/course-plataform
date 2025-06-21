@@ -25,7 +25,7 @@ export class ReviewController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para avaliar um curso.'
         });
       }
 
@@ -52,7 +52,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create review'
+        message: error instanceof Error ? error.message : 'Não foi possível criar a avaliação. Tente novamente.'
       });
     }
   }
@@ -81,7 +81,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch reviews'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar as avaliações. Tente novamente.'
       });
     }
   }
@@ -122,7 +122,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch rating stats'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar rating stats. Tente novamente.'
       });
     }
   }
@@ -133,7 +133,7 @@ export class ReviewController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para avaliar cursos.'
         });
       }
 
@@ -183,7 +183,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update review'
+        message: error instanceof Error ? error.message : 'Não foi possível atualizar review. Tente novamente.'
       });
     }
   }
@@ -194,7 +194,7 @@ export class ReviewController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para avaliar cursos.'
         });
       }
 
@@ -226,7 +226,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete review'
+        message: error instanceof Error ? error.message : 'Não foi possível excluir review. Tente novamente.'
       });
     }
   }
@@ -237,7 +237,7 @@ export class ReviewController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para avaliar cursos.'
         });
       }
 
@@ -261,7 +261,7 @@ export class ReviewController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch user reviews'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar user reviews. Tente novamente.'
       });
     }
   }

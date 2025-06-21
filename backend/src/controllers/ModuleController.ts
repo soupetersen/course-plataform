@@ -1,4 +1,4 @@
-﻿import { FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { CreateModuleUseCase } from '@/use-cases/CreateModuleUseCase';
 import { ModuleRepository } from '@/interfaces/ModuleRepository';
@@ -18,14 +18,13 @@ export class ModuleController {
   constructor(container: DIContainer) {
     this.container = container;
   }
-
   async create(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Voc� precisa estar logado para criar um m�dulo.'
         });
       }
 
@@ -41,7 +40,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create module'
+        message: error instanceof Error ? error.message : 'Não foi possível criar module. Tente novamente.'
       });
     }
   }
@@ -52,7 +51,7 @@ export class ModuleController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar módulos.'
         });
       }
 
@@ -66,7 +65,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch modules'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar modules. Tente novamente.'
       });
     }
   }
@@ -77,7 +76,7 @@ export class ModuleController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar módulos.'
         });
       }
 
@@ -100,7 +99,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch module'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar module. Tente novamente.'
       });
     }
   }
@@ -111,7 +110,7 @@ export class ModuleController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar módulos.'
         });
       }
 
@@ -127,7 +126,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch modules'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar modules. Tente novamente.'
       });
     }
   }
@@ -138,7 +137,7 @@ export class ModuleController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar módulos.'
         });
       }
 
@@ -165,7 +164,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update module'
+        message: error instanceof Error ? error.message : 'Não foi possível atualizar module. Tente novamente.'
       });
     }
   }
@@ -176,7 +175,7 @@ export class ModuleController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Você precisa estar logado para gerenciar módulos.'
         });
       }
 
@@ -201,7 +200,7 @@ export class ModuleController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete module'
+        message: error instanceof Error ? error.message : 'Não foi possível excluir module. Tente novamente.'
       });
     }
   }

@@ -28,11 +28,10 @@ export class AuthController {
           role: user.role,
           isActive: user.isActive
         }
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Registration failed'
+        message: error instanceof Error ? error.message : 'Falha no cadastro. Verifique os dados informados e tente novamente.'
       });
     }
   }
@@ -47,11 +46,10 @@ export class AuthController {
       reply.send({
         success: true,
         data: authResponse
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(401).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Authentication failed'
+        message: error instanceof Error ? error.message : 'Falha na autenticação. Verifique suas credenciais.'
       });
     }
   }
@@ -59,11 +57,10 @@ export class AuthController {
   async me(request: FastifyRequest, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
-      
-      if (!userInfo) {
+        if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'User not authenticated'
+          message: 'Acesso não autorizado. Faça login novamente.'
         });
       }
 
@@ -74,7 +71,7 @@ export class AuthController {
       if (!user) {
         return reply.status(404).send({
           success: false,
-          message: 'User not found'
+          message: 'Usuário não encontrado. Entre em contato com o suporte.'
         });
       }
 
@@ -89,11 +86,10 @@ export class AuthController {
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to get user info'
+        message: error instanceof Error ? error.message : 'Erro interno do servidor. Tente novamente mais tarde.'
       });
     }
   }

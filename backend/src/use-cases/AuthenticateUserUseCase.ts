@@ -25,18 +25,16 @@ export class AuthenticateUserUseCase {
   async execute(dataOrEmail: AuthenticateUserRequest | string, password?: string): Promise<AuthenticateUserResponse> {
     const data = typeof dataOrEmail === 'string' 
       ? { email: dataOrEmail, password: password! }
-      : dataOrEmail;
-
-    const user = await this.userRepository.findByEmail(data.email);
+      : dataOrEmail;    const user = await this.userRepository.findByEmail(data.email);
     if (!user) {
-      throw new Error('Invalid credentials');
+      throw new Error('Email ou senha incorretos. Verifique suas credenciais e tente novamente.');
     }
     if (!user.isActive) {
-      throw new Error('User account is deactivated');
+      throw new Error('Sua conta foi desativada. Entre em contato com o suporte para mais informações.');
     }
     const isPasswordValid = await this.passwordService.compare(data.password, user.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid credentials');
+      throw new Error('Email ou senha incorretos. Verifique suas credenciais e tente novamente.');
     }
     const token = this.jwtService.sign({
       userId: user.id,
