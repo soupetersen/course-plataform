@@ -68,8 +68,8 @@ export const InstructorCouponManagement: React.FC = () => {
     } catch (error) {
       console.error("Failed to load data:", error);
       toast({
-        title: "Error",
-        description: "Failed to load data",
+        title: "Erro",
+        description: "Falha ao carregar dados",
         variant: "destructive",
       });
     } finally {
@@ -84,8 +84,8 @@ export const InstructorCouponManagement: React.FC = () => {
   const handleCreateCoupon = async () => {
     if (!validateForm(formData)) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Erro de Validação",
+        description: "Por favor, preencha todos os campos obrigatórios",
         variant: "destructive",
       });
       return;
@@ -97,8 +97,8 @@ export const InstructorCouponManagement: React.FC = () => {
 
       if (response?.success) {
         toast({
-          title: "Success",
-          description: "Coupon created successfully",
+          title: "Sucesso",
+          description: "Cupom criado com sucesso",
           variant: "default",
         });
 
@@ -107,8 +107,8 @@ export const InstructorCouponManagement: React.FC = () => {
         loadData();
       } else {
         toast({
-          title: "Error",
-          description: response?.error || "Failed to create coupon",
+          title: "Erro",
+          description: response?.error || "Falha ao criar cupom",
           variant: "destructive",
         });
       }
@@ -122,8 +122,8 @@ export const InstructorCouponManagement: React.FC = () => {
 
     if (!validateForm(formData)) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields",
+        title: "Erro de Validação",
+        description: "Por favor, preencha todos os campos obrigatórios",
         variant: "destructive",
       });
       return;
@@ -135,8 +135,8 @@ export const InstructorCouponManagement: React.FC = () => {
 
       if (response?.success) {
         toast({
-          title: "Success",
-          description: "Coupon updated successfully",
+          title: "Sucesso",
+          description: "Cupom atualizado com sucesso",
           variant: "default",
         });
 
@@ -145,8 +145,8 @@ export const InstructorCouponManagement: React.FC = () => {
         loadData();
       } else {
         toast({
-          title: "Error",
-          description: response?.error || "Failed to update coupon",
+          title: "Erro",
+          description: response?.error || "Falha ao atualizar cupom",
           variant: "destructive",
         });
       }
@@ -156,7 +156,7 @@ export const InstructorCouponManagement: React.FC = () => {
   };
 
   const handleDeleteCoupon = async (couponId: string) => {
-    if (!confirm("Are you sure you want to delete this coupon?")) return;
+    if (!confirm("Tem certeza que deseja excluir este cupom?")) return;
 
     setOperationLoading(true);
     try {
@@ -164,16 +164,16 @@ export const InstructorCouponManagement: React.FC = () => {
 
       if (response?.success) {
         toast({
-          title: "Success",
-          description: "Coupon deleted successfully",
+          title: "Sucesso",
+          description: "Cupom excluído com sucesso",
           variant: "default",
         });
 
         loadData();
       } else {
         toast({
-          title: "Error",
-          description: response?.message || "Failed to delete coupon",
+          title: "Erro",
+          description: response?.message || "Falha ao excluir cupom",
           variant: "destructive",
         });
       }
@@ -193,23 +193,23 @@ export const InstructorCouponManagement: React.FC = () => {
   };
 
   if (loading) {
-    return <LoadingSpinner message="Loading coupons..." />;
+    return <LoadingSpinner message="Carregando cupons..." />;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Coupon Management</h2>
+          <h2 className="text-2xl font-bold">Gerenciamento de Cupons</h2>
           <p className="text-gray-600">
-            Create and manage discount coupons for your courses
+            Crie e gerencie cupons de desconto para seus cursos
           </p>
         </div>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleCreateDialogOpen}>
               <Plus className="h-4 w-4 mr-2" />
-              Create Coupon
+              Criar Cupom
             </Button>
           </DialogTrigger>
           <CouponDialog
@@ -226,9 +226,9 @@ export const InstructorCouponManagement: React.FC = () => {
 
       <Tabs defaultValue="active" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="active">Active Coupons</TabsTrigger>
-          <TabsTrigger value="inactive">Inactive Coupons</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="active">Cupons Ativos</TabsTrigger>
+          <TabsTrigger value="inactive">Cupons Inativos</TabsTrigger>
+          <TabsTrigger value="analytics">Análises</TabsTrigger>
         </TabsList>
 
         <TabsContent value="active" className="space-y-4">
