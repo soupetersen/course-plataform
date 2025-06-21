@@ -23,6 +23,7 @@ import {
   useCourse,
   useUpdateCourse,
   usePublishCourse,
+  useUnpublishCourse,
 } from "../hooks/useCourses";
 import { useCategories } from "../hooks/useCategoriesAndEnrollments";
 import { useModulesByCourse } from "../hooks/useModulesAndLessons";
@@ -44,6 +45,7 @@ export const EditCoursePage = () => {
   );
   const updateCourse = useUpdateCourse();
   const publishCourse = usePublishCourse();
+  const unpublishCourse = useUnpublishCourse();
 
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -120,12 +122,19 @@ export const EditCoursePage = () => {
       console.error("Error updating course:", error);
     }
   };
-
   const handlePublish = async () => {
     try {
       await publishCourse.mutateAsync(id);
     } catch (error) {
       console.error("Error publishing course:", error);
+    }
+  };
+
+  const handleUnpublish = async () => {
+    try {
+      await unpublishCourse.mutateAsync(id);
+    } catch (error) {
+      console.error("Error unpublishing course:", error);
     }
   };
 
@@ -160,21 +169,28 @@ export const EditCoursePage = () => {
             <p className="text-gray-600 mt-2">
               Edite as informações do seu curso e gerencie o conteúdo.
             </p>
-          </div>
-
+          </div>{" "}
           <div className="flex space-x-2">
             <Button variant="outline" onClick={() => navigate(`/course/${id}`)}>
               <Eye className="w-4 h-4 mr-2" />
               Visualizar
             </Button>
 
-            {!isPublished && (
+            {!isPublished ? (
               <Button
                 onClick={handlePublish}
                 disabled={publishCourse.isPending}
                 className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {publishCourse.isPending ? "Publicando..." : "Publicar"}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleUnpublish}
+                disabled={unpublishCourse.isPending}
+                variant="destructive"
+              >
+                {unpublishCourse.isPending ? "Despublicando..." : "Despublicar"}
               </Button>
             )}
           </div>

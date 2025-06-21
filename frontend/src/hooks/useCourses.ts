@@ -164,3 +164,26 @@ export const usePublishCourse = () => {
     },
   });
 };
+
+export const useUnpublishCourse = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (id: string): Promise<ApiResponse<Course>> => {
+      return apiRequest({
+        method: 'PATCH',
+        url: `/api/courses/${id}/unpublish`,
+      });
+    },
+    onSuccess: (data, id) => {
+      
+      queryClient.setQueryData(queryKeys.course(id), data);
+      
+      
+      queryClient.invalidateQueries({ queryKey: queryKeys.courses });
+    },
+    onError: (error) => {
+      console.error('Unpublish course error:', error);
+    },
+  });
+};
