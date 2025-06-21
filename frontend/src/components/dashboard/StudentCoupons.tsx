@@ -21,12 +21,12 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { useStudentCouponApi } from "../../hooks/usePaymentApi";
 import { AvailableCoupon } from "../../types/payment";
-import { useToast } from "../ui/use-toast";
+import { useGlobalError } from "../../hooks/useGlobalError";
 
 export const StudentCoupons: React.FC = () => {
   const { user } = useAuth();
   const { getAvailableCoupons } = useStudentCouponApi();
-  const { toast } = useToast();
+  const { handleError, handleSuccess } = useGlobalError();
   const [availableCoupons, setAvailableCoupons] = useState<AvailableCoupon[]>(
     []
   );
@@ -51,10 +51,8 @@ export const StudentCoupons: React.FC = () => {
         if (response !== null) {
           const errorMessage = "Falha ao carregar cupons do servidor";
           setError(errorMessage);
-          toast({
+          handleError(errorMessage, {
             title: "Erro de conexão",
-            description: errorMessage,
-            variant: "destructive",
           });
         }
       }
@@ -64,15 +62,13 @@ export const StudentCoupons: React.FC = () => {
       const errorMessage =
         "Não foi possível carregar os cupons. Verifique se o backend está rodando.";
       setError(errorMessage);
-      toast({
+      handleError(fetchError, {
         title: "Erro de conexão",
-        description: errorMessage,
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
-  }, [getAvailableCoupons, toast]);
+  }, [getAvailableCoupons, handleError]);
 
   useEffect(() => {
     if (user) {
@@ -91,17 +87,15 @@ export const StudentCoupons: React.FC = () => {
     try {
       await navigator.clipboard.writeText(code);
       setCopiedCode(code);
-      toast({
-        title: "Código copiado!",
-        description: `O código "${code}" foi copiado para a área de transferência`,
-      });
+      handleSuccess(
+        `O código "${code}" foi copiado para a área de transferência`,
+        "Código copiado!"
+      );
       setTimeout(() => setCopiedCode(null), 2000);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
-      toast({
+      handleError("Não foi possível copiar o código. Tente novamente.", {
         title: "Erro ao copiar",
-        description: "Não foi possível copiar o código. Tente novamente.",
-        variant: "destructive",
       });
     }
   };

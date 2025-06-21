@@ -115,11 +115,19 @@ export const CourseGrid = ({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                 />
               </div>
-            )}
+            )}{" "}
             <div className="flex items-center justify-between">
               <Badge className={getLevelColor(course.level)}>
                 {getLevelText(course.level)}
               </Badge>
+              {course.status !== "PUBLISHED" && (
+                <Badge
+                  variant="outline"
+                  className="bg-orange-50 text-orange-600 border-orange-200"
+                >
+                  Rascunho
+                </Badge>
+              )}
               <div className="text-lg font-bold text-primary">
                 R$ {course.price.toFixed(2)}
               </div>
@@ -137,13 +145,17 @@ export const CourseGrid = ({
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-1" />
-                  {course.enrollments?.length || 0} estudantes
+                  {(course.enrollments?.length || 0) > 0
+                    ? `${course.enrollments.length} estudantes`
+                    : "Sem estudantes"}
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="h-4 w-4 mr-1" />
-                  {course.modules?.length || 0} módulos
+                  {(course.modules?.length || 0) > 0
+                    ? `${course.modules.length} módulos`
+                    : "Sem módulos"}
                 </div>
-              </div>
+              </div>{" "}
               {course.averageRating && course.averageRating > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center text-yellow-600">
@@ -152,7 +164,11 @@ export const CourseGrid = ({
                       {course.averageRating.toFixed(1)}
                     </span>
                     <span className="text-gray-500 ml-1">
-                      ({course.reviewCount || 0} avaliações)
+                      (
+                      {(course.reviewCount || 0) > 0
+                        ? `${course.reviewCount} avaliações`
+                        : "Sem avaliações"}
+                      )
                     </span>
                   </div>
                 </div>

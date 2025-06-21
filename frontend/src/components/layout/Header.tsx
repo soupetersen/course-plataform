@@ -40,12 +40,7 @@ export function Header() {
                 >
                   Dashboard
                 </Link>
-                <Link
-                  to="/courses"
-                  className="text-gray-600 hover:text-quaternary-500 transition-colors"
-                >
-                  Cursos
-                </Link>
+
                 <Link
                   to="/explore"
                   className="text-gray-600 hover:text-quaternary-500 transition-colors"

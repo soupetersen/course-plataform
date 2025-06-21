@@ -2,7 +2,6 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
-  BookOpen,
   User,
   Settings,
   ChevronLeft,
@@ -24,11 +23,6 @@ export const Sidebar = () => {
       title: "Dashboard",
       icon: Home,
       href: "/dashboard",
-    },
-    {
-      title: "Meus Cursos",
-      icon: BookOpen,
-      href: "/courses",
     },
     {
       title: "Explorar",
