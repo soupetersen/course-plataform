@@ -83,9 +83,7 @@ export async function courseRoutes(fastify: FastifyInstance) {
           }
         }
       }
-    }, courseController.delete.bind(courseController));
-
-    fastify.patch('/:id/publish', {
+    }, courseController.delete.bind(courseController));    fastify.patch('/:id/publish', {
       schema: {
         params: {
           type: 'object',
@@ -95,5 +93,16 @@ export async function courseRoutes(fastify: FastifyInstance) {
         }
       }
     }, courseController.publish.bind(courseController));
+
+    fastify.patch('/:id/unpublish', {
+      schema: {
+        params: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' }
+          }
+        }
+      }
+    }, courseController.unpublish.bind(courseController));
   });
 }

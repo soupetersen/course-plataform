@@ -384,7 +384,6 @@ export class CourseController {
       });
     }
   }
-
   async publish(request: FastifyRequest<{ Params: CourseParams }>, reply: FastifyReply) {
     try {
       const userInfo = (request as any).userInfo;
@@ -425,6 +424,50 @@ export class CourseController {
       reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : 'Failed to publish course'
+      });
+    }
+  }
+
+  async unpublish(request: FastifyRequest<{ Params: CourseParams }>, reply: FastifyReply) {
+    try {
+      const userInfo = (request as any).userInfo;
+      if (!userInfo) {
+        return reply.status(401).send({
+          success: false,
+          message: 'User not authenticated'
+        });
+      }
+
+      const { id } = request.params;
+
+      const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
+      
+      const existingCourse = await courseRepository.findById(id);
+      if (!existingCourse) {
+        return reply.status(404).send({
+          success: false,
+          message: 'Course not found'
+        });
+      }
+
+      if (existingCourse.instructorId !== userInfo.userId && userInfo.role !== 'admin') {
+        return reply.status(403).send({
+          success: false,
+          message: 'Not authorized to unpublish this course'
+        });
+      }
+
+      existingCourse.archive();
+      const updatedCourse = await courseRepository.update(id, existingCourse);
+
+      reply.send({
+        success: true,
+        data: updatedCourse
+      });
+    } catch (error) {
+      reply.status(500).send({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to unpublish course'
       });
     }
   }
