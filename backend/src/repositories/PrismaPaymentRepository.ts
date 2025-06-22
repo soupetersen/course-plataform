@@ -5,6 +5,15 @@ import { PaymentRepository } from '@/interfaces/PaymentRepository';
 export class PrismaPaymentRepository implements PaymentRepository {
   constructor(private prisma: PrismaClient) {}
   async create(payment: Payment): Promise<Payment> {
+    const existingPayment = await this.prisma.payment.findUnique({
+      where: { externalPaymentId: payment.externalPaymentId }
+    });
+
+    if (existingPayment) {
+      console.log(`Payment with externalPaymentId ${payment.externalPaymentId} already exists, returning existing payment`);
+      return this.toDomain(existingPayment);
+    }
+
     const result = await this.prisma.payment.create({
       data: {
         id: payment.id,

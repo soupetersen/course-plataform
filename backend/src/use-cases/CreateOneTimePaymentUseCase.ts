@@ -3,6 +3,7 @@ import { Payment, PaymentStatus, PaymentType } from '@/models/Payment';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
+import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 
 export interface CreateOneTimePaymentRequest {
@@ -12,6 +13,18 @@ export interface CreateOneTimePaymentRequest {
   couponCode?: string;
   paymentMethod?: 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BOLETO';
   gatewayType?: 'MERCADOPAGO' | 'STRIPE' | 'PAGSEGURO';
+  cardData?: {
+    cardNumber?: string;
+    cardHolderName?: string;
+    expirationMonth?: string;
+    expirationYear?: string;
+    securityCode: string;
+    installments?: number;
+    identificationType?: string;
+    identificationNumber?: string;
+    saveCard?: boolean;
+    savedCardId?: string; // ID do cartão salvo
+  };
 }
 
 export interface CreateOneTimePaymentResponse {
@@ -30,11 +43,12 @@ export class CreateOneTimePaymentUseCase {
     private paymentRepository: PaymentRepository,
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
+    private savedCardRepository: SavedCardRepository,
     private paymentGatewayFactory: PaymentGatewayFactory
   ) {}
 
   async execute(request: CreateOneTimePaymentRequest): Promise<CreateOneTimePaymentResponse> {
-    const { userId, courseId, currency, couponCode, paymentMethod = 'PIX', gatewayType } = request;
+    const { userId, courseId, currency, couponCode, paymentMethod = 'PIX', gatewayType, cardData } = request;
 
     // Validar usuário
     const user = await this.userRepository.findById(userId);
@@ -84,6 +98,10 @@ export class CreateOneTimePaymentUseCase {
     const instructorAmount = amount - platformFeeAmount;
 
     // Determinar a notification URL - usar ngrok se disponível para desenvolvimento
+    console.log('DEBUG - Environment variables:');
+    console.log('  NGROK_URL:', process.env.NGROK_URL);
+    console.log('  API_BASE_URL:', process.env.API_BASE_URL);
+    
     const baseUrl = process.env.NGROK_URL || process.env.API_BASE_URL || 'http://localhost:3000';
     const notificationUrl = `${baseUrl}/api/payments/webhook`;
     const returnUrl = `${process.env.FRONTEND_URL}/courses/${courseId}?payment=success`;
@@ -91,8 +109,53 @@ export class CreateOneTimePaymentUseCase {
     console.log('Notification URL para MercadoPago:', notificationUrl);
     console.log('Return URL para MercadoPago:', returnUrl);
 
-    // Criar pagamento no gateway
-    const gatewayResponse = await gateway.createPayment({
+    // Processar dados do cartão (novo ou salvo)
+    let finalCardData: any = undefined;
+    
+    if (cardData && paymentMethod === 'CREDIT_CARD') {
+      if (cardData.savedCardId) {
+        // Usar cartão salvo
+        const savedCard = await this.savedCardRepository.findById(cardData.savedCardId);
+        if (!savedCard) {
+          throw new Error('Cartão salvo não encontrado.');
+        }
+        
+        if (savedCard.userId !== userId) {
+          throw new Error('Cartão não pertence ao usuário.');
+        }
+        
+        finalCardData = {
+          cardNumber: `****${savedCard.cardNumberLast4}`, // Placeholder para cartão salvo
+          cardHolderName: savedCard.cardHolderName,
+          expirationMonth: savedCard.expirationMonth,
+          expirationYear: savedCard.expirationYear,
+          securityCode: cardData.securityCode,
+          installments: cardData.installments || 1,
+          identificationType: savedCard.identificationType,
+          identificationNumber: savedCard.identificationNumber,
+        };
+      } else if (cardData.cardNumber) {
+        // Usar novo cartão
+        finalCardData = {
+          cardNumber: cardData.cardNumber,
+          cardHolderName: cardData.cardHolderName!,
+          expirationMonth: cardData.expirationMonth!,
+          expirationYear: cardData.expirationYear!,
+          securityCode: cardData.securityCode,
+          installments: cardData.installments || 1,
+          identificationType: cardData.identificationType,
+          identificationNumber: cardData.identificationNumber,
+        };
+      } else {
+        throw new Error('Dados do cartão são obrigatórios para pagamento com cartão de crédito.');
+      }
+    }
+
+    // Criar pagamento no gateway - sempre usar notification_url se ngrok estiver configurado
+    const shouldUseNotification = Boolean(process.env.NGROK_URL);
+    console.log('Should use notification:', shouldUseNotification);
+    
+    const gatewayRequest = {
       amount: amount,
       currency: finalCurrency,
       customerEmail: user.email,
@@ -108,12 +171,30 @@ export class CreateOneTimePaymentUseCase {
         instructorAmount: instructorAmount.toString(),
         ...(couponCode && { couponCode })
       },
-      notificationUrl: notificationUrl,
-      returnUrl: returnUrl
-    });
+      ...(shouldUseNotification && { notificationUrl: notificationUrl }),
+      returnUrl: returnUrl,
+      ...(finalCardData && { cardData: finalCardData })
+    };
+
+    const gatewayResponse = await gateway.createPayment(gatewayRequest);
 
     if (!gatewayResponse.success) {
       throw new Error(gatewayResponse.error || 'Falha ao criar pagamento');
+    }
+
+    console.log('Gateway response received:', { 
+      paymentId: gatewayResponse.paymentId, 
+      orderId: gatewayResponse.orderId 
+    });
+
+    // Verificar se já existe um pagamento com este externalPaymentId
+    const existingPayment = await this.paymentRepository.findByExternalPaymentId(gatewayResponse.paymentId);
+    if (existingPayment) {
+      console.log('Payment already exists, returning existing payment:', existingPayment.id);
+      return {
+        payment: existingPayment,
+        paymentData: gatewayResponse.paymentData,
+      };
     }
 
     // Criar pagamento no banco de dados
@@ -136,11 +217,45 @@ export class CreateOneTimePaymentUseCase {
       }
     );
 
+    console.log('Creating new payment:', payment.id);
     const savedPayment = await this.paymentRepository.create(payment);
+
+    // Salvar cartão se solicitado (apenas para novos cartões)
+    if (cardData && cardData.saveCard && cardData.cardNumber && !cardData.savedCardId) {
+      try {
+        await this.savedCardRepository.create(userId, {
+          cardHolderName: cardData.cardHolderName!,
+          cardNumber: cardData.cardNumber,
+          expirationMonth: cardData.expirationMonth!,
+          expirationYear: cardData.expirationYear!,
+          identificationType: cardData.identificationType || 'CPF',
+          identificationNumber: cardData.identificationNumber || '',
+          isDefault: false,
+        });
+        
+        console.log('Card saved successfully for user:', userId);
+      } catch (error) {
+        console.error('Error saving card:', error);
+        // Não falhar o pagamento se não conseguir salvar o cartão
+      }
+    }
 
     return {
       payment: savedPayment,
       paymentData: gatewayResponse.paymentData,
     };
+  }
+
+  private detectCardBrand(cardNumber: string): string {
+    const cleanNumber = cardNumber.replace(/\D/g, "");
+    
+    if (/^4/.test(cleanNumber)) return "visa";
+    if (/^5[1-5]/.test(cleanNumber)) return "mastercard";
+    if (/^3[47]/.test(cleanNumber)) return "amex";
+    if (/^6/.test(cleanNumber)) return "discover";
+    if (/^35/.test(cleanNumber)) return "jcb";
+    if (/^30[0-5]/.test(cleanNumber)) return "diners";
+    
+    return "unknown";
   }
 }

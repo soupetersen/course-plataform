@@ -82,7 +82,64 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         };
       }
 
-      // Para outros métodos - usar Preference API (checkout pro)
+      // Para cartão de crédito - verificar se tem dados do cartão para checkout transparente
+      if (request.paymentMethod === 'CREDIT_CARD' && request.cardData) {
+        // Checkout Transparente - usar Payment API
+        const paymentData = {
+          transaction_amount: request.amount,
+          payment_method_id: 'visa', // Será detectado automaticamente pelo MP
+          payer: {
+            email: request.customerEmail,
+            first_name: request.customerName.split(' ')[0],
+            last_name: request.customerName.split(' ').slice(1).join(' ') || '',
+            identification: {
+              type: request.cardData.identificationType || 'CPF',
+              number: request.cardData.identificationNumber || '',
+            },
+          },
+          card: {
+            card_number: request.cardData.cardNumber.replace(/\s+/g, ''),
+            security_code: request.cardData.securityCode,
+            expiration_month: request.cardData.expirationMonth,
+            expiration_year: request.cardData.expirationYear,
+            cardholder: {
+              name: request.cardData.cardHolderName,
+              identification: {
+                type: request.cardData.identificationType || 'CPF',
+                number: request.cardData.identificationNumber || '',
+              },
+            },
+          },
+          installments: request.cardData.installments || 1,
+          description: request.description,
+          metadata: request.metadata || {},
+          ...(request.notificationUrl && { notification_url: request.notificationUrl }),
+        };
+
+        const payment = await this.payment.create({ body: paymentData });
+
+        if (payment.id) {
+          return {
+            success: true,
+            paymentId: payment.id.toString(),
+            status: this.mapToStandardStatus(payment.status || 'pending'),
+            paymentData: {
+              transactionId: payment.id.toString(),
+              authorizationCode: payment.authorization_code,
+            }
+          };
+        }
+
+        return {
+          success: false,
+          paymentId: '',
+          status: 'REJECTED',
+          error: 'Falha ao criar pagamento com cartão'
+        };
+      }
+
+      // Para outros métodos ou cartão sem dados - usar Preference API (checkout pro)
+
       const preferenceData = {
         items: [
           {
@@ -99,7 +156,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         },
         payment_methods: {
           excluded_payment_methods: [],
-          excluded_payment_types: this.getExcludedPaymentTypes(request.paymentMethod),
+          excluded_payment_types: this.getExcludedPaymentTypes(request.paymentMethod || 'CREDIT_CARD'),
           installments: request.paymentMethod === 'CREDIT_CARD' ? 12 : 1,
         },
         back_urls: {
@@ -107,7 +164,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
           failure: request.returnUrl,
           pending: request.returnUrl,
         },
-        auto_return: 'approved',
         ...(request.notificationUrl && { notification_url: request.notificationUrl }),
         metadata: request.metadata || {},
       };

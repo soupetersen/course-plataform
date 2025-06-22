@@ -23,6 +23,17 @@ export interface CreatePaymentRequest {
   paymentMethod?: 'PIX' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'BOLETO';
   returnUrl?: string;
   notificationUrl?: string;
+  
+  cardData?: {
+    cardNumber: string;
+    cardHolderName: string;
+    expirationMonth: string;
+    expirationYear: string;
+    securityCode: string;
+    installments?: number;
+    identificationType?: string;
+    identificationNumber?: string;
+  };
 }
 
 export interface CreatePaymentResponse {

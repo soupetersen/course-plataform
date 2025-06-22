@@ -34,8 +34,28 @@ model User {
   // Novas relações para sistema de saldo
   instructorBalance       InstructorBalance? @relation("InstructorBalance")
   payoutRequestsProcessed PayoutRequest[]    @relation("PayoutProcessor")
+  savedCards              SavedCard[]
 
   @@map("users")
+}
+
+model SavedCard {
+  id                   String   @id @default(cuid())
+  userId               String
+  cardHolderName       String
+  cardNumberLast4      String // Últimos 4 dígitos do cartão
+  cardBrand            String // visa, mastercard, etc
+  expirationMonth      String
+  expirationYear       String
+  identificationType   String // CPF ou CNPJ
+  identificationNumber String
+  isDefault            Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("saved_cards")
 }
 
 model Category {

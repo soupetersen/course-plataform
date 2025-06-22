@@ -21,7 +21,7 @@ export class PaymentController {  constructor(
     private paymentGatewayFactory: PaymentGatewayFactory
   ) {}async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const { courseId, currency, paymentMethod = 'PIX', gatewayType, couponCode } = req.body as any;
+      const { courseId, currency, paymentMethod = 'PIX', gatewayType, couponCode, cardData } = req.body as any;
       const userInfo = (req as any).userInfo;
       
       console.log('Received payment request:', { courseId, currency, paymentMethod, gatewayType, couponCode });
@@ -32,15 +32,14 @@ export class PaymentController {  constructor(
           error: 'Você precisa estar logado para realizar um pagamento.' 
         });
         return;
-      }
-
-      const result = await this.createOneTimePaymentUseCase.execute({
+      }      const result = await this.createOneTimePaymentUseCase.execute({
         userId: userInfo.userId,
         courseId,
         currency,
         paymentMethod,
         gatewayType,
         couponCode,
+        cardData,
       });
 
       reply.status(201).send({

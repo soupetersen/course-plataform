@@ -16,6 +16,7 @@ import { instructorCouponRoutes } from './routes/instructorCouponRoutes';
 import { instructorAnalyticsRoutes } from './routes/instructorAnalyticsRoutes';
 import { studentCouponRoutes } from './routes/studentCouponRoutes';
 import { createUploadRoutes } from './routes/uploadRoutes';
+import { savedCardRoutes } from './routes/savedCardRoutes';
 import { UploadController } from './controllers/UploadController';
 import { S3Service } from './services/S3Service';
 import { ErrorHandler } from './middlewares/ErrorHandler';
@@ -77,10 +78,10 @@ async function buildApp() {
   await fastify.register(instructorCouponRoutes, { prefix: '/api' });
   await fastify.register(instructorAnalyticsRoutes, { prefix: '/api/instructor/analytics' });
   await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });
-  
-  const s3Service = container.resolve<S3Service>('S3Service');
+    const s3Service = container.resolve<S3Service>('S3Service');
   const uploadController = new UploadController(s3Service);
   await fastify.register(createUploadRoutes(uploadController), { prefix: '/api/uploads' });
+  await fastify.register(savedCardRoutes, { prefix: '' });
 
   fastify.get('/health', async () => {
     const uptime = process.uptime();

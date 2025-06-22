@@ -11,6 +11,7 @@ import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { SubscriptionRepository } from '@/interfaces/SubscriptionRepository';
 import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
+import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 
 import { CouponRepository } from '@/domain/repositories/CouponRepository';
 import { CouponUsageRepository } from '@/domain/repositories/CouponUsageRepository';
@@ -27,6 +28,7 @@ import { PrismaPaymentRepository } from '@/repositories/PrismaPaymentRepository'
 import { PrismaSubscriptionRepository } from '@/repositories/PrismaSubscriptionRepository';
 import { PrismaCategoryRepository } from '@/repositories/PrismaCategoryRepository';
 import { PrismaReviewRepository } from '@/repositories/PrismaReviewRepository';
+import { PrismaSavedCardRepository } from '@/repositories/PrismaSavedCardRepository';
 
 import { PrismaCouponRepository } from '@/infrastructure/repositories/PrismaCouponRepository';
 import { PrismaCouponUsageRepository } from '@/infrastructure/repositories/PrismaCouponUsageRepository';
@@ -107,10 +109,14 @@ export function setupDependencies(): DIContainer {
   container.registerSingleton('CategoryRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     return new PrismaCategoryRepository(prisma);
-  });
-  container.registerSingleton('ReviewRepository', () => {
+  });  container.registerSingleton('ReviewRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     return new PrismaReviewRepository(prisma);
+  });
+
+  container.registerSingleton('SavedCardRepository', () => {
+    const prisma = container.resolve<PrismaClient>('PrismaClient');
+    return new PrismaSavedCardRepository(prisma);
   });
 
   container.registerSingleton('CouponRepository', () => {
@@ -175,13 +181,13 @@ export function setupDependencies(): DIContainer {
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
     return new EnrollInCourseUseCase(enrollmentRepository, courseRepository, userRepository);
-  });
-  container.register('CreateOneTimePaymentUseCase', () => {
+  });  container.register('CreateOneTimePaymentUseCase', () => {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
+    const savedCardRepository = container.resolve<SavedCardRepository>('SavedCardRepository');
     const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
-    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, paymentGatewayFactory);
+    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, savedCardRepository, paymentGatewayFactory);
   });
   container.register('CreateSubscriptionPaymentUseCase', () => {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
