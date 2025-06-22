@@ -13,6 +13,7 @@ import {
   Play,
   Award,
 } from "lucide-react";
+import { getLevelText, getLevelColor } from "@/lib/utils";
 
 interface Course {
   id: string;
@@ -140,7 +141,9 @@ export function CartStep({
             {/* Level Badge */}
             {course.level && (
               <div className="flex gap-2">
-                <Badge variant="secondary">Nível: {course.level}</Badge>
+                <Badge className={getLevelColor(course.level)}>
+                  Nível: {getLevelText(course.level)}
+                </Badge>
                 {isSubscription && (
                   <Badge
                     variant="outline"

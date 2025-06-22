@@ -11,6 +11,7 @@ import { Badge } from "../components/ui/badge";
 import { useCourse } from "../hooks/useCourses";
 import { useCurrentUser } from "../hooks/useAuth";
 import { useCourseRatingStats } from "../hooks/useReviews";
+import { getLevelText, getLevelColor } from "../lib/utils";
 
 export const CourseViewPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,13 +28,7 @@ export const CourseViewPage = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
-  }
-  const isInstructor = user?.id === course.instructorId;
-  const levelLabels = {
-    BEGINNER: "Iniciante",
-    INTERMEDIATE: "Intermediário",
-    ADVANCED: "Avançado",
-  };
+  }  const isInstructor = user?.id === course.instructorId;
 
   const totalLessons =
     course.modules?.reduce(
@@ -71,9 +66,8 @@ export const CourseViewPage = () => {
               <div className="flex items-center space-x-2 mb-2">
                 <Badge variant="secondary">
                   {course.category?.name || "Sem categoria"}
-                </Badge>
-                <Badge variant="outline">
-                  {levelLabels[course.level as keyof typeof levelLabels]}
+                </Badge>                <Badge className={getLevelColor(course.level)}>
+                  {getLevelText(course.level)}
                 </Badge>
                 <Badge
                   variant={

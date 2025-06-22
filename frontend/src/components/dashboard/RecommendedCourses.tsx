@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { BookOpen, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Course } from "../../types/api";
+import { getLevelText, getLevelColor } from "../../lib/utils";
 
 interface RecommendedCoursesProps {
   courses: Course[];
@@ -78,12 +79,10 @@ export const RecommendedCourses = ({
               )}
 
               <div className="flex flex-col flex-1 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <Badge
-                    variant="secondary"
-                    className="text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                <div className="flex items-center justify-between mb-3">                  <Badge
+                    className={`text-xs font-medium transition-colors ${getLevelColor(course.level)}`}
                   >
-                    {course.level}
+                    {getLevelText(course.level)}
                   </Badge>
                   <span className="text-lg font-bold text-green-600">
                     R$ {course.price.toFixed(2)}

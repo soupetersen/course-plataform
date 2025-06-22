@@ -1,6 +1,7 @@
 ﻿import { Card, CardContent } from "../../ui/card";
 import { Clock, Users, Star, Award } from "lucide-react";
 import type { Course } from "../../../types/api";
+import { getLevelText } from "../../../lib/utils";
 
 interface CourseStatsProps {
   course: Course;
@@ -25,11 +26,10 @@ export const CourseStats = ({ course }: CourseStatsProps) => {
       label: "Avaliação",
       value: course.averageRating?.toFixed(1) || "0.0",
       color: "text-yellow-600",
-    },
-    {
+    },    {
       icon: Award,
       label: "Nível",
-      value: course.level,
+      value: getLevelText(course.level),
       color: "text-purple-600",
     },
   ];

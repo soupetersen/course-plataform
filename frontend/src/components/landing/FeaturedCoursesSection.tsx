@@ -4,6 +4,7 @@ import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { BookOpen, Star, Users, Clock, ArrowRight } from "lucide-react";
 import { useCourses } from "../../hooks/useCourses";
+import { getLevelText, getLevelColor } from "../../lib/utils";
 
 export const FeaturedCoursesSection = () => {
   const { data: coursesData, isLoading } = useCourses({
@@ -61,13 +62,8 @@ export const FeaturedCoursesSection = () => {
                       ) : (
                         <BookOpen className="h-12 w-12 sm:h-16 sm:w-16 text-white" />
                       )}
-                    </div>
-                    <Badge className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-white text-primary text-xs px-2 py-1 max-w-[calc(100%-4rem)] truncate">
-                      {course.level === "BEGINNER"
-                        ? "Iniciante"
-                        : course.level === "INTERMEDIATE"
-                        ? "Intermediário"
-                        : "Avançado"}
+                    </div>                    <Badge className={`absolute top-2 sm:top-4 left-2 sm:left-4 text-xs px-2 py-1 max-w-[calc(100%-4rem)] truncate ${getLevelColor(course.level)}`}>
+                      {getLevelText(course.level)}
                     </Badge>
                     {course.price > 0 && (
                       <Badge className="absolute top-2 sm:top-4 right-2 sm:right-4 bg-green-500 text-white text-xs px-2 py-1 whitespace-nowrap">

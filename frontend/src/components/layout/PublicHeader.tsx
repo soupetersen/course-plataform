@@ -32,7 +32,7 @@ export function PublicHeader() {
               <BookOpen className="w-5 h-5 text-white" />
             </div>
             <span className="text-lg md:text-xl font-bold text-[#00224D]">
-              CourseHub
+              Guitar Academy
             </span>
           </Link>
           {/* Desktop Navigation */}

@@ -12,6 +12,7 @@ import { useCourseRatingStats } from "../../../hooks/useReviews";
 import { useCurrentUser } from "../../../hooks/useAuth";
 import { useCreateReview } from "../../../hooks/useReviews";
 import { useState } from "react";
+import { getLevelText } from "../../../lib/utils";
 
 interface CourseTabsProps {
   course: Course;
@@ -87,10 +88,12 @@ export const CourseTabs = ({
                   <span className="text-sm">
                     Duração: {course.duration} horas
                   </span>
-                </div>
+                </div>{" "}
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">Nível: {course.level}</span>
+                  <span className="text-sm">
+                    Nível: {getLevelText(course.level)}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-gray-500" />
