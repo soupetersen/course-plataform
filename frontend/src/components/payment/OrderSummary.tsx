@@ -1,114 +1,161 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Receipt } from "lucide-react";
-import { type OrderSummaryResponse } from "@/services/payment";
+import { ShoppingCart, Tag, Calculator } from "lucide-react";
+
+interface Course {
+  id: string;
+  title: string;
+  price: number;
+  description?: string;
+}
+
+interface CouponValidation {
+  isValid: boolean;
+  discount: {
+    type: "PERCENTAGE" | "FLAT_RATE";
+    value: number;
+    amount: number;
+  };
+  message?: string;
+}
+
+interface FeeCalculation {
+  subtotal: number;
+  discount: number;
+  platformFee: number;
+  processingFee: number;
+  total: number;
+  instructorAmount: number;
+}
 
 interface OrderSummaryProps {
-  orderSummary: OrderSummaryResponse["data"];
+  course: Course;
+  feeCalculation: FeeCalculation | null;
+  appliedCoupon: CouponValidation | null;
+  formatCurrency: (amount: number) => string;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
-  frequency: number;
-  frequencyType: "months" | "weeks" | "days" | "years";
 }
 
 export function OrderSummary({
-  orderSummary,
+  course,
+  feeCalculation,
+  appliedCoupon,
+  formatCurrency,
   paymentType,
-  frequency,
-  frequencyType,
 }: OrderSummaryProps) {
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format(amount);
-  };
-
-  const getFrequencyText = () => {
-    const typeMap = {
-      days: "dia(s)",
-      weeks: "semana(s)",
-      months: "mês(es)",
-      years: "ano(s)",
-    };
-    return `${frequency} ${typeMap[frequencyType]}`;
-  };
-
-  if (!orderSummary) return null;
+  const isSubscription = paymentType === "SUBSCRIPTION";
 
   return (
-    <Card className="shadow-sm sticky top-6">
+    <Card className="shadow-sm sticky top-4">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-xl">
-          <Receipt className="w-6 h-6" />
+        <CardTitle className="flex items-center gap-2 text-lg">
+          <ShoppingCart className="w-5 h-5" />
           Resumo do Pedido
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Course Info */}
-        <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <div className="flex justify-between items-start">
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg">Curso de thiago</h3>
-              <p className="text-sm text-muted-foreground mt-1">
-                emersive.com.br
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="font-semibold text-lg">
-                {formatCurrency(orderSummary.originalPrice)}
-              </div>
-            </div>
+        <div className="space-y-2">
+          <h3 className="font-medium text-sm">{course.title}</h3>
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">
+              {isSubscription ? "Preço mensal" : "Preço único"}
+            </span>
+            <span className="font-medium">
+              {formatCurrency(
+                isSubscription ? course.price / 12 : course.price
+              )}
+            </span>
           </div>
         </div>
 
-        {/* Price Breakdown */}
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-base">
-              {paymentType === "SUBSCRIPTION" ? "Valor mensal" : "Subtotal"}
-            </span>
-            <span className="font-semibold">
-              {formatCurrency(orderSummary.originalPrice)}
-            </span>
-          </div>
-
-          {orderSummary.discountAmount > 0 && (
-            <div className="flex justify-between items-center text-green-600">
-              <span>Desconto</span>
-              <span className="font-semibold">
-                -{formatCurrency(orderSummary.discountAmount)}
+        {/* Applied Coupon */}
+        {appliedCoupon && (
+          <div className="space-y-2">
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-green-600" />
+                <span className="text-sm">Desconto aplicado</span>
+              </div>
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-800"
+              >
+                {appliedCoupon.discount.type === "PERCENTAGE"
+                  ? `${appliedCoupon.discount.value}%`
+                  : formatCurrency(appliedCoupon.discount.value)}
+              </Badge>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm text-muted-foreground">Economia</span>
+              <span className="text-sm text-green-600 font-medium">
+                -{formatCurrency(appliedCoupon.discount.amount)}
               </span>
             </div>
-          )}
-
-          <div className="flex justify-between items-center text-muted-foreground">
-            <span>Taxa da plataforma</span>
-            <span>{formatCurrency(orderSummary.platformFee || 0)}</span>
           </div>
+        )}
 
-          <div className="flex justify-between items-center text-muted-foreground">
-            <span>Taxa de processamento</span>
-            <span>
-              {formatCurrency(orderSummary.processingFeeEstimate || 0)}
-            </span>
-          </div>
-
-          <Separator className="my-4" />
-
-          <div className="flex justify-between items-center text-xl font-bold">
-            <span>
-              {paymentType === "SUBSCRIPTION" ? "Total mensal" : "Total"}
-            </span>
-            <span className="text-2xl text-green-600">
-              {formatCurrency(orderSummary.finalPrice)}
-            </span>
-          </div>
-
-          {paymentType === "SUBSCRIPTION" && (
-            <div className="text-sm text-center text-muted-foreground mt-2">
-              Cobrança a cada {getFrequencyText()}
+        {/* Fee Breakdown */}
+        {feeCalculation && (
+          <div className="space-y-2">
+            <Separator />
+            <div className="flex items-center gap-2 mb-2">
+              <Calculator className="w-4 h-4" />
+              <span className="text-sm font-medium">Detalhamento</span>
             </div>
+
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatCurrency(feeCalculation.subtotal)}</span>
+              </div>
+
+              {feeCalculation.discount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Desconto</span>
+                  <span className="text-green-600">
+                    -{formatCurrency(feeCalculation.discount)}
+                  </span>
+                </div>
+              )}
+
+              {feeCalculation.platformFee > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Taxa da plataforma
+                  </span>
+                  <span>{formatCurrency(feeCalculation.platformFee)}</span>
+                </div>
+              )}
+
+              {feeCalculation.processingFee > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Taxa de processamento
+                  </span>
+                  <span>{formatCurrency(feeCalculation.processingFee)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Total */}
+        <div className="space-y-2">
+          <Separator />
+          <div className="flex justify-between items-center font-bold text-lg">
+            <span>Total</span>
+            <span className="text-primary">
+              {formatCurrency(feeCalculation?.total || course.price)}
+            </span>
+          </div>
+          {isSubscription && (
+            <p className="text-xs text-muted-foreground">
+              Valor será cobrado mensalmente
+            </p>
           )}
         </div>
       </CardContent>

@@ -85,7 +85,12 @@ export function CheckoutPage() {
         </div>
 
         <PaymentCheckout
-          course={course}
+          course={{
+            id: course.id,
+            title: course.title,
+            price: course.price,
+            description: course.description,
+          }}
           onPaymentSuccess={handlePaymentSuccess}
           onPaymentError={handlePaymentError}
         />

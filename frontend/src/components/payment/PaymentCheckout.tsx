@@ -1,24 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { CreditCard, Gift } from "lucide-react";
-import { PAYMENT_GATEWAYS } from "@/services/payment";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 
-import { PaymentTypeSelector } from "./PaymentTypeSelector";
-import { GatewaySelection } from "./GatewaySelection";
-import { PaymentMethodSelection } from "./PaymentMethodSelection";
-import { CouponSection } from "./CouponSection";
-import { CourseSummary } from "./CourseSummary";
-import { PriceBreakdown } from "./PriceBreakdown";
-import { PaymentButton } from "./PaymentButton";
+// New modular components
+import { PaymentSteps } from "./PaymentSteps";
+import { CartStep } from "./CartStep";
+import { PaymentStep } from "./PaymentStep";
+import { CheckoutStep } from "./CheckoutStep";
+import { PixPaymentModal } from "./PixPaymentModal";
+
+// Types and services
+import { CreditCardData } from "./CreditCardForm";
+import { SavedCard } from "@/services/savedCards";
 
 interface Course {
   id: string;
@@ -48,15 +42,21 @@ interface FeeCalculation {
 
 interface PaymentCheckoutProps {
   course: Course;
+  paymentType?: "ONE_TIME" | "SUBSCRIPTION";
   onPaymentSuccess: (paymentId: string) => void;
   onPaymentError: (error: string) => void;
 }
 
 export function PaymentCheckout({
   course,
+  paymentType: initialPaymentType = "ONE_TIME",
   onPaymentSuccess,
   onPaymentError,
 }: PaymentCheckoutProps) {
+  // Step management
+  const [currentStep, setCurrentStep] = useState<string>("cart");
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<CouponValidation | null>(
     null
@@ -67,11 +67,27 @@ export function PaymentCheckout({
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [selectedGateway] = useState<"MERCADOPAGO">("MERCADOPAGO");
-  const [paymentType, setPaymentType] = useState<"ONE_TIME" | "SUBSCRIPTION">(
-    "ONE_TIME"
+  const [paymentType] = useState<"ONE_TIME" | "SUBSCRIPTION">(
+    initialPaymentType
   );
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState<string>("PIX");
+  const [creditCardData, setCreditCardData] = useState<CreditCardData | null>(
+    null
+  );
+  const [selectedSavedCard, setSelectedSavedCard] = useState<SavedCard | null>(
+    null
+  );
+  const [savedCardCvv, setSavedCardCvv] = useState<string>("");
+  const [useNewCard, setUseNewCard] = useState<boolean>(true);
+  const [pixData, setPixData] = useState<{
+    qrCode: string;
+    qrCodeBase64?: string;
+    amount: number;
+    currency: string;
+    paymentId: string;
+  } | null>(null);
+  const [showPixModal, setShowPixModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -157,13 +173,20 @@ export function PaymentCheckout({
     });
   };
 
+  const handleSavedCardSelected = (card: SavedCard | null, cvv?: string) => {
+    setSelectedSavedCard(card);
+    setSavedCardCvv(cvv || "");
+    setUseNewCard(false);
+  };
+
+  const handleNewCardSelected = () => {
+    setSelectedSavedCard(null);
+    setSavedCardCvv("");
+    setUseNewCard(true);
+  };
+
   const processPayment = async () => {
     setIsProcessingPayment(true);
-
-    console.log("DEBUG - PaymentCheckout processPayment:");
-    console.log("- paymentType:", paymentType);
-    console.log("- selectedGateway:", selectedGateway);
-    console.log("- selectedPaymentMethod:", selectedPaymentMethod);
 
     try {
       const endpoint =
@@ -179,16 +202,66 @@ export function PaymentCheckout({
         paymentMethod: selectedPaymentMethod,
         currency: "BRL",
         gatewayType: "MERCADOPAGO",
+        ...(selectedPaymentMethod === "CREDIT_CARD" && {
+          cardData:
+            useNewCard && creditCardData
+              ? {
+                  cardNumber: creditCardData.cardNumber,
+                  cardHolderName: creditCardData.cardHolderName,
+                  expirationMonth: creditCardData.expirationMonth,
+                  expirationYear: creditCardData.expirationYear,
+                  securityCode: creditCardData.securityCode,
+                  installments: creditCardData.installments,
+                  identificationType: creditCardData.identificationType,
+                  identificationNumber: creditCardData.identificationNumber,
+                  saveCard: creditCardData.saveCard,
+                }
+              : selectedSavedCard
+              ? {
+                  savedCardId: selectedSavedCard.id,
+                  securityCode: savedCardCvv,
+                  installments: 1, // Pode ser configurável
+                }
+              : undefined,
+        }),
       };
 
       const response = await api.post(endpoint, paymentData);
 
       if (response.data) {
-        if (response.data.url) {
-          // Redirect para gateway externo (Mercado Pago)
-          window.location.href = response.data.url;
+        const responseData = response.data.data || response.data;
+
+        if (selectedPaymentMethod === "PIX" && responseData.paymentData) {
+          const paymentData = responseData.paymentData;
+
+          if (paymentData.pixQrCode || paymentData.pixCopiaECola) {
+            const pixDataForModal = {
+              qrCode: paymentData.pixQrCode || paymentData.pixCopiaECola,
+              qrCodeBase64: paymentData.pixCopiaECola,
+              amount: feeCalculation?.total || course.price,
+              currency: "BRL",
+              paymentId: responseData.paymentId,
+            };
+
+            setPixData(pixDataForModal);
+            setShowPixModal(true);
+
+            return;
+          } else {
+            console.log("PIX data is invalid - no qrCode or pixCopiaECola");
+          }
         } else {
-          onPaymentSuccess(response.data.paymentId);
+          console.log("Not PIX or no payment data");
+          console.log("Is PIX?", selectedPaymentMethod === "PIX");
+          console.log("Has payment data?", !!responseData.paymentData);
+        }
+
+        if (responseData.url) {
+          console.log("Redirecting to URL:", responseData.url);
+          window.location.href = responseData.url;
+        } else {
+          console.log("Calling onPaymentSuccess");
+          onPaymentSuccess(responseData.paymentId);
         }
       } else {
         const errorMessage = "Erro ao processar pagamento";
@@ -222,6 +295,38 @@ export function PaymentCheckout({
     }
   };
 
+  // Step navigation functions
+  const handleStepChange = (stepId: string) => {
+    if (completedSteps.includes(stepId) || stepId === currentStep) {
+      setCurrentStep(stepId);
+    }
+  };
+
+  const goToNextStep = () => {
+    const stepOrder = ["cart", "payment", "checkout"];
+    const currentIndex = stepOrder.indexOf(currentStep);
+
+    if (currentIndex < stepOrder.length - 1) {
+      const nextStep = stepOrder[currentIndex + 1];
+      setCurrentStep(nextStep);
+
+      // Mark current step as completed
+      if (!completedSteps.includes(currentStep)) {
+        setCompletedSteps((prev) => [...prev, currentStep]);
+      }
+    }
+  };
+
+  const goToPreviousStep = () => {
+    const stepOrder = ["cart", "payment", "checkout"];
+    const currentIndex = stepOrder.indexOf(currentStep);
+
+    if (currentIndex > 0) {
+      const previousStep = stepOrder[currentIndex - 1];
+      setCurrentStep(previousStep);
+    }
+  };
+
   const formatDiscount = (discount: CouponValidation["discount"]) => {
     if (discount.type === "PERCENTAGE") {
       return `${discount.value}%`;
@@ -239,81 +344,77 @@ export function PaymentCheckout({
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <CreditCard className="w-6 h-6" />
-                  Opções de Pagamento
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Escolha o tipo de pagamento e método preferido
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <PaymentTypeSelector
-                  paymentType={paymentType}
-                  onPaymentTypeChange={setPaymentType}
-                  coursePrice={course.price}
-                  formatCurrency={formatCurrency}
-                />
+      <div className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
+        {/* Payment Steps Header */}
+        <div className="mb-8">
+          <PaymentSteps
+            currentStep={currentStep}
+            completedSteps={completedSteps}
+            onStepChange={handleStepChange}
+          />
+        </div>
 
-                <GatewaySelection />
+        {/* Step Content */}
+        <div className="max-w-5xl mx-auto">
+          {currentStep === "cart" && (
+            <CartStep
+              course={course}
+              formatCurrency={formatCurrency}
+              paymentType={paymentType}
+              onContinue={goToNextStep}
+            />
+          )}
 
-                <PaymentMethodSelection
-                  gateway={PAYMENT_GATEWAYS[selectedGateway]}
-                  selectedMethod={selectedPaymentMethod}
-                  onMethodChange={setSelectedPaymentMethod}
-                  paymentType={paymentType}
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <CourseSummary course={course} formatCurrency={formatCurrency} />
-
-            <Card className="shadow-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Gift className="w-5 h-5 text-green-600" />
-                  Cupom de Desconto
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CouponSection
-                  couponCode={couponCode}
-                  setCouponCode={setCouponCode}
-                  appliedCoupon={appliedCoupon}
-                  isValidatingCoupon={isValidatingCoupon}
-                  onValidateCoupon={validateCoupon}
-                  onRemoveCoupon={removeCoupon}
-                  formatDiscount={formatDiscount}
-                />
-              </CardContent>
-            </Card>
-
-            {feeCalculation && (
-              <PriceBreakdown
-                feeCalculation={feeCalculation}
-                paymentType={paymentType}
-                formatCurrency={formatCurrency}
-              />
-            )}
-
-            <PaymentButton
+          {currentStep === "payment" && (
+            <PaymentStep
+              selectedPaymentMethod={selectedPaymentMethod}
+              onPaymentMethodChange={setSelectedPaymentMethod}
+              onCreditCardDataChange={setCreditCardData}
+              useNewCard={useNewCard}
+              onSavedCardSelected={handleSavedCardSelected}
+              onNewCardSelected={handleNewCardSelected}
               isProcessingPayment={isProcessingPayment}
               paymentType={paymentType}
-              feeCalculation={feeCalculation}
-              selectedGateway={selectedGateway}
-              formatCurrency={formatCurrency}
-              onProcessPayment={processPayment}
+              couponCode={couponCode}
+              setCouponCode={setCouponCode}
+              appliedCoupon={appliedCoupon}
+              isValidatingCoupon={isValidatingCoupon}
+              onValidateCoupon={validateCoupon}
+              onRemoveCoupon={removeCoupon}
+              formatDiscount={formatDiscount}
+              onContinue={goToNextStep}
+              onBack={goToPreviousStep}
             />
-          </div>
+          )}
+
+          {currentStep === "checkout" && (
+            <CheckoutStep
+              course={course}
+              selectedPaymentMethod={selectedPaymentMethod}
+              feeCalculation={feeCalculation}
+              appliedCoupon={appliedCoupon}
+              formatCurrency={formatCurrency}
+              paymentType={paymentType}
+              isProcessingPayment={isProcessingPayment}
+              onProcessPayment={processPayment}
+              onBack={goToPreviousStep}
+            />
+          )}
         </div>
       </div>
+
+      {/* PIX Modal */}
+      {pixData && (
+        <PixPaymentModal
+          isOpen={showPixModal}
+          onClose={() => setShowPixModal(false)}
+          pixData={pixData}
+          onPaymentConfirmed={() => {
+            setShowPixModal(false);
+            onPaymentSuccess(pixData.paymentId);
+          }}
+        />
+      )}
     </div>
   );
 }

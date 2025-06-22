@@ -40,9 +40,8 @@ export const StatsGrid = ({ enrollments }: StatsGridProps) => {
       bgColor: "bg-quaternary/10",
     },
   ];
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
         return (
@@ -50,16 +49,16 @@ export const StatsGrid = ({ enrollments }: StatsGridProps) => {
             key={stat.title}
             className="hover:shadow-lg transition-shadow duration-200 fade-in-up"
           >
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center">
                 <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
+                  <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${stat.color}`} />
                 </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="ml-3 sm:ml-4 flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">
                     {stat.title}
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-lg sm:text-2xl font-bold text-gray-900">
                     {stat.value}
                   </p>
                 </div>

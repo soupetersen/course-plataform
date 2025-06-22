@@ -8,11 +8,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Settings, BookOpen } from "lucide-react";
+import { User, LogOut, Settings, BookOpen, Menu } from "lucide-react";
+import { useState } from "react";
 
 export function PublicHeader() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -23,16 +25,18 @@ export function PublicHeader() {
     <header className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {}
+          {" "}
+          {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-[#FF204E] rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-[#00224D]">CourseHub</span>
+            <span className="text-lg md:text-xl font-bold text-[#00224D]">
+              CourseHub
+            </span>
           </Link>
-
-          {}
-          <nav className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-8">
             <Link
               to="/courses"
               className="text-gray-700 hover:text-[#FF204E] transition-colors"
@@ -52,18 +56,58 @@ export function PublicHeader() {
               Depoimentos
             </Link>
           </nav>
-
-          {}
-          <div className="flex items-center space-x-4">
+          {/* Mobile Navigation Menu */}
+          <div className="lg:hidden">
+            <DropdownMenu
+              open={isMobileMenuOpen}
+              onOpenChange={setIsMobileMenuOpen}
+            >
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigate("/courses");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Cursos
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigate("/#features");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Recursos
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    navigate("/#testimonials");
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Depoimentos
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>{" "}
+          {/* User Actions */}
+          <div className="flex items-center space-x-2 md:space-x-4">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-1 md:space-x-2"
                   >
                     <User className="w-4 h-4" />
-                    <span>{user.name}</span>
+                    <span className="hidden sm:inline truncate max-w-20 md:max-w-none">
+                      {user.name}
+                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -83,17 +127,19 @@ export function PublicHeader() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 md:space-x-2">
                 <Button
                   variant="ghost"
+                  size="sm"
                   onClick={() => navigate("/login")}
-                  className="text-gray-700 hover:text-[#FF204E]"
+                  className="text-gray-700 hover:text-[#FF204E] text-sm"
                 >
                   Entrar
                 </Button>
                 <Button
+                  size="sm"
                   onClick={() => navigate("/register")}
-                  className="bg-[#FF204E] hover:bg-[#A0153E] text-white"
+                  className="bg-[#FF204E] hover:bg-[#A0153E] text-white text-sm"
                 >
                   Cadastrar
                 </Button>

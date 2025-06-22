@@ -1,0 +1,107 @@
+/* Responsive Text and Layout Fixes */
+
+/* Force text wrapping and prevent overflow */
+.text-responsive {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+}
+
+/* Responsive font sizes for cards */
+@media (max-width: 640px) {
+  .card-title-responsive {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+  
+  .card-text-responsive {
+    font-size: 0.75rem !important;
+    line-height: 1rem !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .card-title-responsive {
+    font-size: 1rem !important;
+    line-height: 1.5rem !important;
+  }
+  
+  .card-text-responsive {
+    font-size: 0.875rem !important;
+    line-height: 1.25rem !important;
+  }
+}
+
+/* Prevent text overflow in cards */
+.card-container {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card-content {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Responsive button text */
+.btn-text-responsive {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .btn-text-responsive {
+    white-space: normal;
+    line-height: 1.2;
+    text-align: center;
+  }
+}
+
+/* Title truncation for small screens */
+.title-truncate-mobile {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .title-truncate-mobile {
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+  }
+}
+
+/* Description truncation */
+.description-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .description-truncate {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+}
+
+/* Flexible text sizing */
+.text-flex {
+  font-size: clamp(0.75rem, 2vw, 1rem);
+}
+
+.text-flex-lg {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+}
+
+.text-flex-xl {
+  font-size: clamp(1.125rem, 4vw, 1.5rem);
+}

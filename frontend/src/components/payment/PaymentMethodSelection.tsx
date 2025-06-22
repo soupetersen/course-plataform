@@ -82,13 +82,16 @@ export function PaymentMethodSelection({
   if (availableMethods.length === 0) {
     return (
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Método de Pagamento</CardTitle>
+        <CardHeader className="pb-3 p-4 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">
+            Método de Pagamento
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center text-gray-500 py-4">
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <div className="text-center text-gray-500 py-4 text-sm sm:text-base">
             Nenhum método de pagamento disponível para{" "}
-            {paymentType === "SUBSCRIPTION" ? "assinaturas" : "pagamento único"}.
+            {paymentType === "SUBSCRIPTION" ? "assinaturas" : "pagamento único"}
+            .
           </div>
         </CardContent>
       </Card>
@@ -97,19 +100,21 @@ export function PaymentMethodSelection({
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Método de Pagamento</CardTitle>
+      <CardHeader className="pb-3 p-4 sm:p-6">
+        <CardTitle className="text-base sm:text-lg">
+          Método de Pagamento
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 sm:p-6 pt-0">
         <RadioGroup
           value={selectedMethod}
           onValueChange={onMethodChange}
-          className="space-y-3"
+          className="space-y-2 sm:space-y-3"
         >
           {availableMethods.map((method) => (
             <div
               key={method.id}
-              className={`relative flex items-center space-x-3 p-4 border-2 rounded-lg transition-all cursor-pointer hover:border-primary/50 ${
+              className={`relative flex items-center space-x-3 p-3 sm:p-4 border-2 rounded-lg transition-all cursor-pointer hover:border-primary/50 ${
                 selectedMethod === method.id
                   ? "border-primary bg-primary/5"
                   : "border-gray-200"
@@ -118,15 +123,17 @@ export function PaymentMethodSelection({
               <RadioGroupItem
                 value={method.id}
                 id={method.id}
-                className="mt-0.5"
+                className="mt-0.5 flex-shrink-0"
               />
               <Label
                 htmlFor={method.id}
-                className="flex items-center justify-between w-full cursor-pointer"
+                className="flex items-center justify-between w-full cursor-pointer min-w-0"
               >
-                <div className="flex items-center gap-3">
-                  {getMethodIcon(method.type)}
-                  <div>
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+                  <div className="flex-shrink-0">
+                    {getMethodIcon(method.type)}
+                  </div>
+                  <div className="min-w-0 flex-1">
                     <div className="font-medium text-sm">{method.name}</div>
                     {method.type === "PIX" && (
                       <div className="text-xs text-gray-500 mt-0.5">
@@ -135,8 +142,8 @@ export function PaymentMethodSelection({
                     )}
                     {method.type === "CREDIT_CARD" && (
                       <div className="text-xs text-gray-500 mt-0.5">
-                        {paymentType === "SUBSCRIPTION" 
-                          ? "Para assinaturas mensais" 
+                        {paymentType === "SUBSCRIPTION"
+                          ? "Para assinaturas mensais"
                           : "Parcele em até 2x sem juros"}
                       </div>
                     )}
@@ -152,7 +159,9 @@ export function PaymentMethodSelection({
                     )}
                   </div>
                 </div>
-                {getMethodBadge(method.type)}
+                <div className="flex-shrink-0">
+                  {getMethodBadge(method.type)}
+                </div>
               </Label>
             </div>
           ))}

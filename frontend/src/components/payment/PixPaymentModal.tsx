@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Copy, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
@@ -96,18 +96,15 @@ export function PixPaymentModal({
       }
     };
 
-    // Verificar status inicial imediatamente
     checkPaymentStatus();
 
-    // Configurar polling com backoff exponencial
-    let pollInterval = 5000; // Começar com 5 segundos
-    const maxInterval = 30000; // Máximo de 30 segundos
+    let pollInterval = 5000;
+    const maxInterval = 30000;
 
     const scheduleNextCheck = () => {
       setTimeout(() => {
         if (paymentStatus === "pending" && isOpen) {
           checkPaymentStatus().then(() => {
-            // Aumentar o intervalo gradualmente para reduzir carga
             pollInterval = Math.min(pollInterval * 1.2, maxInterval);
             scheduleNextCheck();
           });
@@ -158,37 +155,33 @@ export function PixPaymentModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle className="text-center">
+      <DialogContent className="max-w-sm mx-auto p-3">
+        <DialogHeader className="pb-1">
+          <DialogTitle className="text-center text-sm">
             {paymentStatus === "pending" && "Pagamento via PIX"}
             {paymentStatus === "confirmed" && "Pagamento Confirmado!"}
             {paymentStatus === "expired" && "PIX Expirado"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          {/* Status do Pagamento */}
+        <div className="space-y-2">
           <Card>
-            <CardContent className="pt-6">
-              <div className="text-center space-y-2">
+            <CardContent className="pt-2 pb-2">
+              <div className="text-center space-y-1">
                 {paymentStatus === "pending" && (
                   <>
-                    <Clock className="w-8 h-8 mx-auto text-blue-500" />
-                    <p className="text-sm text-gray-600">
+                    <Clock className="w-4 h-4 mx-auto text-blue-500" />
+                    <p className="text-xs text-gray-600">
                       {isCheckingStatus
-                        ? "Verificando pagamento..."
+                        ? "Verificando..."
                         : "Aguardando pagamento"}
                     </p>
-                    <div className="text-2xl font-bold text-blue-600">
+                    <div className="text-sm font-bold text-blue-600">
                       {formatTime(timeLeft)}
                     </div>
-                    <p className="text-xs text-gray-500">
-                      Tempo restante para pagamento
-                    </p>
                     {isCheckingStatus && (
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <div className="flex items-center justify-center space-x-1">
+                        <div className="animate-spin rounded-full h-2 w-2 border-b-2 border-blue-600"></div>
                         <span className="text-xs text-gray-500">
                           Verificando...
                         </span>
@@ -199,8 +192,8 @@ export function PixPaymentModal({
 
                 {paymentStatus === "confirmed" && (
                   <>
-                    <CheckCircle className="w-8 h-8 mx-auto text-green-500" />
-                    <p className="text-sm text-green-600 font-medium">
+                    <CheckCircle className="w-4 h-4 mx-auto text-green-500" />
+                    <p className="text-xs text-green-600 font-medium">
                       Pagamento confirmado!
                     </p>
                   </>
@@ -208,12 +201,9 @@ export function PixPaymentModal({
 
                 {paymentStatus === "expired" && (
                   <>
-                    <AlertCircle className="w-8 h-8 mx-auto text-red-500" />
-                    <p className="text-sm text-red-600 font-medium">
+                    <AlertCircle className="w-4 h-4 mx-auto text-red-500" />
+                    <p className="text-xs text-red-600 font-medium">
                       PIX expirado
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Gere um novo código para continuar
                     </p>
                   </>
                 )}
@@ -221,12 +211,11 @@ export function PixPaymentModal({
             </CardContent>
           </Card>
 
-          {/* Valor do Pagamento */}
           <Card>
-            <CardContent className="pt-4">
+            <CardContent className="pt-1 pb-1">
               <div className="text-center">
-                <p className="text-sm text-gray-600">Valor a pagar</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs text-gray-600">Valor</p>
+                <p className="text-sm font-bold text-gray-900">
                   {formatCurrency(pixData.amount, pixData.currency)}
                 </p>
               </div>
@@ -235,82 +224,73 @@ export function PixPaymentModal({
 
           {paymentStatus === "pending" && (
             <>
-              {/* QR Code */}
               {pixData.qrCodeBase64 && (
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="text-center text-sm">
-                      Escaneie o QR Code
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex justify-center">
+                  <CardContent className="pt-2 pb-1">
+                    <div className="text-center">
+                      <p className="text-xs text-gray-600 mb-1">QR Code</p>
                       <img
                         src={`data:image/png;base64,${pixData.qrCodeBase64}`}
                         alt="QR Code PIX"
-                        className="w-48 h-48 border rounded"
+                        className="w-28 h-28 mx-auto border rounded"
                       />
                     </div>
                   </CardContent>
                 </Card>
               )}
 
-              {/* Código PIX */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-center text-sm">
-                    Ou copie o código PIX
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="p-3 bg-gray-50 rounded-lg border">
-                    <p className="text-xs font-mono break-all text-gray-700">
-                      {pixData.qrCode}
+                <CardContent className="pt-2 pb-2">
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-600 text-center">
+                      Código PIX
                     </p>
-                  </div>
-                  <Button
-                    onClick={() => copyToClipboard(pixData.qrCode)}
-                    className="w-full"
-                    variant="outline"
-                  >
-                    <Copy className="w-4 h-4 mr-2" />
-                    Copiar código PIX
-                  </Button>
-                </CardContent>
-              </Card>
-
-              {/* Instruções */}
-              <Card>
-                <CardContent className="pt-4">
-                  <div className="text-sm text-gray-600 space-y-2">
-                    <p className="font-medium">Como pagar:</p>
-                    <ol className="list-decimal list-inside space-y-1 text-xs">
-                      <li>Abra o app do seu banco</li>
-                      <li>Escolha a opção PIX</li>
-                      <li>Escaneie o QR Code ou cole o código</li>
-                      <li>Confirme o pagamento</li>
-                    </ol>
+                    <div className="p-1 bg-gray-50 rounded border">
+                      <p
+                        className="text-xs font-mono break-all text-gray-700 overflow-hidden"
+                        style={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                        }}
+                      >
+                        {pixData.qrCode}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => copyToClipboard(pixData.qrCode)}
+                      className="w-full h-7"
+                      variant="outline"
+                      size="sm"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      <span className="text-xs">Copiar</span>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
             </>
           )}
 
-          {/* Botões */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 pt-1">
             {paymentStatus === "expired" && (
-              <Button onClick={onClose} className="flex-1">
-                Gerar novo PIX
+              <Button onClick={onClose} className="flex-1 h-8" size="sm">
+                <span className="text-xs">Gerar novo PIX</span>
               </Button>
             )}
             {paymentStatus === "pending" && (
-              <Button variant="outline" onClick={onClose} className="w-full">
-                Cancelar
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="w-full h-8"
+                size="sm"
+              >
+                <span className="text-xs">Cancelar</span>
               </Button>
             )}
             {paymentStatus === "confirmed" && (
-              <Button onClick={handleClose} className="w-full">
-                Continuar
+              <Button onClick={handleClose} className="w-full h-8" size="sm">
+                <span className="text-xs">Continuar</span>
               </Button>
             )}
           </div>

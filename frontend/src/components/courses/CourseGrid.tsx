@@ -57,17 +57,19 @@ export const CourseGrid = ({
   });
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {[...Array(8)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+          <Card key={i} className="animate-pulse flex flex-col h-full">
+            <CardHeader className="p-3 sm:p-4 lg:p-6 flex-1">
+              <div className="aspect-video bg-gray-200 rounded mb-3"></div>
+              <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-2 sm:h-3 bg-gray-200 rounded w-1/2"></div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-3 sm:p-4 lg:p-6 pt-0 mt-auto">
               <div className="space-y-2">
-                <div className="h-3 bg-gray-200 rounded"></div>
-                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-2 sm:h-3 bg-gray-200 rounded"></div>
+                <div className="h-2 sm:h-3 bg-gray-200 rounded w-2/3"></div>
+                <div className="h-8 bg-gray-200 rounded"></div>
               </div>
             </CardContent>
           </Card>
@@ -92,21 +94,20 @@ export const CourseGrid = ({
       </Card>
     );
   }
-
   return (
     <div
-      className={`grid gap-6 ${
+      className={`grid gap-4 sm:gap-6 ${
         viewMode === "grid"
-          ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           : "grid-cols-1"
       }`}
     >
       {courses.map((course) => (
         <Card
           key={course.id}
-          className="hover:shadow-lg transition-all duration-200 group animate-slide-in-left"
+          className="hover:shadow-lg transition-all duration-200 group animate-slide-in-left flex flex-col h-full"
         >
-          <CardHeader className="pb-3">
+          <CardHeader className="pb-3 p-3 sm:p-4 lg:p-6 flex-1">
             {course.imageUrl && (
               <div className="aspect-video rounded-lg overflow-hidden mb-3">
                 <img
@@ -115,55 +116,62 @@ export const CourseGrid = ({
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                 />
               </div>
-            )}{" "}
-            <div className="flex items-center justify-between">
-              <Badge className={getLevelColor(course.level)}>
+            )}
+            <div className="flex items-center justify-between mb-2 gap-2">
+              <Badge
+                className={`${getLevelColor(
+                  course.level
+                )} text-xs px-2 py-1 flex-shrink-0`}
+              >
                 {getLevelText(course.level)}
               </Badge>
               {course.status !== "PUBLISHED" && (
                 <Badge
                   variant="outline"
-                  className="bg-orange-50 text-orange-600 border-orange-200"
+                  className="bg-orange-50 text-orange-600 border-orange-200 text-xs px-2 py-1 flex-shrink-0"
                 >
                   Rascunho
                 </Badge>
               )}
-              <div className="text-lg font-bold text-primary">
+              <div className="text-xs sm:text-sm lg:text-base font-bold text-primary flex-shrink-0">
                 R$ {course.price.toFixed(2)}
               </div>
             </div>
-            <CardTitle className="group-hover:text-primary transition-colors line-clamp-2">
+            <CardTitle className="group-hover:text-primary transition-colors line-clamp-2 text-sm sm:text-base lg:text-lg leading-tight mb-2">
               {course.title}
             </CardTitle>
-            <CardDescription className="line-clamp-2">
+            <CardDescription className="line-clamp-3 text-xs sm:text-sm leading-relaxed flex-1">
               {course.description}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0 mt-auto">
             <div className="space-y-3">
-              {" "}
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Users className="h-4 w-4 mr-1" />
-                  {(course.enrollments?.length || 0) > 0
-                    ? `${course.enrollments.length} estudantes`
-                    : "Sem estudantes"}
+              <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
+                <div className="flex items-center min-w-0 flex-1">
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">
+                    {(course.enrollments?.length || 0) > 0
+                      ? `${course.enrollments.length} estudantes`
+                      : "Sem estudantes"}
+                  </span>
                 </div>
-                <div className="flex items-center">
-                  <BookOpen className="h-4 w-4 mr-1" />
-                  {(course.modules?.length || 0) > 0
-                    ? `${course.modules.length} módulos`
-                    : "Sem módulos"}
+                <div className="flex items-center min-w-0 flex-1 justify-end">
+                  <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
+                  <span className="truncate">
+                    {(course.modules?.length || 0) > 0
+                      ? `${course.modules.length} módulos`
+                      : "Sem módulos"}
+                  </span>
                 </div>
-              </div>{" "}
+              </div>
               {course.averageRating && course.averageRating > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center text-yellow-600">
-                    <Star className="h-4 w-4 mr-1 fill-current" />
-                    <span className="font-medium">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <div className="flex items-center text-yellow-600 min-w-0 flex-1">
+                    <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 fill-current flex-shrink-0" />
+                    <span className="font-medium mr-1">
                       {course.averageRating.toFixed(1)}
                     </span>
-                    <span className="text-gray-500 ml-1">
+                    <span className="text-gray-500 truncate">
                       (
                       {(course.reviewCount || 0) > 0
                         ? `${course.reviewCount} avaliações`
@@ -173,14 +181,14 @@ export const CourseGrid = ({
                   </div>
                 </div>
               )}
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="font-medium">Instrutor:</span>
-                <span className="ml-1">
+              <div className="flex items-center text-xs sm:text-sm text-gray-600">
+                <span className="font-medium flex-shrink-0">Instrutor:</span>
+                <span className="ml-1 truncate">
                   {course.instructor?.name || "Instrutor não informado"}
                 </span>
               </div>
-              <Link to={`/course/${course.id}`}>
-                <Button className="w-full group-hover:scale-105 transition-transform">
+              <Link to={`/course/${course.id}`} className="block">
+                <Button className="w-full group-hover:scale-105 transition-transform text-xs sm:text-sm py-2 h-auto">
                   Ver curso
                 </Button>
               </Link>

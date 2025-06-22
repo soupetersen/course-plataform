@@ -8,6 +8,10 @@ import { router } from "./routes";
 import { ErrorProvider } from "./contexts/ErrorContext";
 import { Toaster } from "./components/ui/toaster";
 import "./styles/index.css";
+import "./styles/responsive-text.css";
+import "./styles/text-overflow-fix.css";
+import "./styles/course-cards.css";
+import "./styles/responsive-typography.css";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
