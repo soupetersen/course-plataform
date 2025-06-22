@@ -10,13 +10,12 @@ import {
 import { Badge } from "../components/ui/badge";
 import { useCourse } from "../hooks/useCourses";
 import { useCurrentUser } from "../hooks/useAuth";
-import { useReviewsByCourse, useCourseRatingStats } from "../hooks/useReviews";
+import { useCourseRatingStats } from "../hooks/useReviews";
 
 export const CourseViewPage = () => {
   const { id } = useParams<{ id: string }>();
   const { data: courseData } = useCourse(id!);
   const { data: user } = useCurrentUser();
-  const { data: reviewsData } = useReviewsByCourse(id!);
   const { data: ratingStatsData } = useCourseRatingStats(id!);
 
   const course = courseData?.data;

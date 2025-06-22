@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -228,7 +229,9 @@ export const UserPaymentHistory: React.FC = () => {
             <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
               Você ainda não fez nenhuma compra. Explore nossos cursos!
             </p>
-            <Button size="sm">Explorar Cursos</Button>
+            <Link to="/courses">
+              <Button size="sm">Ver Cursos</Button>
+            </Link>
           </div>
         ) : (
           <>

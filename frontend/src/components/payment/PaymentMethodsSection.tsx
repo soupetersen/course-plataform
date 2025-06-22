@@ -86,8 +86,8 @@ export function PaymentMethodsSection({
           </TabsList>
 
           <TabsContent value="PIX" className="mt-6">
-            <div className="space-y-4">
-              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border border-green-200 dark:border-green-800">
+            <div className="space-y-4 animate-in slide-in-from-bottom-4 fade-in duration-500">
+              <div className="bg-green-50 dark:bg-green-950 p-4 rounded-lg border border-green-200 dark:border-green-800 animate-in zoom-in-95 fade-in duration-600 delay-100">
                 <div className="flex items-center gap-2 mb-2">
                   <Zap className="w-5 h-5 text-green-600" />
                   <h3 className="font-medium text-green-800 dark:text-green-200">
@@ -107,7 +107,7 @@ export function PaymentMethodsSection({
           </TabsContent>
 
           <TabsContent value="CREDIT_CARD" className="mt-6">
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-bottom-4 fade-in duration-500">
               <SavedCardSelector
                 onCardSelected={onSavedCardSelected}
                 onNewCardSelected={onNewCardSelected}
@@ -115,18 +115,20 @@ export function PaymentMethodsSection({
               />
 
               {useNewCard && (
-                <CreditCardForm
-                  onCardDataChange={onCreditCardDataChange}
-                  maxInstallments={paymentType === "ONE_TIME" ? 12 : 1}
-                  isLoading={isProcessingPayment}
-                />
+                <div className="animate-in slide-in-from-bottom-4 fade-in duration-500 delay-200">
+                  <CreditCardForm
+                    onCardDataChange={onCreditCardDataChange}
+                    maxInstallments={paymentType === "ONE_TIME" ? 12 : 1}
+                    isLoading={isProcessingPayment}
+                  />
+                </div>
               )}
             </div>
           </TabsContent>
 
           <TabsContent value="BOLETO" className="mt-6">
-            <div className="space-y-4">
-              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+            <div className="space-y-4 animate-in slide-in-from-bottom-4 fade-in duration-500">
+              <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg border border-blue-200 dark:border-blue-800 animate-in zoom-in-95 fade-in duration-600 delay-100">
                 <div className="flex items-center gap-2 mb-2">
                   <FileText className="w-5 h-5 text-blue-600" />
                   <h3 className="font-medium text-blue-800 dark:text-blue-200">

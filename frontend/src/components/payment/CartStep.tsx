@@ -46,7 +46,7 @@ export function CartStep({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-2 animate-in fade-in duration-300">
         <h2 className="text-2xl font-bold">Revisar Produto</h2>
         <p className="text-muted-foreground">
           Confirme os detalhes do curso antes de prosseguir
@@ -54,7 +54,7 @@ export function CartStep({
       </div>
 
       {/* Course Details Card */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500 delay-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="w-5 h-5" />
@@ -168,9 +168,13 @@ export function CartStep({
           </div>
 
           {/* Continue Button */}
-          <Button onClick={onContinue} size="lg" className="w-full">
+          <Button
+            onClick={onContinue}
+            size="lg"
+            className="w-full animate-in slide-in-from-bottom-4 fade-in duration-500 delay-700 group hover:scale-[1.02] transition-transform"
+          >
             Continuar para Pagamento
-            <ChevronRight className="w-4 h-4 ml-2" />
+            <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
         </CardContent>
       </Card>

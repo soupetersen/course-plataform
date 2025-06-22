@@ -59,12 +59,12 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
                     className="text-gray-600 hover:text-quaternary-500 transition-colors"
                   >
                     Dashboard
-                  </Link>
+                  </Link>{" "}
                   <Link
-                    to="/explore"
+                    to="/courses"
                     className="text-gray-600 hover:text-quaternary-500 transition-colors"
                   >
-                    Explorar
+                    Cursos
                   </Link>
                   <Link
                     to="/my-learning"

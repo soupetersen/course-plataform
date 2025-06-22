@@ -102,98 +102,152 @@ export const CourseGrid = ({
           : "grid-cols-1"
       }`}
     >
-      {courses.map((course) => (
+      {" "}
+      {courses.map((course, index) => (
         <Card
           key={course.id}
-          className="hover:shadow-lg transition-all duration-200 group animate-slide-in-left flex flex-col h-full"
+          variant="elevated"
+          padding="none"
+          className={`course-card group overflow-hidden transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-4 ${
+            viewMode === "grid"
+              ? "flex flex-col h-full hover:scale-[1.02]"
+              : "flex flex-row h-auto hover:shadow-lg"
+          }`}
+          style={{ animationDelay: `${index * 50}ms` }}
         >
-          <CardHeader className="pb-3 p-3 sm:p-4 lg:p-6 flex-1">
-            {course.imageUrl && (
-              <div className="aspect-video rounded-lg overflow-hidden mb-3">
-                <img
-                  src={course.imageUrl}
-                  alt={course.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                />
-              </div>
-            )}
-            <div className="flex items-center justify-between mb-2 gap-2">
+          {course.imageUrl ? (
+            <div
+              className={`relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100 ${
+                viewMode === "grid" ? "aspect-video" : "w-48 h-32 flex-shrink-0"
+              }`}
+            >
+              <img
+                src={course.imageUrl}
+                alt={course.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+            </div>
+          ) : (
+            <div
+              className={`bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center ${
+                viewMode === "grid" ? "aspect-video" : "w-48 h-32 flex-shrink-0"
+              }`}
+            >
+              <BookOpen className="h-12 w-12 text-gray-400" />
+            </div>
+          )}
+
+          <div className="flex flex-col flex-1 p-4">
+            <div className="flex items-center justify-between mb-3">
               <Badge
                 className={`${getLevelColor(
                   course.level
-                )} text-xs px-2 py-1 flex-shrink-0`}
+                )} text-xs font-medium transition-colors`}
               >
                 {getLevelText(course.level)}
               </Badge>
-              {course.status !== "PUBLISHED" && (
+              <span className="text-lg font-bold text-green-600">
+                {course.price === 0
+                  ? "Gratuito"
+                  : `R$ ${course.price.toFixed(2)}`}
+              </span>
+            </div>
+
+            {course.status !== "PUBLISHED" && (
+              <div className="mb-3">
                 <Badge
                   variant="outline"
-                  className="bg-orange-50 text-orange-600 border-orange-200 text-xs px-2 py-1 flex-shrink-0"
+                  className="bg-orange-50 text-orange-600 border-orange-200 text-xs px-2 py-1"
                 >
                   Rascunho
                 </Badge>
-              )}
-              <div className="text-xs sm:text-sm lg:text-base font-bold text-primary flex-shrink-0">
-                R$ {course.price.toFixed(2)}
               </div>
-            </div>
-            <CardTitle className="group-hover:text-primary transition-colors line-clamp-2 text-sm sm:text-base lg:text-lg leading-tight mb-2">
+            )}
+
+            <CardTitle
+              className={`group-hover:text-primary transition-colors duration-200 text-base md:text-lg leading-tight mb-2 ${
+                viewMode === "grid"
+                  ? "line-clamp-2 min-h-[3rem]"
+                  : "line-clamp-1"
+              }`}
+            >
               {course.title}
             </CardTitle>
-            <CardDescription className="line-clamp-3 text-xs sm:text-sm leading-relaxed flex-1">
+
+            <CardDescription
+              className={`text-sm leading-relaxed flex-1 mb-4 ${
+                viewMode === "grid" ? "line-clamp-3" : "line-clamp-2"
+              }`}
+            >
               {course.description}
             </CardDescription>
-          </CardHeader>
-          <CardContent className="p-3 sm:p-4 lg:p-6 pt-0 mt-auto">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-xs sm:text-sm text-gray-600">
-                <div className="flex items-center min-w-0 flex-1">
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                  <span className="truncate">
-                    {(course.enrollments?.length || 0) > 0
-                      ? `${course.enrollments.length} estudantes`
-                      : "Sem estudantes"}
-                  </span>
-                </div>
-                <div className="flex items-center min-w-0 flex-1 justify-end">
-                  <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 mr-1 flex-shrink-0" />
-                  <span className="truncate">
-                    {(course.modules?.length || 0) > 0
-                      ? `${course.modules.length} módulos`
-                      : "Sem módulos"}
-                  </span>
-                </div>
-              </div>
-              {course.averageRating && course.averageRating > 0 && (
-                <div className="flex items-center justify-between text-xs sm:text-sm">
-                  <div className="flex items-center text-yellow-600 min-w-0 flex-1">
-                    <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 fill-current flex-shrink-0" />
-                    <span className="font-medium mr-1">
-                      {course.averageRating.toFixed(1)}
-                    </span>
-                    <span className="text-gray-500 truncate">
-                      (
-                      {(course.reviewCount || 0) > 0
-                        ? `${course.reviewCount} avaliações`
-                        : "Sem avaliações"}
-                      )
-                    </span>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center text-xs sm:text-sm text-gray-600">
-                <span className="font-medium flex-shrink-0">Instrutor:</span>
-                <span className="ml-1 truncate">
-                  {course.instructor?.name || "Instrutor não informado"}
+
+            <div className="text-xs text-gray-600 mb-3">
+              <span className="font-medium">por</span>{" "}
+              {course.instructor?.name || "Instrutor não informado"}
+            </div>
+
+            {course.averageRating && course.averageRating > 0 && (
+              <div className="flex items-center text-xs text-gray-600 mb-3">
+                <Star className="h-4 w-4 mr-1 fill-yellow-400 text-yellow-400" />
+                <span className="font-medium mr-1">
+                  {course.averageRating.toFixed(1)}
+                </span>
+                <span className="text-gray-500">
+                  ({course.reviewCount || 0} avaliações)
                 </span>
               </div>
-              <Link to={`/course/${course.id}`} className="block">
-                <Button className="w-full group-hover:scale-105 transition-transform text-xs sm:text-sm py-2 h-auto">
-                  Ver curso
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
+            )}
+
+            {viewMode === "grid" ? (
+              <>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    <span>{course.enrollments?.length || 0} alunos</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course.modules?.length || 0} módulos</span>
+                  </div>
+                </div>
+
+                <Link to={`/course/${course.id}`} className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200"
+                  >
+                    Ver detalhes
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    <span>{course.enrollments?.length || 0}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course.modules?.length || 0}</span>
+                  </div>
+                </div>
+
+                <Link to={`/course/${course.id}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200"
+                  >
+                    Ver detalhes
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </Card>
       ))}
     </div>

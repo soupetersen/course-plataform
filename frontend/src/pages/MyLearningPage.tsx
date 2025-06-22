@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -275,7 +276,11 @@ export function MyLearningPage() {
                     ? "Tente ajustar seus termos de busca"
                     : "Explore nossa biblioteca de cursos e comece a aprender hoje!"}
                 </p>
-                {!searchTerm && <Button>Explorar Cursos</Button>}
+                {!searchTerm && (
+                  <Link to="/courses">
+                    <Button>Ver Cursos</Button>
+                  </Link>
+                )}
               </div>
             )}
           </TabsContent>

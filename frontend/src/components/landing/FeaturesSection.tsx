@@ -30,14 +30,13 @@ export const FeaturesSection = () => {
       description: "Acesso vitalício ao conteúdo",
     },
   ];
-
   return (
     <section className="section-padding bg-card">
       <div className="container">
-        <div className="text-center mb-16 fade-in">
+        <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-800">
           <h2 className="text-4xl font-bold text-foreground mb-4">
             Por que escolher nossa plataforma?
-          </h2>{" "}
+          </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Oferecemos a melhor experiência de aprendizado online com recursos
             exclusivos
@@ -48,11 +47,12 @@ export const FeaturesSection = () => {
           {features.map((feature, index) => (
             <Card
               key={index}
-              className="text-center border-none shadow-lg card-hover fade-in-up"
+              className="text-center border-none shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-in zoom-in-95 fade-in delay-100"
+              style={{ animationDelay: `${index * 150 + 200}ms` }}
             >
               <CardHeader>
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <feature.icon className="h-8 w-8 text-primary" />
+                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                  <feature.icon className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
                 </div>
                 <CardTitle className="text-foreground">
                   {feature.title}

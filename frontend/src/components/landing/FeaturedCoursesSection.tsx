@@ -13,24 +13,24 @@ export const FeaturedCoursesSection = () => {
   });
 
   const courses = coursesData?.data ?? [];
-
   return (
     <section id="cursos" className="section-padding hero-gradient">
       <div className="container">
-        <div className="text-center mb-16 fade-in">
+        <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-800">
           <h2 className="text-4xl font-bold text-foreground mb-4">
             Cursos em Destaque
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Nossos cursos mais populares escolhidos por milhares de estudantes
           </p>
-        </div>{" "}
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
           {isLoading
             ? Array.from({ length: 3 }).map((_, index) => (
                 <Card
                   key={index}
-                  className="course-card fade-in-up animate-pulse flex flex-col h-full"
+                  className="course-card animate-pulse flex flex-col h-full animate-in zoom-in-95 fade-in duration-500"
+                  style={{ animationDelay: `${index * 150 + 200}ms` }}
                 >
                   <div className="w-full h-40 sm:h-48 bg-gray-200"></div>
                   <CardContent className="p-4 sm:p-6 flex-1">
@@ -44,10 +44,11 @@ export const FeaturedCoursesSection = () => {
                   </CardContent>
                 </Card>
               ))
-            : courses.map((course) => (
+            : courses.map((course, index) => (
                 <Card
                   key={course.id}
-                  className="course-card fade-in-up flex flex-col h-full"
+                  className="course-card flex flex-col h-full hover:shadow-xl hover:scale-105 transition-all duration-300 animate-in zoom-in-95 fade-in group"
+                  style={{ animationDelay: `${index * 150 + 300}ms` }}
                 >
                   <div className="relative">
                     <div className="w-full h-40 sm:h-48 bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -118,14 +119,14 @@ export const FeaturedCoursesSection = () => {
                             Gratuito
                           </span>
                         )}
-                      </div>
+                      </div>{" "}
                       <Link
                         to={`/course/${course.id}`}
                         className="order-1 sm:order-2 w-full sm:w-auto"
                       >
                         <Button
                           size="sm"
-                          className="bg-primary hover:bg-secondary text-white text-xs md:text-sm py-2 px-3 md:px-4 h-auto w-full sm:w-auto"
+                          className="bg-primary hover:bg-secondary text-white text-xs md:text-sm py-2 px-3 md:px-4 h-auto w-full sm:w-auto group-hover:scale-105 transition-transform"
                         >
                           Ver Curso
                         </Button>
@@ -134,16 +135,16 @@ export const FeaturedCoursesSection = () => {
                   </CardContent>
                 </Card>
               ))}
-        </div>
-        <div className="text-center mt-12 fade-in-up">
+        </div>{" "}
+        <div className="text-center mt-12 animate-in slide-in-from-bottom-6 fade-in duration-600 delay-1000">
           <Link to="/courses">
             <Button
               size="lg"
               variant="outline"
-              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground hover:scale-105 transition-all group"
             >
               Ver Todos os Cursos
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
         </div>

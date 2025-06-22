@@ -343,7 +343,7 @@ export function PaymentCheckout({
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
         {/* Payment Steps Header */}
         <div className="mb-8">
@@ -357,48 +357,54 @@ export function PaymentCheckout({
         {/* Step Content */}
         <div className="max-w-5xl mx-auto">
           {currentStep === "cart" && (
-            <CartStep
-              course={course}
-              formatCurrency={formatCurrency}
-              paymentType={paymentType}
-              onContinue={goToNextStep}
-            />
+            <div className="animate-in slide-in-from-left-8 fade-in duration-500">
+              <CartStep
+                course={course}
+                formatCurrency={formatCurrency}
+                paymentType={paymentType}
+                onContinue={goToNextStep}
+              />
+            </div>
           )}
 
           {currentStep === "payment" && (
-            <PaymentStep
-              selectedPaymentMethod={selectedPaymentMethod}
-              onPaymentMethodChange={setSelectedPaymentMethod}
-              onCreditCardDataChange={setCreditCardData}
-              useNewCard={useNewCard}
-              onSavedCardSelected={handleSavedCardSelected}
-              onNewCardSelected={handleNewCardSelected}
-              isProcessingPayment={isProcessingPayment}
-              paymentType={paymentType}
-              couponCode={couponCode}
-              setCouponCode={setCouponCode}
-              appliedCoupon={appliedCoupon}
-              isValidatingCoupon={isValidatingCoupon}
-              onValidateCoupon={validateCoupon}
-              onRemoveCoupon={removeCoupon}
-              formatDiscount={formatDiscount}
-              onContinue={goToNextStep}
-              onBack={goToPreviousStep}
-            />
+            <div className="animate-in slide-in-from-bottom-8 fade-in duration-700">
+              <PaymentStep
+                selectedPaymentMethod={selectedPaymentMethod}
+                onPaymentMethodChange={setSelectedPaymentMethod}
+                onCreditCardDataChange={setCreditCardData}
+                useNewCard={useNewCard}
+                onSavedCardSelected={handleSavedCardSelected}
+                onNewCardSelected={handleNewCardSelected}
+                isProcessingPayment={isProcessingPayment}
+                paymentType={paymentType}
+                couponCode={couponCode}
+                setCouponCode={setCouponCode}
+                appliedCoupon={appliedCoupon}
+                isValidatingCoupon={isValidatingCoupon}
+                onValidateCoupon={validateCoupon}
+                onRemoveCoupon={removeCoupon}
+                formatDiscount={formatDiscount}
+                onContinue={goToNextStep}
+                onBack={goToPreviousStep}
+              />
+            </div>
           )}
 
           {currentStep === "checkout" && (
-            <CheckoutStep
-              course={course}
-              selectedPaymentMethod={selectedPaymentMethod}
-              feeCalculation={feeCalculation}
-              appliedCoupon={appliedCoupon}
-              formatCurrency={formatCurrency}
-              paymentType={paymentType}
-              isProcessingPayment={isProcessingPayment}
-              onProcessPayment={processPayment}
-              onBack={goToPreviousStep}
-            />
+            <div className="animate-in slide-in-from-right-8 fade-in duration-600">
+              <CheckoutStep
+                course={course}
+                selectedPaymentMethod={selectedPaymentMethod}
+                feeCalculation={feeCalculation}
+                appliedCoupon={appliedCoupon}
+                formatCurrency={formatCurrency}
+                paymentType={paymentType}
+                isProcessingPayment={isProcessingPayment}
+                onProcessPayment={processPayment}
+                onBack={goToPreviousStep}
+              />
+            </div>
           )}
         </div>
       </div>

@@ -41,9 +41,9 @@ export const Sidebar = ({
       href: "/dashboard",
     },
     {
-      title: "Explorar",
+      title: "Cursos",
       icon: GraduationCap,
-      href: "/explore",
+      href: "/courses",
     },
     {
       title: "Perfil",

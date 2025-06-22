@@ -84,23 +84,25 @@ export function PaymentActionButton({
   };
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500">
       <CardContent className="p-6 space-y-4">
         {/* Payment method info */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between animate-in slide-in-from-left-4 fade-in duration-500 delay-100">
           <div className="flex items-center gap-2">
-            {getPaymentMethodIcon()}
+            <div className="animate-in zoom-in fade-in duration-300 delay-200">
+              {getPaymentMethodIcon()}
+            </div>
             <span className="font-medium">{getPaymentMethodName()}</span>
             {selectedPaymentMethod === "PIX" && (
               <Badge
                 variant="secondary"
-                className="bg-green-100 text-green-800"
+                className="bg-green-100 text-green-800 animate-in slide-in-from-right-2 fade-in duration-400 delay-300"
               >
                 Instantâneo
               </Badge>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-right animate-in slide-in-from-right-4 fade-in duration-500 delay-200">
             <div className="font-bold text-lg">{formatCurrency(total)}</div>
             {isSubscription && (
               <div className="text-xs text-muted-foreground">/mês</div>
@@ -109,7 +111,7 @@ export function PaymentActionButton({
         </div>
 
         {/* Security info */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-500 delay-300">
           <Shield className="w-4 h-4" />
           <span>Pagamento 100% seguro e criptografado</span>
         </div>
@@ -119,7 +121,7 @@ export function PaymentActionButton({
           onClick={onProcessPayment}
           disabled={disabled || isProcessingPayment}
           size="lg"
-          className="w-full font-semibold"
+          className="w-full font-semibold animate-in slide-in-from-bottom-4 fade-in duration-500 delay-400 group hover:scale-[1.02] transition-all"
         >
           {isProcessingPayment ? (
             <>
@@ -128,8 +130,12 @@ export function PaymentActionButton({
             </>
           ) : (
             <>
-              {getPaymentMethodIcon()}
-              <span className="ml-2">{getButtonText()}</span>
+              <div className="group-hover:scale-110 transition-transform duration-200">
+                {getPaymentMethodIcon()}
+              </div>
+              <span className="ml-2 group-hover:tracking-wide transition-all duration-200">
+                {getButtonText()}
+              </span>
             </>
           )}
         </Button>

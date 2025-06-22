@@ -1,10 +1,4 @@
-﻿import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+﻿import { Card, CardDescription, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { BookOpen, Users } from "lucide-react";
@@ -31,84 +25,95 @@ export const RecommendedCourses = ({
             Explorar mais
           </Button>
         </Link>
-      </div>
-
+      </div>{" "}
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader className="p-4 sm:p-6">
-                <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-2 sm:h-3 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent className="p-4 sm:p-6 pt-0">
-                <div className="space-y-2">
-                  <div className="h-2 sm:h-3 bg-gray-200 rounded"></div>
-                  <div className="h-2 sm:h-3 bg-gray-200 rounded w-2/3"></div>
+            <Card
+              key={i}
+              variant="elevated"
+              padding="none"
+              className="animate-pulse overflow-hidden"
+            >
+              <div className="aspect-video bg-gray-200 w-full"></div>
+              <div className="p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-5 bg-gray-200 rounded-full w-16"></div>
+                  <div className="h-5 bg-gray-200 rounded w-20"></div>
                 </div>
-              </CardContent>
+                <div className="space-y-2">
+                  <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div className="h-4 bg-gray-200 rounded w-16"></div>
+                  <div className="h-4 bg-gray-200 rounded w-20"></div>
+                </div>
+                <div className="h-9 bg-gray-200 rounded w-full"></div>
+              </div>
             </Card>
           ))}
         </div>
       ) : (
         <div className="course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {courses.map((course) => (
+          {courses.map((course, index) => (
             <Card
               key={course.id}
-              className="course-card hover:shadow-lg transition-all duration-200 group animate-slide-in-left flex flex-col h-full"
+              variant="elevated"
+              padding="none"
+              className="course-card group overflow-hidden flex flex-col h-full hover:scale-[1.02] transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-4"
+              style={{ animationDelay: `${index * 100}ms` }}
             >
-              <CardHeader className="card-header pb-3 p-3 sm:p-4 lg:p-6 sm:pb-3 flex-1">
-                {course.imageUrl && (
-                  <div className="image-container">
-                    <img
-                      src={course.imageUrl}
-                      alt={course.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                    />
-                  </div>
-                )}
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="secondary" className="badge-responsive">
+              {course.imageUrl && (
+                <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+                  <img
+                    src={course.imageUrl}
+                    alt={course.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+                </div>
+              )}
+
+              <div className="flex flex-col flex-1 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <Badge
+                    variant="secondary"
+                    className="text-xs font-medium bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                  >
                     {course.level}
                   </Badge>
-                  <div className="price-display price-display-sm sm:price-display-md text-primary">
+                  <span className="text-lg font-bold text-green-600">
                     R$ {course.price.toFixed(2)}
-                  </div>
+                  </span>
                 </div>{" "}
-                <CardTitle className="group-hover:text-primary transition-colors text-sm md:text-base lg:text-lg leading-tight hyphens-auto break-words min-h-[2.5rem] md:min-h-[3rem] mb-2">
+                <CardTitle className="group-hover:text-primary transition-colors duration-200 text-base md:text-lg leading-tight mb-2 line-clamp-2 min-h-[3rem]">
                   {course.title}
                 </CardTitle>
-                <CardDescription className="text-xs md:text-sm leading-relaxed break-words flex-1">
+                <CardDescription className="text-sm leading-relaxed flex-1 mb-4 line-clamp-3">
                   {course.description}
                 </CardDescription>
-              </CardHeader>
-              <CardContent className="card-content p-3 sm:p-4 lg:p-6 pt-0 mt-auto">
-                <div className="space-y-3">
-                  <div className="card-stats">
-                    <div className="flex items-center min-w-0 flex-1">
-                      <Users className="stats-icon" />
-                      <span className="truncate text-xs sm:text-sm text-gray-600">
-                        {course.enrollments?.length || 0}
-                      </span>
-                    </div>
-                    <div className="flex items-center min-w-0 flex-1 justify-end">
-                      <BookOpen className="stats-icon" />
-                      <span className="truncate text-xs sm:text-sm text-gray-600">
-                        {course.modules?.length || 0} módulos
-                      </span>
-                    </div>
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    <span>{course.enrollments?.length || 0} alunos</span>
                   </div>
-
-                  <Link to={`/courses/${course.id}`} className="block">
-                    <Button
-                      variant="outline"
-                      className="btn-responsive w-full group-hover:scale-105 transition-transform"
-                    >
-                      Ver detalhes
-                    </Button>
-                  </Link>
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>{course.modules?.length || 0} módulos</span>
+                  </div>
                 </div>
-              </CardContent>
+                <Link to={`/courses/${course.id}`} className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200"
+                  >
+                    Ver detalhes
+                  </Button>
+                </Link>
+              </div>
             </Card>
           ))}
         </div>

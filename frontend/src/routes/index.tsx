@@ -5,7 +5,6 @@ import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
 import { LessonPage } from "../pages/LessonPage";
-import { ExplorePage } from "../pages/ExplorePage";
 import { MyLearningPage } from "../pages/MyLearningPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CoursesPage } from "@/pages/CoursesPage";
@@ -51,7 +50,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "explore",
-        element: <ExplorePage />,
+        element: <CoursesPage />, // Redireciona explore para a mesma página de cursos
       },
       {
         path: "my-learning",

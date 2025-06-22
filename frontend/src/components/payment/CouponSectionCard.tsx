@@ -42,16 +42,19 @@ export function CouponSectionCard({
   };
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Gift className="w-5 h-5 text-green-600" />
+          <Gift className="w-5 h-5 text-green-600 animate-in zoom-in fade-in duration-300 delay-100" />
           Cupom de Desconto
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {!appliedCoupon ? (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-200"
+          >
             <div className="space-y-2">
               <Label htmlFor="coupon-code">Código do cupom</Label>
               <div className="flex gap-2">
@@ -62,13 +65,13 @@ export function CouponSectionCard({
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   disabled={isValidatingCoupon}
-                  className="flex-1"
+                  className="flex-1 focus:scale-[1.02] transition-transform"
                 />
                 <Button
                   type="submit"
                   disabled={!couponCode.trim() || isValidatingCoupon}
                   size="default"
-                  className="min-w-24"
+                  className="min-w-24 hover:scale-105 transition-transform"
                 >
                   {isValidatingCoupon ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -79,7 +82,7 @@ export function CouponSectionCard({
               </div>
             </div>
 
-            <Alert>
+            <Alert className="animate-in fade-in duration-500 delay-400">
               <Tag className="w-4 h-4" />
               <AlertDescription>
                 Insira seu código de cupom para obter desconto na compra.
@@ -87,15 +90,15 @@ export function CouponSectionCard({
             </Alert>
           </form>
         ) : (
-          <div className="space-y-4">
-            <Alert className="border-green-200 bg-green-50 dark:bg-green-950">
+          <div className="space-y-4 animate-in slide-in-from-bottom-4 fade-in duration-600">
+            <Alert className="border-green-200 bg-green-50 dark:bg-green-950 animate-in zoom-in-95 fade-in duration-500 delay-100">
               <Check className="w-4 h-4 text-green-600" />
               <AlertDescription className="text-green-800 dark:text-green-200">
                 <div className="flex items-center justify-between">
                   <span>Cupom aplicado com sucesso!</span>
                   <Badge
                     variant="secondary"
-                    className="bg-green-100 text-green-800"
+                    className="bg-green-100 text-green-800 animate-in slide-in-from-right-2 fade-in duration-400 delay-200"
                   >
                     {formatDiscount(appliedCoupon.discount)}
                   </Badge>
@@ -114,14 +117,14 @@ export function CouponSectionCard({
                 variant="ghost"
                 size="sm"
                 onClick={onRemoveCoupon}
-                className="text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive hover:scale-105 transition-all animate-in slide-in-from-right-4 fade-in duration-500 delay-300"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 hover:rotate-90 transition-transform" />
                 Remover
               </Button>
             </div>
 
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground animate-in fade-in duration-500 delay-400">
               Economia: {formatDiscount(appliedCoupon.discount)}
             </div>
           </div>

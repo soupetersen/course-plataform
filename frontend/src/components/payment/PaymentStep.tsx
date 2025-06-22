@@ -65,7 +65,7 @@ export function PaymentStep({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-400">
         <h2 className="text-2xl font-bold">Método de Pagamento</h2>
         <p className="text-muted-foreground">
           Escolha como deseja pagar e aplique cupons de desconto
@@ -74,7 +74,7 @@ export function PaymentStep({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Payment Methods - Takes 2 columns */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 animate-in slide-in-from-left-6 fade-in duration-600 delay-200">
           <PaymentMethodsSection
             selectedPaymentMethod={selectedPaymentMethod}
             onPaymentMethodChange={onPaymentMethodChange}
@@ -88,7 +88,7 @@ export function PaymentStep({
         </div>
 
         {/* Coupon Section - Takes 1 column (sidebar) */}
-        <div className="space-y-4">
+        <div className="space-y-4 animate-in slide-in-from-right-6 fade-in duration-600 delay-400">
           <CouponSectionCard
             couponCode={couponCode}
             setCouponCode={setCouponCode}
@@ -102,22 +102,22 @@ export function PaymentStep({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex gap-4 pt-4">
+      <div className="flex gap-4 pt-4 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-600">
         <Button
           variant="outline"
           onClick={onBack}
           disabled={isProcessingPayment}
-          className="flex-1"
+          className="flex-1 hover:scale-[1.02] transition-transform"
         >
           Voltar ao Carrinho
         </Button>
         <Button
           onClick={onContinue}
           disabled={!canContinue || isProcessingPayment}
-          className="flex-1"
+          className="flex-1 group hover:scale-[1.02] transition-transform"
         >
           Continuar
-          <ChevronRight className="w-4 h-4 ml-2" />
+          <ChevronRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
     </div>

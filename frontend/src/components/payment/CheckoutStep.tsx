@@ -137,7 +137,7 @@ export function CheckoutStep({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
+      <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-400">
         <h2 className="text-2xl font-bold">Finalizar Pagamento</h2>
         <p className="text-muted-foreground">
           Revise seus dados e confirme a compra
@@ -145,7 +145,7 @@ export function CheckoutStep({
       </div>
 
       {/* Course Summary */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500 delay-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Receipt className="w-5 h-5" />
@@ -306,21 +306,21 @@ export function CheckoutStep({
       </Card>
 
       {/* Security and Action */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm animate-in slide-in-from-bottom-6 fade-in duration-600 delay-300">
         <CardContent className="p-6 space-y-4">
           {/* Security info */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-500 delay-500">
             <Shield className="w-4 h-4" />
             <span>Pagamento 100% seguro e criptografado</span>
           </div>
 
           {/* Action buttons */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-600">
             <Button
               variant="outline"
               onClick={onBack}
               disabled={isProcessingPayment}
-              className="flex-1"
+              className="flex-1 hover:scale-[1.02] transition-transform"
             >
               Voltar
             </Button>
@@ -328,7 +328,7 @@ export function CheckoutStep({
               onClick={onProcessPayment}
               disabled={isProcessingPayment}
               size="lg"
-              className="flex-1 font-semibold"
+              className="flex-1 font-semibold hover:scale-[1.02] transition-transform"
             >
               {isProcessingPayment ? (
                 <>

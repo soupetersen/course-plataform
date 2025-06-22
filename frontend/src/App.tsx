@@ -2,15 +2,28 @@
 import { MainLayout } from "./components/layout/MainLayout";
 import { PublicLayout } from "./components/layout/PublicLayout";
 import { Toaster } from "./components/ui/toaster";
+import { useAuth } from "./hooks/useAuth";
 
 function App() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
-  const publicRoutes = ["/", "/login", "/register", "/courses"];
-  const isPublicRoute =
-    publicRoutes.includes(location.pathname) ||
-    location.pathname.startsWith("/courses/");
-  if (isPublicRoute) {
+  // Rotas que sempre usam layout público, mesmo se logado
+  const alwaysPublicRoutes = ["/", "/login", "/register"];
+
+  // Rotas que usam layout público apenas para usuários não logados
+  const conditionalPublicRoutes = ["/courses"];
+
+  const isAlwaysPublic = alwaysPublicRoutes.includes(location.pathname);
+  const isConditionalPublic = conditionalPublicRoutes.some(
+    (route) =>
+      location.pathname === route || location.pathname.startsWith(route + "/")
+  );
+
+  const shouldUsePublicLayout =
+    isAlwaysPublic || (isConditionalPublic && !isAuthenticated);
+
+  if (shouldUsePublicLayout) {
     return (
       <>
         <PublicLayout>

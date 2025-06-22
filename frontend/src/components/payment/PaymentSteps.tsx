@@ -55,10 +55,10 @@ export function PaymentSteps({
                 {stepIdx !== steps.length - 1 && (
                   <div
                     className={cn(
-                      "absolute top-4 left-4 -ml-px mt-0.5 h-0.5 w-full",
+                      "absolute top-4 left-4 -ml-px mt-0.5 h-0.5 w-full transition-all duration-500 ease-in-out",
                       isCompleted ||
                         completedSteps.includes(steps[stepIdx + 1]?.id)
-                        ? "bg-primary"
+                        ? "bg-primary scale-y-150"
                         : "bg-gray-300"
                     )}
                     aria-hidden="true"
@@ -77,12 +77,12 @@ export function PaymentSteps({
                 >
                   <span
                     className={cn(
-                      "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-colors",
+                      "flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ease-in-out",
                       isCompleted
-                        ? "border-primary bg-primary text-primary-foreground"
+                        ? "border-primary bg-primary text-primary-foreground scale-110"
                         : isCurrent
-                        ? "border-primary bg-background text-primary"
-                        : "border-gray-300 bg-background text-gray-500"
+                        ? "border-primary bg-background text-primary scale-105 shadow-md"
+                        : "border-gray-300 bg-background text-gray-500 hover:border-gray-400"
                     )}
                   >
                     {isCompleted ? (
@@ -94,9 +94,9 @@ export function PaymentSteps({
 
                   <span
                     className={cn(
-                      "mt-2 text-xs font-medium",
+                      "mt-2 text-xs font-medium transition-all duration-300",
                       isCurrent
-                        ? "text-primary"
+                        ? "text-primary scale-105 font-semibold"
                         : isCompleted
                         ? "text-foreground"
                         : "text-muted-foreground"
@@ -107,8 +107,10 @@ export function PaymentSteps({
 
                   <span
                     className={cn(
-                      "mt-1 text-xs",
-                      isCurrent ? "text-primary/70" : "text-muted-foreground"
+                      "mt-1 text-xs transition-all duration-300",
+                      isCurrent
+                        ? "text-primary/70 scale-105"
+                        : "text-muted-foreground"
                     )}
                   >
                     {step.description}
