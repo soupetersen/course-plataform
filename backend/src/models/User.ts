@@ -2,6 +2,14 @@
 
 export type UserRole = 'STUDENT' | 'INSTRUCTOR' | 'ADMIN';
 
+export interface StripeConnectInfo {
+  accountId?: string;
+  accountStatus?: 'pending' | 'enabled' | 'restricted';
+  onboardingCompleted?: boolean;
+  payoutsEnabled?: boolean;
+  detailsSubmitted?: boolean;
+}
+
 export class User {
   id: string;
   email: string;
@@ -10,9 +18,9 @@ export class User {
   role: UserRole;
   avatar?: string;
   isActive: boolean;
+  stripeConnect?: StripeConnectInfo;
   createdAt: Date;
   updatedAt: Date;
-
   constructor(params: {
     id: string;
     email: string;
@@ -21,6 +29,7 @@ export class User {
     role: UserRole;
     avatar?: string;
     isActive?: boolean;
+    stripeConnect?: StripeConnectInfo;
     createdAt?: Date;
     updatedAt?: Date;
   }) {
@@ -31,6 +40,7 @@ export class User {
     this.role = params.role;
     this.avatar = params.avatar;
     this.isActive = params.isActive ?? true;
+    this.stripeConnect = params.stripeConnect;
     this.createdAt = params.createdAt || new Date();
     this.updatedAt = params.updatedAt || new Date();
   }

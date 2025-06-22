@@ -16,37 +16,58 @@ export class Payment {
     public readonly id: string,
     public readonly userId: string,
     public readonly courseId: string,
-    public readonly stripePaymentId: string,
+    public readonly externalPaymentId: string, // ID genérico do pagamento no gateway
     public readonly amount: number,
     public readonly currency: string,
     public readonly status: PaymentStatus,
     public readonly paymentType: PaymentType,
     public readonly createdAt: Date,
-    public readonly updatedAt: Date
+    public readonly updatedAt: Date,
+    // Campos opcionais para dados específicos do gateway
+    public readonly externalOrderId?: string,
+    public readonly paymentData?: string, // JSON com dados específicos (PIX QR code, etc.)
+    public readonly paymentMethod?: string,
+    public readonly platformFeeAmount?: number,
+    public readonly instructorAmount?: number,
+    public readonly gatewayProvider?: string
   ) {}
 
   static create(
     id: string,
     userId: string,
     courseId: string,
-    stripePaymentId: string,
+    externalPaymentId: string,
     amount: number,
     currency: string,
     status: PaymentStatus,
-    paymentType: PaymentType
+    paymentType: PaymentType,
+    options?: {
+      externalOrderId?: string;
+      paymentData?: string;
+      paymentMethod?: string;
+      platformFeeAmount?: number;
+      instructorAmount?: number;
+      gatewayProvider?: string;
+    }
   ): Payment {
     const now = new Date();
     return new Payment(
       id,
       userId,
       courseId,
-      stripePaymentId,
+      externalPaymentId,
       amount,
       currency,
       status,
       paymentType,
       now,
-      now
+      now,
+      options?.externalOrderId,
+      options?.paymentData,
+      options?.paymentMethod,
+      options?.platformFeeAmount,
+      options?.instructorAmount,
+      options?.gatewayProvider
     );
   }
 
@@ -55,13 +76,19 @@ export class Payment {
       this.id,
       this.userId,
       this.courseId,
-      this.stripePaymentId,
+      this.externalPaymentId,
       this.amount,
       this.currency,
       status,
       this.paymentType,
       this.createdAt,
-      new Date()
+      new Date(),
+      this.externalOrderId,
+      this.paymentData,
+      this.paymentMethod,
+      this.platformFeeAmount,
+      this.instructorAmount,
+      this.gatewayProvider
     );
   }
 

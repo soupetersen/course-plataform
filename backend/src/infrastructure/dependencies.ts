@@ -42,7 +42,6 @@ import { CompleteLessonUseCase } from '@/use-cases/CompleteLessonUseCase';
 import { EnrollInCourseUseCase } from '@/use-cases/EnrollInCourseUseCase';
 import { CreateOneTimePaymentUseCase } from '@/use-cases/CreateOneTimePaymentUseCase';
 import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscriptionPaymentUseCase';
-import { ProcessStripeWebhookUseCase } from '@/use-cases/ProcessStripeWebhookUseCase';
 import { CreateReviewUseCase } from '@/use-cases/CreateReviewUseCase';
 
 import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
@@ -53,7 +52,7 @@ import { ManageCouponsUseCase } from '@/use-cases/ManageCouponsUseCase';
 
 import { JwtService } from '@/services/JwtService';
 import { PasswordService } from '@/services/PasswordService';
-import { StripeService } from '@/services/StripeService';
+import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { S3Service } from '@/services/S3Service';
 
 export function setupDependencies(): DIContainer {
@@ -63,7 +62,7 @@ export function setupDependencies(): DIContainer {
 
   container.registerSingleton('JwtService', () => new JwtService());
   container.registerSingleton('PasswordService', () => new PasswordService());
-  container.registerSingleton('StripeService', () => new StripeService());
+  container.registerSingleton('PaymentGatewayFactory', () => PaymentGatewayFactory.getInstance());
   container.registerSingleton('S3Service', () => new S3Service());
 
   container.registerSingleton('UserRepository', () => {
@@ -177,41 +176,27 @@ export function setupDependencies(): DIContainer {
     const userRepository = container.resolve<UserRepository>('UserRepository');
     return new EnrollInCourseUseCase(enrollmentRepository, courseRepository, userRepository);
   });
-
   container.register('CreateOneTimePaymentUseCase', () => {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
-    const stripeService = container.resolve<StripeService>('StripeService');
-    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, stripeService);
+    const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
+    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, paymentGatewayFactory);
   });
-
   container.register('CreateSubscriptionPaymentUseCase', () => {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
     const subscriptionRepository = container.resolve<SubscriptionRepository>('SubscriptionRepository');
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
-    const stripeService = container.resolve<StripeService>('StripeService');
+    const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
     return new CreateSubscriptionPaymentUseCase(
       paymentRepository,
       subscriptionRepository,
       courseRepository,
       userRepository,
-      stripeService
-    );
-  });
-  container.register('ProcessStripeWebhookUseCase', () => {
-    const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
-    const subscriptionRepository = container.resolve<SubscriptionRepository>('SubscriptionRepository');
-    const enrollmentRepository = container.resolve<EnrollmentRepository>('EnrollmentRepository');
-    const stripeService = container.resolve<StripeService>('StripeService');
-    return new ProcessStripeWebhookUseCase(
-      paymentRepository,
-      subscriptionRepository,
-      enrollmentRepository,
-      stripeService
-    );
-  });
+      paymentGatewayFactory
+    );  });
+  
   container.register('CreateReviewUseCase', () => {
     const reviewRepository = container.resolve<ReviewRepository>('ReviewRepository');
     const enrollmentRepository = container.resolve<EnrollmentRepository>('EnrollmentRepository');
@@ -239,8 +224,7 @@ export function setupDependencies(): DIContainer {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
     const platformSettingRepository = container.resolve<PlatformSettingRepository>('PlatformSettingRepository');
     return new CreateRefundRequestUseCase(refundRequestRepository, paymentRepository, platformSettingRepository);
-  });
-  container.register('ManageCouponsUseCase', () => {
+  });  container.register('ManageCouponsUseCase', () => {
     const couponRepository = container.resolve<CouponRepository>('CouponRepository');
     return new ManageCouponsUseCase(couponRepository);
   });

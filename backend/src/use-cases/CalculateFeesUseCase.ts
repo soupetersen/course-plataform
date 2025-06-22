@@ -8,12 +8,10 @@ export interface CalculateFeesRequest {
 export interface CalculateFeesResponse {
   originalAmount: number;
   discountAmount: number;
-  subtotal: number;
-  platformFee: number;
-  stripeFee: number;
-  totalFees: number;
-  finalAmount: number;
-  instructorAmount: number;
+  finalAmount: number; // Valor que o aluno vai pagar (sem taxas adicionais)
+  platformFee: number; // Taxa da plataforma (será debitada via Stripe Connect)
+  instructorAmount: number; // Valor que o instrutor recebe
+  stripeFee: number; // Taxa do Stripe (estimativa para exibição)
 }
 
 export class CalculateFeesUseCase {
@@ -31,25 +29,24 @@ export class CalculateFeesUseCase {
     const stripeFeePercentage = stripeFeeSetting ? stripeFeeSetting.getValueAsNumber() : 2.9;
 
     const originalAmount = coursePrice;
-    const subtotal = Math.max(0, originalAmount - discountAmount);
+    const finalAmount = Math.max(0, originalAmount - discountAmount); // Valor que o aluno paga
     
-    const platformFee = Math.round((subtotal * platformFeePercentage) / 100);
-    const stripeFee = Math.round((subtotal * stripeFeePercentage) / 100);
-    const totalFees = platformFee + stripeFee;
+    // Calcular taxa da plataforma (10% do valor final)
+    const platformFee = Math.round((finalAmount * platformFeePercentage) / 100);
     
-    const finalAmount = subtotal;
+    // Valor que o instrutor recebe (valor final - taxa da plataforma)
+    const instructorAmount = finalAmount - platformFee;
     
-    const instructorAmount = subtotal - platformFee;
+    // Taxa do Stripe (estimativa para exibição - será debitada separadamente)
+    const stripeFee = Math.round((finalAmount * stripeFeePercentage) / 100);
 
     return {
       originalAmount,
       discountAmount,
-      subtotal,
-      platformFee,
-      stripeFee,
-      totalFees,
-      finalAmount,
-      instructorAmount
+      finalAmount, // Aluno paga este valor
+      platformFee, // Plataforma fica com este valor
+      instructorAmount, // Instrutor recebe este valor
+      stripeFee, // Taxa Stripe (apenas para exibição)
     };
   }
 }

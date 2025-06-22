@@ -24,6 +24,8 @@ export async function enrollmentRoutes(fastify: FastifyInstance) {
 
   fastify.get('/my-enrollments', enrollmentController.getUserEnrollments.bind(enrollmentController));
 
+  fastify.get('/my', enrollmentController.getUserEnrollments.bind(enrollmentController));
+
   fastify.get('/user/:userId', {
     schema: {
       params: {

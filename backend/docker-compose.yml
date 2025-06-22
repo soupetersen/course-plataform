@@ -39,7 +39,6 @@
       - default
       - development
       - production
-
   api:
     build:
       context: .
@@ -53,9 +52,12 @@
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
       REDIS_URL: redis://redis:6379
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
+      DEFAULT_PAYMENT_GATEWAY: ${DEFAULT_PAYMENT_GATEWAY:-MERCADOPAGO}
+      DEFAULT_PAYMENT_METHOD: ${DEFAULT_PAYMENT_METHOD:-PIX}
+      FRONTEND_URL: ${FRONTEND_URL}
+      API_BASE_URL: ${API_BASE_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-1}
@@ -75,7 +77,7 @@
     volumes:
       - ./uploads:/app/uploads
     profiles:
-      - production  
+      - production    
   api-dev:
     build:
       context: .
@@ -89,16 +91,19 @@
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
       REDIS_URL: redis://redis:6379
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-sk_test_example_stripe_key_for_development}
-      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-pk_test_example_stripe_key_for_development}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-whsec_test_placeholder}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
+      DEFAULT_PAYMENT_GATEWAY: ${DEFAULT_PAYMENT_GATEWAY:-MERCADOPAGO}
+      DEFAULT_PAYMENT_METHOD: ${DEFAULT_PAYMENT_METHOD:-PIX}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:3000}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-}
       AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
       AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
-      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}   
+      AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
     ports:
       - "3000:3000"      
     depends_on:

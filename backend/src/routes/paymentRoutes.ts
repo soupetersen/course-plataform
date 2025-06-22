@@ -4,32 +4,32 @@ import { AuthMiddleware } from '@/middlewares/AuthMiddleware';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { CreateOneTimePaymentUseCase } from '@/use-cases/CreateOneTimePaymentUseCase';
 import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscriptionPaymentUseCase';
-import { ProcessStripeWebhookUseCase } from '@/use-cases/ProcessStripeWebhookUseCase';
 import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
 import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
 import { CreateRefundRequestUseCase } from '@/use-cases/CreateRefundRequestUseCase';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
+import { CourseRepository } from '@/interfaces/CourseRepository';
+import { UserRepository } from '@/interfaces/UserRepository';
+import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 
 export async function paymentRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;
-  const authMiddleware = new AuthMiddleware();
-
-    const createOneTimePaymentUseCase = container.resolve<CreateOneTimePaymentUseCase>('CreateOneTimePaymentUseCase');
+  const authMiddleware = new AuthMiddleware();    const createOneTimePaymentUseCase = container.resolve<CreateOneTimePaymentUseCase>('CreateOneTimePaymentUseCase');
   const createSubscriptionPaymentUseCase = container.resolve<CreateSubscriptionPaymentUseCase>('CreateSubscriptionPaymentUseCase');
-  const processStripeWebhookUseCase = container.resolve<ProcessStripeWebhookUseCase>('ProcessStripeWebhookUseCase');
   const validateCouponUseCase = container.resolve<ValidateCouponUseCase>('ValidateCouponUseCase');
-  const calculateFeesUseCase = container.resolve<CalculateFeesUseCase>('CalculateFeesUseCase');
-  const createRefundRequestUseCase = container.resolve<CreateRefundRequestUseCase>('CreateRefundRequestUseCase');
-  const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
-
-  const paymentController = new PaymentController(
+  const calculateFeesUseCase = container.resolve<CalculateFeesUseCase>('CalculateFeesUseCase');  const createRefundRequestUseCase = container.resolve<CreateRefundRequestUseCase>('CreateRefundRequestUseCase');const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
+  const courseRepository = container.resolve<CourseRepository>('CourseRepository');
+  const userRepository = container.resolve<UserRepository>('UserRepository');
+  const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');  const paymentController = new PaymentController(
     createOneTimePaymentUseCase,
     createSubscriptionPaymentUseCase,
-    processStripeWebhookUseCase,
     validateCouponUseCase,
     calculateFeesUseCase,
     createRefundRequestUseCase,
-    paymentRepository
+    paymentRepository,
+    courseRepository,
+    userRepository,
+    paymentGatewayFactory
   );
 
   
@@ -44,8 +44,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
   }, paymentController.handleWebhook.bind(paymentController));
 
-  
-  fastify.post('/one-time', {
+    fastify.post('/one-time', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {
       body: {
@@ -53,12 +52,14 @@ export async function paymentRoutes(fastify: FastifyInstance) {
         required: ['courseId'],
         properties: {
           courseId: { type: 'string' },
-          currency: { type: 'string', default: 'usd' }
+          currency: { type: 'string', default: 'BRL' },
+          paymentMethod: { type: 'string', default: 'PIX' },
+          gatewayType: { type: 'string', enum: ['MERCADOPAGO'], default: 'MERCADOPAGO' },
+          couponCode: { type: 'string' }
         }
       }
     }
   }, paymentController.createOneTimePayment.bind(paymentController));
-
   fastify.post('/subscription', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {
@@ -66,7 +67,11 @@ export async function paymentRoutes(fastify: FastifyInstance) {
         type: 'object',
         required: ['courseId'],
         properties: {
-          courseId: { type: 'string' }
+          courseId: { type: 'string' },
+          frequency: { type: 'number', default: 1 },
+          frequencyType: { type: 'string', enum: ['days', 'weeks', 'months', 'years'], default: 'months' },
+          gatewayType: { type: 'string', enum: ['MERCADOPAGO'], default: 'MERCADOPAGO' },
+          cardToken: { type: 'string' }
         }
       }
     }
@@ -89,29 +94,27 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       }
     }
   }, paymentController.getPaymentStatus.bind(paymentController));
-
   fastify.post('/validate-coupon', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {
       body: {
         type: 'object',
-        required: ['code', 'coursePrice'],
+        required: ['code', 'courseId'],
         properties: {
           code: { type: 'string' },
-          coursePrice: { type: 'number' }
+          courseId: { type: 'string' }
         }
       }
     }
   }, paymentController.validateCoupon.bind(paymentController));
-
   fastify.post('/calculate-fees', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {
       body: {
         type: 'object',
-        required: ['coursePrice'],
+        required: ['courseId'],
         properties: {
-          coursePrice: { type: 'number' },
+          courseId: { type: 'string' },
           discountAmount: { type: 'number' }
         }
       }
@@ -147,5 +150,25 @@ export async function paymentRoutes(fastify: FastifyInstance) {
 
   fastify.get('/refund-requests', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
-  }, paymentController.getRefundRequests.bind(paymentController));
+  }, paymentController.getRefundRequests.bind(paymentController));  fastify.post('/calculate-order-summary', {
+    preHandler: authMiddleware.authenticate.bind(authMiddleware),
+    schema: {
+      body: {
+        type: 'object',
+        required: ['courseId'],
+        properties: {
+          courseId: { type: 'string' },
+          couponCode: { type: 'string' }
+        }      }
+    }
+  }, paymentController.calculateOrderSummary.bind(paymentController));
+  // Rota para ganhos do instrutor
+  fastify.get('/instructor/earnings', {
+    preHandler: authMiddleware.authenticate.bind(authMiddleware)
+  }, paymentController.getInstructorEarnings.bind(paymentController));
+
+  // Rota para configuração do webhook (desenvolvimento)
+  fastify.get('/webhook-config', {
+    preHandler: authMiddleware.authenticate.bind(authMiddleware)
+  }, paymentController.getWebhookConfig.bind(paymentController));
 }
