@@ -8,24 +8,32 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(cuid())
-  email            String            @unique
-  name             String
-  password         String
-  role             Role              @default(STUDENT)
-  isActive         Boolean           @default(true)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  courses          Course[]          @relation("InstructorCourses")
-  enrollments      Enrollment[]
-  comments         LessonComment[]
-  payments         Payment[]
-  reviews          Review[]
-  couponsUsed      CouponUsage[]
-  couponsCreated   Coupon[]          @relation("CouponCreator")
-  settingsUpdated  PlatformSetting[]
-  refundRequests   RefundRequest[]
-  refundsProcessed RefundRequest[]   @relation("RefundProcessor")
+  id                      String             @id @default(cuid())
+  email                   String             @unique
+  name                    String
+  password                String
+  role                    Role               @default(STUDENT)
+  isActive                Boolean            @default(true)
+  paymentCustomerId       String? // ID do cliente no gateway (genérico)
+  paymentAccountId        String? // ID da conta de recebimento (genérico)
+  pixKey                  String? // Chave PIX do instrutor para receber pagamentos
+  bankAccount             String? // Dados bancários para saque (JSON)
+  payoutPreference        String?            @default("PIX") // PIX, BANK_TRANSFER
+  createdAt               DateTime           @default(now())
+  updatedAt               DateTime           @updatedAt
+  courses                 Course[]           @relation("InstructorCourses")
+  enrollments             Enrollment[]
+  comments                LessonComment[]
+  payments                Payment[]
+  reviews                 Review[]
+  couponsUsed             CouponUsage[]
+  couponsCreated          Coupon[]           @relation("CouponCreator")
+  settingsUpdated         PlatformSetting[]
+  refundRequests          RefundRequest[]
+  refundsProcessed        RefundRequest[]    @relation("RefundProcessor")
+  // Novas relações para sistema de saldo
+  instructorBalance       InstructorBalance? @relation("InstructorBalance")
+  payoutRequestsProcessed PayoutRequest[]    @relation("PayoutProcessor")
 
   @@map("users")
 }
@@ -151,26 +159,35 @@ model LessonComment {
 }
 
 model Payment {
-  id              String          @id @default(cuid())
-  userId          String
-  courseId        String
-  stripePaymentId String          @unique
-  amount          Float
-  currency        String          @default("usd")
-  status          PaymentStatus   @default(PENDING)
-  paymentType     PaymentType
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-  course          Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subscription    Subscription?
-  couponUsages    CouponUsage[]
-  refundRequests  RefundRequest[]
+  id                  String               @id @default(cuid())
+  userId              String
+  courseId            String
+  externalPaymentId   String?              @unique // ID do pagamento no gateway (genérico)
+  externalOrderId     String?              @unique // ID da ordem no gateway (genérico)
+  paymentData         String? // JSON com dados específicos do gateway (QR code, etc.)
+  paymentMethod       String?              @default("PIX") // PIX, CREDIT_CARD, DEBIT_CARD, BOLETO
+  platformFeeAmount   Float? // Taxa da plataforma em valor absoluto
+  instructorAmount    Float? // Valor que o instrutor vai receber
+  amount              Float
+  currency            String               @default("BRL")
+  status              PaymentStatus        @default(PENDING)
+  paymentType         PaymentType
+  gatewayProvider     String?              @default("MERCADOPAGO") // MERCADOPAGO, STRIPE, PAGSEGURO, etc.
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  course              Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription        Subscription?
+  couponUsages        CouponUsage[]
+  refundRequests      RefundRequest[]
+  balanceTransactions BalanceTransaction[]
 
   @@index([userId])
   @@index([courseId])
   @@index([status])
-  @@index([stripePaymentId])
+  @@index([externalPaymentId])
+  @@index([externalOrderId])
+  @@index([gatewayProvider])
   @@map("payments")
 }
 
@@ -346,4 +363,80 @@ enum RefundStatus {
   CANCELLED
   APPROVED
   REJECTED
+}
+
+// Sistema de saldo interno dos instrutores
+model InstructorBalance {
+  id               String               @id @default(cuid())
+  instructorId     String               @unique
+  availableBalance Float                @default(0)
+  pendingBalance   Float                @default(0)
+  totalEarnings    Float                @default(0)
+  totalWithdrawn   Float                @default(0)
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  instructor       User                 @relation("InstructorBalance", fields: [instructorId], references: [id], onDelete: Cascade)
+  transactions     BalanceTransaction[]
+  payoutRequests   PayoutRequest[]
+
+  @@index([instructorId])
+  @@map("instructor_balances")
+}
+
+model PayoutRequest {
+  id                String              @id @default(cuid())
+  instructorId      String
+  amount            Float
+  status            PayoutStatus        @default(PENDING)
+  bankAccountType   String? // 'PIX', 'CONTA_CORRENTE', 'POUPANCA'
+  bankDetails       Json // Dados bancários (PIX, banco, agência, conta)
+  requestedAt       DateTime            @default(now())
+  processedAt       DateTime?
+  processedBy       String?
+  notes             String?
+  rejectionReason   String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  instructorBalance InstructorBalance   @relation(fields: [instructorId], references: [instructorId], onDelete: Cascade)
+  processor         User?               @relation("PayoutProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
+  transaction       BalanceTransaction?
+
+  @@index([instructorId])
+  @@index([status])
+  @@map("payout_requests")
+}
+
+model BalanceTransaction {
+  id                String                 @id @default(cuid())
+  instructorId      String
+  type              BalanceTransactionType
+  amount            Float
+  description       String
+  paymentId         String?
+  payoutRequestId   String?                @unique
+  createdAt         DateTime               @default(now())
+  instructorBalance InstructorBalance      @relation(fields: [instructorId], references: [instructorId], onDelete: Cascade)
+  payment           Payment?               @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  payoutRequest     PayoutRequest?         @relation(fields: [payoutRequestId], references: [id], onDelete: SetNull)
+
+  @@index([instructorId])
+  @@index([type])
+  @@index([paymentId])
+  @@map("balance_transactions")
+}
+
+enum PayoutStatus {
+  PENDING
+  APPROVED
+  PROCESSING
+  COMPLETED
+  REJECTED
+  FAILED
+}
+
+enum BalanceTransactionType {
+  CREDIT // Ganho de venda
+  DEBIT // Saque processado
+  REFUND // Estorno
+  FEE // Taxa da plataforma
 }
