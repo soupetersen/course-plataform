@@ -5,17 +5,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-
-const mockCourse = {
-  id: "1",
-  title: "Curso Completo de React",
-  description: "Aprenda React do básico ao avançado com projetos práticos",
-  price: 297.0,
-};
+import { useCourse } from "@/hooks/useCourses";
 
 export function CheckoutPage() {
   const { courseId } = useParams();
   const { toast } = useToast();
+  const { data: courseData, isLoading } = useCourse(courseId!);
 
   const handlePaymentSuccess = (paymentId: string) => {
     toast({
@@ -35,8 +30,42 @@ export function CheckoutPage() {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-6 max-w-2xl">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/3"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!courseData?.data) {
+    return (
+      <div className="container mx-auto py-6 max-w-2xl text-center">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Curso não encontrado
+        </h1>
+        <p className="text-gray-600">
+          O curso que você está tentando comprar não existe.
+        </p>
+        <Link
+          to="/courses"
+          className="inline-flex items-center gap-2 mt-4 text-blue-600 hover:text-blue-700"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar para cursos
+        </Link>
+      </div>
+    );
+  }
+
+  const course = courseData.data;
+
   return (
-    <div className="container mx-auto py-6 max-w-2xl">
+    <div className="container mx-auto py-6">
       <div className="mb-6">
         <Link
           to={`/courses/${courseId}`}
@@ -56,7 +85,7 @@ export function CheckoutPage() {
         </div>
 
         <PaymentCheckout
-          course={mockCourse}
+          course={course}
           onPaymentSuccess={handlePaymentSuccess}
           onPaymentError={handlePaymentError}
         />
@@ -86,7 +115,7 @@ export function CheckoutPage() {
                 <CheckCircle className="w-8 h-8 text-green-600" />
                 <div className="text-sm">
                   <div className="font-medium">Pagamento Seguro</div>
-                  <div className="text-muted-foreground">Powered by Stripe</div>
+                  <div className="text-muted-foreground">Múltiplos métodos</div>
                 </div>
               </div>
             </div>

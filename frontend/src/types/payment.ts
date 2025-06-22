@@ -3,11 +3,12 @@ export interface Payment {
   id: string;
   userId: string;
   courseId: string;
-  stripePaymentId: string;
+  gatewayPaymentId: string;
   amount: number;
   currency: string;
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'CANCELLED' | 'REFUNDED';
   paymentType: 'ONE_TIME' | 'SUBSCRIPTION';
+  gateway: 'MERCADOPAGO';
   createdAt: string;
   updatedAt: string;
   course?: {
@@ -45,8 +46,7 @@ export interface CouponUsage {
 
 export interface CouponValidationRequest {
   code: string;
-  coursePrice: number;
-  courseId?: string;
+  courseId: string;
 }
 
 export interface CouponValidationResponse {
@@ -100,7 +100,7 @@ export interface RefundRequest {
   reason?: string;
   amount: number;
   status: 'PENDING' | 'PROCESSED' | 'APPROVED' | 'REJECTED' | 'FAILED' | 'CANCELLED';
-  stripeRefundId?: string;
+  gatewayRefundId?: string;
   processedAt?: string;
   processedBy?: string;
   notes?: string;
@@ -123,7 +123,7 @@ export interface RefundRequestResponse {
 
 // Fee calculation types
 export interface FeeCalculationRequest {
-  originalAmount: number;
+  courseId: string;
   discountAmount?: number;
 }
 
@@ -133,7 +133,7 @@ export interface FeeCalculationResponse {
     subtotal: number;
     discount: number;
     platformFee: number;
-    stripeFee: number;
+    processingFee: number;
     total: number;
     instructorAmount: number;
   };
@@ -205,7 +205,7 @@ export interface CreatePaymentRequest {
 export interface CreatePaymentResponse {
   success: boolean;
   paymentId?: string;
-  url?: string; // Stripe Checkout URL
+  url?: string; // Mercado Pago Checkout URL
   message?: string;
   error?: string;
 }

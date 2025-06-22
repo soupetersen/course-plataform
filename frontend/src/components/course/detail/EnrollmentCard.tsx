@@ -4,8 +4,6 @@ import { Badge } from "../../ui/badge";
 import { ShoppingCart, Users, Star, TrendingUp, Lock } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { PaymentModal } from "../../payment/PaymentModal";
-import { useState } from "react";
 import type { Course } from "../../../types/api";
 
 interface EnrollmentCardProps {
@@ -23,8 +21,6 @@ export const EnrollmentCard = ({
 }: EnrollmentCardProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-
   const handleEnrollClick = () => {
     if (!user) {
       navigate(`/login?redirect=/courses/${course.id}`);
@@ -34,14 +30,8 @@ export const EnrollmentCard = ({
     if (course.price === 0) {
       onEnroll();
       return;
-    }
-
-    setShowPaymentModal(true);
-  };
-
-  const handlePaymentSuccess = () => {
-    setShowPaymentModal(false);
-    onEnroll();
+    } // Redirecionar para página de checkout
+    navigate(`/checkout/${course.id}`);
   };
 
   return (
@@ -108,16 +98,8 @@ export const EnrollmentCard = ({
             <Badge variant="outline" className="w-full justify-center">
               Garantia de 30 dias
             </Badge>
-          </div>
-        </CardContent>
-
-        <PaymentModal
-          course={course}
-          isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
-          onSuccess={handlePaymentSuccess}
-          paymentType="ONE_TIME"
-        />
+          </div>{" "}
+        </CardContent>{" "}
       </Card>
     </div>
   );

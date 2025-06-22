@@ -6,11 +6,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
-import { Loader2, Tag, Check, X, CreditCard, DollarSign } from "lucide-react";
+import { CreditCard, Gift } from "lucide-react";
+import { PAYMENT_GATEWAYS } from "@/services/payment";
+import { api } from "@/lib/api";
+import { AxiosError } from "axios";
+
+import { PaymentTypeSelector } from "./PaymentTypeSelector";
+import { GatewaySelection } from "./GatewaySelection";
+import { PaymentMethodSelection } from "./PaymentMethodSelection";
+import { CouponSection } from "./CouponSection";
+import { CourseSummary } from "./CourseSummary";
+import { PriceBreakdown } from "./PriceBreakdown";
+import { PaymentButton } from "./PaymentButton";
 
 interface Course {
   id: string;
@@ -33,7 +41,7 @@ interface FeeCalculation {
   subtotal: number;
   discount: number;
   platformFee: number;
-  stripeFee: number;
+  processingFee: number;
   total: number;
   instructorAmount: number;
 }
@@ -58,34 +66,37 @@ export function PaymentCheckout({
   );
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [showCouponInput, setShowCouponInput] = useState(false);
+  const [selectedGateway] = useState<"MERCADOPAGO">("MERCADOPAGO");
+  const [paymentType, setPaymentType] = useState<"ONE_TIME" | "SUBSCRIPTION">(
+    "ONE_TIME"
+  );
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState<string>("PIX");
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (
+      paymentType === "SUBSCRIPTION" &&
+      selectedPaymentMethod !== "CREDIT_CARD"
+    ) {
+      setSelectedPaymentMethod("CREDIT_CARD");
+    }
+  }, [paymentType, selectedPaymentMethod]);
 
   const calculateFees = useCallback(async () => {
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("/api/payments/calculate-fees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          originalAmount: course.price,
-          discountAmount: appliedCoupon?.discount.amount || 0,
-        }),
+      const response = await api.post("/api/payments/calculate-fees", {
+        courseId: course.id,
+        discountAmount: appliedCoupon?.discount.amount || 0,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setFeeCalculation(data.calculation);
-      } else {
-        console.error("Failed to calculate fees");
+      if (response.data && response.data.calculation) {
+        setFeeCalculation(response.data.calculation);
       }
     } catch (error) {
       console.error("Error calculating fees:", error);
     }
-  }, [course.price, appliedCoupon?.discount.amount]);
+  }, [course.id, appliedCoupon?.discount.amount]);
 
   useEffect(() => {
     calculateFees();
@@ -103,31 +114,24 @@ export function PaymentCheckout({
 
     setIsValidatingCoupon(true);
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("/api/payments/validate-coupon", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          code: couponCode,
-          coursePrice: course.price,
-        }),
+      const response = await api.post("/api/payments/validate-coupon", {
+        code: couponCode,
+        courseId: course.id,
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.isValid) {
-        setAppliedCoupon(data);
+      if (response.data && response.data.isValid) {
+        setAppliedCoupon(response.data);
         toast({
           title: "Cupom aplicado!",
-          description: `Desconto de ${formatDiscount(data.discount)} aplicado`,
+          description: `Desconto de ${formatDiscount(
+            response.data.discount
+          )} aplicado`,
         });
       } else {
         toast({
           title: "Cupom inválido",
-          description: data.message || "Código de cupom inválido ou expirado",
+          description:
+            response.data?.message || "Código de cupom inválido ou expirado",
           variant: "destructive",
         });
         setAppliedCoupon(null);
@@ -147,7 +151,6 @@ export function PaymentCheckout({
   const removeCoupon = () => {
     setCouponCode("");
     setAppliedCoupon(null);
-    setShowCouponInput(false);
     toast({
       title: "Cupom removido",
       description: "O desconto foi removido do pedido",
@@ -156,34 +159,64 @@ export function PaymentCheckout({
 
   const processPayment = async () => {
     setIsProcessingPayment(true);
+
+    console.log("DEBUG - PaymentCheckout processPayment:");
+    console.log("- paymentType:", paymentType);
+    console.log("- selectedGateway:", selectedGateway);
+    console.log("- selectedPaymentMethod:", selectedPaymentMethod);
+
     try {
-      const token = localStorage.getItem("authToken");
-      const response = await fetch("/api/payments/one-time", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          courseId: course.id,
-          amount: feeCalculation?.total || course.price,
-          couponCode: appliedCoupon ? couponCode : undefined,
-        }),
-      });
+      const endpoint =
+        paymentType === "SUBSCRIPTION"
+          ? "/api/payments/subscription"
+          : "/api/payments/one-time";
 
-      const data = await response.json();
+      const paymentData = {
+        courseId: course.id,
+        amount: feeCalculation?.total || course.price,
+        couponCode: appliedCoupon ? couponCode : undefined,
+        gateway: selectedGateway,
+        paymentMethod: selectedPaymentMethod,
+        currency: "BRL",
+        gatewayType: "MERCADOPAGO",
+      };
 
-      if (response.ok) {
-        if (data.url) {
-          window.location.href = data.url;
+      const response = await api.post(endpoint, paymentData);
+
+      if (response.data) {
+        if (response.data.url) {
+          // Redirect para gateway externo (Mercado Pago)
+          window.location.href = response.data.url;
         } else {
-          onPaymentSuccess(data.paymentId);
+          onPaymentSuccess(response.data.paymentId);
         }
       } else {
-        onPaymentError(data.message || "Erro ao processar pagamento");
+        const errorMessage = "Erro ao processar pagamento";
+        toast({
+          title: "Erro no pagamento",
+          description: errorMessage,
+          variant: "destructive",
+        });
+        onPaymentError(errorMessage);
       }
-    } catch {
-      onPaymentError("Erro de conexão");
+    } catch (error) {
+      console.error("Erro no processamento do pagamento:", error);
+      let errorMessage =
+        "Erro de conexão. Verifique sua internet e tente novamente.";
+
+      if (error instanceof AxiosError && error.response?.data) {
+        errorMessage =
+          error.response.data.error ||
+          error.response.data.message ||
+          errorMessage;
+      }
+
+      toast({
+        title: "Erro no pagamento",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      onPaymentError(errorMessage);
     } finally {
       setIsProcessingPayment(false);
     }
@@ -205,189 +238,82 @@ export function PaymentCheckout({
   };
 
   return (
-    <div className="space-y-6">
-      {/* Course Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="w-5 h-5" />
-            Resumo do Pedido
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-semibold">{course.title}</h3>
-                {course.description && (
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {course.description}
-                  </p>
-                )}
-              </div>
-              <div className="text-right">
-                <div className="font-semibold">
-                  {formatCurrency(course.price)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Coupon Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Tag className="w-5 h-5" />
-            Cupom de Desconto
-          </CardTitle>
-          <CardDescription>
-            Tem um cupom? Digite o código para aplicar desconto
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!appliedCoupon && !showCouponInput && (
-            <Button
-              variant="outline"
-              onClick={() => setShowCouponInput(true)}
-              className="w-full"
-            >
-              <Tag className="w-4 h-4 mr-2" />
-              Adicionar Cupom de Desconto
-            </Button>
-          )}
-
-          {!appliedCoupon && showCouponInput && (
-            <div className="space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Digite o código do cupom"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  disabled={isValidatingCoupon}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <CreditCard className="w-6 h-6" />
+                  Opções de Pagamento
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Escolha o tipo de pagamento e método preferido
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <PaymentTypeSelector
+                  paymentType={paymentType}
+                  onPaymentTypeChange={setPaymentType}
+                  coursePrice={course.price}
+                  formatCurrency={formatCurrency}
                 />
-                <Button
-                  onClick={validateCoupon}
-                  disabled={isValidatingCoupon || !couponCode.trim()}
-                >
-                  {isValidatingCoupon ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    "Aplicar"
-                  )}
-                </Button>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowCouponInput(false)}
-              >
-                Cancelar
-              </Button>
-            </div>
-          )}
 
-          {appliedCoupon && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-green-600" />
-                  <div>
-                    <div className="font-medium text-green-800 dark:text-green-200">
-                      Cupom "{couponCode}" aplicado
-                    </div>
-                    <div className="text-sm text-green-600 dark:text-green-300">
-                      Desconto: {formatDiscount(appliedCoupon.discount)}
-                    </div>
-                  </div>
-                </div>
-                <Button variant="ghost" size="sm" onClick={removeCoupon}>
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <GatewaySelection />
 
-      {/* Price Breakdown */}
-      {feeCalculation && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5" />
-              Detalhamento do Preço
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{formatCurrency(feeCalculation.subtotal)}</span>
-              </div>
-
-              {feeCalculation.discount > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Desconto</span>
-                  <span>-{formatCurrency(feeCalculation.discount)}</span>
-                </div>
-              )}
-
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Taxa da plataforma</span>
-                <span>{formatCurrency(feeCalculation.platformFee)}</span>
-              </div>
-
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Taxa de processamento</span>
-                <span>{formatCurrency(feeCalculation.stripeFee)}</span>
-              </div>
-
-              <Separator />
-
-              <div className="flex justify-between font-semibold text-lg">
-                <span>Total</span>
-                <span>{formatCurrency(feeCalculation.total)}</span>
-              </div>
-
-              <div className="text-xs text-muted-foreground">
-                Instrutor recebe:{" "}
-                {formatCurrency(feeCalculation.instructorAmount)}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Payment Button */}
-      <Card>
-        <CardContent className="pt-6">
-          <Button
-            onClick={processPayment}
-            disabled={isProcessingPayment}
-            className="w-full"
-            size="lg"
-          >
-            {isProcessingPayment ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Processando...
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-4 h-4 mr-2" />
-                Finalizar Pagamento{" "}
-                {feeCalculation && `- ${formatCurrency(feeCalculation.total)}`}
-              </>
-            )}
-          </Button>
-
-          <div className="mt-3 text-xs text-center text-muted-foreground">
-            Pagamento seguro processado pelo Stripe
+                <PaymentMethodSelection
+                  gateway={PAYMENT_GATEWAYS[selectedGateway]}
+                  selectedMethod={selectedPaymentMethod}
+                  onMethodChange={setSelectedPaymentMethod}
+                  paymentType={paymentType}
+                />
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="space-y-6">
+            <CourseSummary course={course} formatCurrency={formatCurrency} />
+
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Gift className="w-5 h-5 text-green-600" />
+                  Cupom de Desconto
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CouponSection
+                  couponCode={couponCode}
+                  setCouponCode={setCouponCode}
+                  appliedCoupon={appliedCoupon}
+                  isValidatingCoupon={isValidatingCoupon}
+                  onValidateCoupon={validateCoupon}
+                  onRemoveCoupon={removeCoupon}
+                  formatDiscount={formatDiscount}
+                />
+              </CardContent>
+            </Card>
+
+            {feeCalculation && (
+              <PriceBreakdown
+                feeCalculation={feeCalculation}
+                paymentType={paymentType}
+                formatCurrency={formatCurrency}
+              />
+            )}
+
+            <PaymentButton
+              isProcessingPayment={isProcessingPayment}
+              paymentType={paymentType}
+              feeCalculation={feeCalculation}
+              selectedGateway={selectedGateway}
+              formatCurrency={formatCurrency}
+              onProcessPayment={processPayment}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

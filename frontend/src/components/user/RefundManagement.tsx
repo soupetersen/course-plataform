@@ -394,14 +394,13 @@ export function RefundManagement() {
         </Card>
       )}
 
-      {/* Refund Request Dialog */}
       <Dialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Solicitar Reembolso</DialogTitle>
             <DialogDescription>
               Solicite o reembolso do seu pagamento. A solicitação será
-              analisada em até 3 dias úteis.
+              analisada em até 5 dias úteis.
             </DialogDescription>
           </DialogHeader>
 

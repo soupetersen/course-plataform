@@ -155,7 +155,8 @@ export interface Payment {
   currency: string;
   status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
   paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'BOLETO';
-  stripePaymentIntentId?: string;
+  gatewayPaymentId?: string;
+  gateway: 'MERCADOPAGO';
   userId: string;
   user: User;
   courseId?: string;
