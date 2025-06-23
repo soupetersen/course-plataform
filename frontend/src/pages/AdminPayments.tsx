@@ -132,8 +132,7 @@ export function AdminPayments() {
       setActionLoading(paymentId);
 
       const response = await api.post(
-        `/api/payments/admin/${paymentId}/approve`,
-        { reason: "Aprovado pelo administrador" }
+        `/api/payments/admin/${paymentId}/approve`
       );
 
       if (response.data.success) {
@@ -162,8 +161,7 @@ export function AdminPayments() {
       setActionLoading(paymentId);
 
       const response = await api.post(
-        `/api/payments/admin/${paymentId}/reject`,
-        { reason: "Reprovado pelo administrador" }
+        `/api/payments/admin/${paymentId}/reject`
       );
 
       if (response.data.success) {
