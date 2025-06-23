@@ -9,7 +9,6 @@ import { CartStep } from "./CartStep";
 import { PaymentStep } from "./PaymentStep";
 import { CheckoutStep } from "./CheckoutStep";
 import { PixPaymentModal } from "./PixPaymentModal";
-import { PaymentWaitingModal } from "./PaymentWaitingModal";
 
 // Types and services
 import { CreditCardData } from "./CreditCardForm";
@@ -88,19 +87,19 @@ export function PaymentCheckout({
     amount: number;
     currency: string;
     paymentId: string;
+    expirationDate?: string;
+    expirationMinutes?: number;
   } | null>(null);
   const [showPixModal, setShowPixModal] = useState(false);
 
   // Payment waiting states
   const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
-  const [showWaitingModal, setShowWaitingModal] = useState(false);
   const [pendingPayments, setPendingPayments] = useState<Set<string>>(
     new Set()
   );
 
   // Payment status hook
-  const { payment, isPolling, startPolling, stopPolling } =
-    usePaymentStatus(currentPaymentId);
+  const { isPolling, startPolling } = usePaymentStatus(currentPaymentId);
 
   const { toast } = useToast();
 
@@ -117,7 +116,6 @@ export function PaymentCheckout({
         // Adicionar à lista de pagamentos pendentes
         setPendingPayments((prev) => new Set(prev).add(course.id));
         setCurrentPaymentId(pendingPayment.id);
-        setShowWaitingModal(true);
 
         // Iniciar polling para este pagamento
         startPolling(
@@ -129,7 +127,6 @@ export function PaymentCheckout({
               newSet.delete(course.id);
               return newSet;
             });
-            setShowWaitingModal(false);
 
             if (status.status === "COMPLETED") {
               onPaymentSuccess(status.id);
@@ -147,7 +144,6 @@ export function PaymentCheckout({
               newSet.delete(course.id);
               return newSet;
             });
-            setShowWaitingModal(false);
             setCurrentPaymentId(null);
             toast({
               title: "Pagamento não encontrado",
@@ -335,13 +331,15 @@ export function PaymentCheckout({
         if (selectedPaymentMethod === "PIX" && responseData.paymentData) {
           const paymentData = responseData.paymentData;
 
-          if (paymentData.pixQrCode || paymentData.pixCopiaECola) {
+          if (paymentData.pixQrCodeText || paymentData.pixQrCodeImage) {
             const pixDataForModal = {
-              qrCode: paymentData.pixQrCode || paymentData.pixCopiaECola,
-              qrCodeBase64: paymentData.pixCopiaECola,
+              qrCode: paymentData.pixQrCodeText, // String para "Copia e Cola"
+              qrCodeBase64: paymentData.pixQrCodeImage, // Imagem PNG base64
               amount: feeCalculation?.total || course.price,
               currency: "BRL",
               paymentId: responseData.paymentId,
+              expirationDate: paymentData.expirationDate, // Data de expiração do backend
+              expirationMinutes: paymentData.expirationMinutes, // Minutos configurados
             };
 
             setPixData(pixDataForModal);
@@ -349,7 +347,9 @@ export function PaymentCheckout({
 
             return;
           } else {
-            console.log("PIX data is invalid - no qrCode or pixCopiaECola");
+            console.log(
+              "PIX data is invalid - no pixQrCodeText or pixQrCodeImage"
+            );
           }
         } else {
           console.log("Not PIX or no payment data");
@@ -367,7 +367,6 @@ export function PaymentCheckout({
           // Adicionar à lista de pagamentos pendentes
           setPendingPayments((prev) => new Set(prev).add(course.id));
           setCurrentPaymentId(responseData.paymentId);
-          setShowWaitingModal(true);
 
           // Iniciar polling
           startPolling(
@@ -382,7 +381,6 @@ export function PaymentCheckout({
                 return newSet;
               });
 
-              setShowWaitingModal(false);
               setIsProcessingPayment(false);
 
               if (status.status === "COMPLETED") {
@@ -403,7 +401,6 @@ export function PaymentCheckout({
                 newSet.delete(course.id);
                 return newSet;
               });
-              setShowWaitingModal(false);
               setIsProcessingPayment(false);
               setCurrentPaymentId(null);
               toast({
@@ -453,10 +450,8 @@ export function PaymentCheckout({
       });
       onPaymentError(errorMessage);
     } finally {
-      // Só resetar isProcessingPayment se não estiver aguardando confirmação
-      if (!showWaitingModal) {
-        setIsProcessingPayment(false);
-      }
+      // Sempre resetar isProcessingPayment
+      setIsProcessingPayment(false);
     }
   };
 
@@ -570,6 +565,22 @@ export function PaymentCheckout({
                 paymentType={paymentType}
                 isProcessingPayment={isProcessingPayment || isPolling}
                 hasPendingPayment={pendingPayments.has(course.id)}
+                isPolling={isPolling}
+                onCancelPendingPayment={() => {
+                  // Cancelar pagamento pendente
+                  setPendingPayments((prev) => {
+                    const newSet = new Set(prev);
+                    newSet.delete(course.id);
+                    return newSet;
+                  });
+                  setCurrentPaymentId(null);
+                  setIsProcessingPayment(false);
+                  toast({
+                    title: "Pagamento cancelado",
+                    description:
+                      "Você pode tentar realizar o pagamento novamente.",
+                  });
+                }}
                 onProcessPayment={processPayment}
                 onBack={goToPreviousStep}
               />
@@ -590,40 +601,6 @@ export function PaymentCheckout({
           }}
         />
       )}
-
-      {/* Payment Waiting Modal */}
-      <PaymentWaitingModal
-        isOpen={showWaitingModal}
-        paymentStatus={payment?.status || null}
-        paymentId={currentPaymentId}
-        onClose={() => {
-          setShowWaitingModal(false);
-          setCurrentPaymentId(null);
-          stopPolling();
-          setPendingPayments((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(course.id);
-            return newSet;
-          });
-        }}
-        onSuccess={() => {
-          setShowWaitingModal(false);
-          if (currentPaymentId) {
-            onPaymentSuccess(currentPaymentId);
-          }
-        }}
-        onError={() => {
-          setShowWaitingModal(false);
-          setCurrentPaymentId(null);
-          stopPolling();
-          setPendingPayments((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(course.id);
-            return newSet;
-          });
-          setIsProcessingPayment(false);
-        }}
-      />
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { CreateCoursePage } from "@/pages/CreateCoursePage";
 import { EditCoursePage } from "@/pages/EditCoursePage";
 import { CourseViewPage } from "@/pages/CourseViewPage";
 import { AdminDashboard } from "@/pages/AdminDashboard";
+import { AdminPayments } from "@/pages/AdminPayments";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { InstructorDashboard } from "@/pages/InstructorDashboard";
@@ -103,12 +104,19 @@ export const router = createBrowserRouter([
             <CheckoutPage />
           </ProtectedRoute>
         ),
-      },
-      {
+      },      {
         path: "admin",
         element: (
           <ProtectedRoute requiredRole="ADMIN">
             <AdminDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "admin/payments",
+        element: (
+          <ProtectedRoute requiredRole="ADMIN">
+            <AdminPayments />
           </ProtectedRoute>
         ),
       },

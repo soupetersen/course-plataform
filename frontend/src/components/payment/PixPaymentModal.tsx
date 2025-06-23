@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Copy, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/lib/api";
+import QRCode from "qrcode";
 
 interface PixPaymentModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ interface PixPaymentModalProps {
     amount: number;
     currency: string;
     paymentId: string;
+    expirationDate?: string; // Data de expiração do PIX
+    expirationMinutes?: number; // Minutos de expiração configurados
   };
   onPaymentConfirmed?: () => void;
 }
@@ -30,18 +33,95 @@ export function PixPaymentModal({
   pixData,
   onPaymentConfirmed,
 }: PixPaymentModalProps) {
-  const [timeLeft, setTimeLeft] = useState(900);
+  // Calcular tempo de expiração real baseado nos dados do backend
+  const getInitialTimeLeft = useCallback(() => {
+    if (pixData.expirationDate) {
+      const now = new Date();
+      const expiration = new Date(pixData.expirationDate);
+
+      console.log("🕐 Cálculo de expiração PIX:");
+      console.log("  - Data atual:", now.toISOString());
+      console.log("  - Data atual local:", now.toLocaleString("pt-BR"));
+      console.log("  - Data de expiração:", expiration.toISOString());
+      console.log(
+        "  - Data de expiração local:",
+        expiration.toLocaleString("pt-BR")
+      );
+      console.log("  - Data recebida (string):", pixData.expirationDate);
+
+      const timeLeftMs = expiration.getTime() - now.getTime();
+      const timeLeftSeconds = Math.max(0, Math.floor(timeLeftMs / 1000));
+
+      console.log("  - Diferença timestamp (ms):", timeLeftMs);
+      console.log("  - Tempo restante (segundos):", timeLeftSeconds);
+      console.log(
+        "  - Tempo restante (minutos):",
+        Math.floor(timeLeftSeconds / 60)
+      );
+
+      // Se o tempo calculado for negativo ou muito pequeno, usar fallback
+      if (timeLeftSeconds <= 10) {
+        console.log("⚠️ Tempo muito pequeno, usando fallback");
+        const fallbackTime = pixData.expirationMinutes
+          ? pixData.expirationMinutes * 60
+          : 900;
+        console.log("  - Tempo fallback:", fallbackTime, "segundos");
+        return fallbackTime;
+      }
+
+      return timeLeftSeconds;
+    }
+    // Fallback para tempo padrão se não tiver dados de expiração
+    const fallbackTime = pixData.expirationMinutes
+      ? pixData.expirationMinutes * 60
+      : 900;
+    console.log("⚠️ Usando tempo padrão:", fallbackTime, "segundos");
+    return fallbackTime;
+  }, [pixData.expirationDate, pixData.expirationMinutes]);
+
+  const [timeLeft, setTimeLeft] = useState(getInitialTimeLeft);
   const [paymentStatus, setPaymentStatus] = useState<
     "pending" | "confirmed" | "expired"
   >("pending");
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
+  const [generatedQrCode, setGeneratedQrCode] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Gerar QR Code se não vier da API
+  useEffect(() => {
+    const generateQrCode = async () => {
+      if (!pixData.qrCodeBase64 && pixData.qrCode) {
+        try {
+          const qrCodeDataUrl = await QRCode.toDataURL(pixData.qrCode, {
+            width: 256,
+            margin: 2,
+            color: {
+              dark: "#000000",
+              light: "#ffffff",
+            },
+          });
+          setGeneratedQrCode(qrCodeDataUrl);
+        } catch (error) {
+          console.error("Erro ao gerar QR Code:", error);
+        }
+      }
+    };
+
+    if (isOpen) {
+      generateQrCode();
+    }
+  }, [isOpen, pixData.qrCode, pixData.qrCodeBase64]);
+
+  // Recalcular timeLeft quando pixData mudar
+  useEffect(() => {
+    setTimeLeft(getInitialTimeLeft());
+  }, [getInitialTimeLeft]);
 
   useEffect(() => {
     if (!isOpen || paymentStatus !== "pending") return;
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
+      setTimeLeft((prev: number) => {
         if (prev <= 1) {
           setPaymentStatus("expired");
           clearInterval(timer);
@@ -224,16 +304,26 @@ export function PixPaymentModal({
 
           {paymentStatus === "pending" && (
             <>
-              {pixData.qrCodeBase64 && (
+              {/* QR Code - da API ou gerado localmente */}
+              {(pixData.qrCodeBase64 || generatedQrCode) && (
                 <Card>
                   <CardContent className="pt-2 pb-1">
                     <div className="text-center">
                       <p className="text-xs text-gray-600 mb-1">QR Code</p>
                       <img
-                        src={`data:image/png;base64,${pixData.qrCodeBase64}`}
+                        src={
+                          pixData.qrCodeBase64
+                            ? `data:image/png;base64,${pixData.qrCodeBase64}`
+                            : generatedQrCode || ""
+                        }
                         alt="QR Code PIX"
                         className="w-28 h-28 mx-auto border rounded"
                       />
+                      <p className="text-xs text-gray-500 mt-1">
+                        {pixData.qrCodeBase64
+                          ? "Mercado Pago"
+                          : "Gerado automaticamente"}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>

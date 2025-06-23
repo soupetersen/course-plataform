@@ -48,7 +48,9 @@ interface CheckoutStepProps {
   formatCurrency: (amount: number) => string;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
   isProcessingPayment: boolean;
-  hasPendingPayment?: boolean;
+  hasPendingPayment: boolean;
+  isPolling: boolean;
+  onCancelPendingPayment: () => void;
   onProcessPayment: () => void;
   onBack: () => void;
 }
@@ -61,7 +63,9 @@ export function CheckoutStep({
   formatCurrency,
   paymentType,
   isProcessingPayment,
-  hasPendingPayment = false,
+  hasPendingPayment,
+  isPolling,
+  onCancelPendingPayment,
   onProcessPayment,
   onBack,
 }: CheckoutStepProps) {
@@ -145,6 +149,39 @@ export function CheckoutStep({
           Revise seus dados e confirme a compra
         </p>
       </div>
+
+      {/* Aviso de Pagamento Pendente */}
+      {hasPendingPayment && (
+        <Card className="border-yellow-200 bg-yellow-50 animate-in slide-in-from-top-4 duration-400">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <Loader2 className="w-5 h-5 text-yellow-600 animate-spin" />
+              </div>
+              <div className="flex-1 space-y-2">
+                <h3 className="font-semibold text-yellow-800">
+                  Aguardando confirmação de pagamento
+                </h3>
+                <p className="text-sm text-yellow-700">
+                  {isPolling
+                    ? "Verificando status do pagamento automaticamente..."
+                    : "Você já possui um pagamento pendente para este curso. Aguarde a confirmação ou cancele para tentar novamente."}
+                </p>
+                <div className="flex gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={onCancelPendingPayment}
+                    className="border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                  >
+                    Cancelar e tentar novamente
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Course Summary */}
       <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500 delay-100">
