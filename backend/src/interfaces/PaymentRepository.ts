@@ -9,6 +9,7 @@ export interface PaymentRepository {
   findByCourseId(courseId: string): Promise<Payment[]>;  
   findByUserAndCourse(userId: string, courseId: string): Promise<Payment[]>;
   findPendingByCourseAndUser(courseId: string, userId: string): Promise<Payment | null>;
+  findAll(filters?: { status?: string; page?: number; limit?: number }): Promise<Payment[]>;
   update(payment: Payment): Promise<Payment>;
   delete(id: string): Promise<void>;
 }

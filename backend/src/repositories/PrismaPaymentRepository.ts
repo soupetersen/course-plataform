@@ -127,10 +127,29 @@ export class PrismaPaymentRepository implements PaymentRepository {
       orderBy: {
         createdAt: 'desc'
       }
+    });    return results.map(payment => this.toDomain(payment));
+  }
+
+  async findAll(filters?: { status?: string; page?: number; limit?: number }): Promise<Payment[]> {
+    const { status, page = 1, limit = 20 } = filters || {};
+    
+    const where: any = {};
+    if (status) {
+      where.status = status;
+    }
+
+    const results = await this.prisma.payment.findMany({
+      where,
+      orderBy: {
+        createdAt: 'desc'
+      },
+      skip: (page - 1) * limit,
+      take: limit
     });
 
     return results.map(payment => this.toDomain(payment));
   }
+
   private toDomain(payment: any): Payment {
     return new Payment(
       payment.id,

@@ -46,6 +46,21 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     try {
       // Para PIX - usar Payment API
       if (request.paymentMethod === 'PIX') {
+        // Definir tempo de expiração baseado no valor
+        const getPixExpirationMinutes = (amount: number): number => {
+          if (amount <= 100) return 10;   // 15 min para valores baixos
+          if (amount <= 500) return 20;   // 30 min para valores médios  
+          return 30;                      // 1 hora para valores altos
+        };
+
+        const expirationMinutes = getPixExpirationMinutes(request.amount);
+        const expirationDate = new Date(Date.now() + expirationMinutes * 60 * 1000);
+
+        console.log(`🕐 PIX expirará em ${expirationMinutes} minutos`);
+        console.log(`📅 Data atual: ${new Date().toISOString()}`);
+        console.log(`📅 Data de expiração: ${expirationDate.toISOString()}`);
+        console.log(`📅 Data de expiração local: ${expirationDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`);
+
         const paymentData = {
           transaction_amount: request.amount,
           payment_method_id: 'pix',
@@ -55,6 +70,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             last_name: request.customerName.split(' ').slice(1).join(' ') || '',
           },
           description: request.description,
+          date_of_expiration: expirationDate.toISOString(), // Sempre UTC para evitar problemas de fuso
           metadata: request.metadata || {},
           // notification_url removida para usar apenas configuração do painel
         };
@@ -62,14 +78,25 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         const payment = await this.payment.create({ body: paymentData });
 
         if (payment.id) {
+          console.log(`✅ PIX criado: ${payment.id}, expira em: ${payment.date_of_expiration}`);
+          
+          // Debug: verificar dados do QR Code
+          console.log('🔍 Dados do QR Code recebidos do Mercado Pago:', {
+            qr_code: payment.point_of_interaction?.transaction_data?.qr_code ? 'Presente' : 'Ausente',
+            qr_code_base64: payment.point_of_interaction?.transaction_data?.qr_code_base64 ? 'Presente' : 'Ausente',
+            ticket_url: payment.point_of_interaction?.transaction_data?.ticket_url ? 'Presente' : 'Ausente'
+          });
+          
           return {
             success: true,
             paymentId: payment.id.toString(),
             status: this.mapToStandardStatus(payment.status || 'pending'),
             paymentData: {
-              pixQrCode: payment.point_of_interaction?.transaction_data?.qr_code,
-              pixCopiaECola: payment.point_of_interaction?.transaction_data?.qr_code_base64,
+              pixQrCodeText: payment.point_of_interaction?.transaction_data?.qr_code, // String para "Copia e Cola"
+              pixQrCodeImage: payment.point_of_interaction?.transaction_data?.qr_code_base64, // Imagem PNG base64
               ticketUrl: payment.point_of_interaction?.transaction_data?.ticket_url,
+              expirationDate: payment.date_of_expiration, // Data de expiração para o frontend
+              expirationMinutes: expirationMinutes, // Minutos restantes
             }
           };
         }
@@ -83,48 +110,49 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
       }
 
       if (request.paymentMethod === 'CREDIT_CARD') {
-        const preferenceData = {
-          items: [
-            {
-              id: `course_${Date.now()}`,
-              title: request.description,
-              currency_id: request.currency,
-              quantity: 1,
-              unit_price: request.amount,
-            }
-          ],
+        // Usar Payment API direta para cartão (melhor UX + status imediato)
+        const paymentData = {
+          transaction_amount: request.amount,
+          token: request.cardData?.token, // Token do cartão processado pelo frontend
+          description: request.description,
+          installments: request.cardData?.installments || 1,
+          payment_method_id: request.cardData?.paymentMethodId || 'visa', // ex: visa, master, etc
+          issuer_id: request.cardData?.issuerId ? parseInt(request.cardData.issuerId) : undefined,
           payer: {
             email: request.customerEmail,
-            name: request.customerName,
+            first_name: request.customerName.split(' ')[0],
+            last_name: request.customerName.split(' ').slice(1).join(' ') || '',
+            identification: {
+              type: request.cardData?.identificationType || 'CPF',
+              number: request.cardData?.identificationNumber || '',
+            },
           },
-          payment_methods: {
-            excluded_payment_methods: [],
-            excluded_payment_types: [
-              { id: 'ticket' }, 
-              { id: 'bank_transfer' },
-            ],
-            installments: request.cardData?.installments || 12,
-          },
-          back_urls: {
-            success: request.returnUrl,
-            failure: request.returnUrl,
-            pending: request.returnUrl,
-          },
-          // notification_url removida para usar apenas configuração do painel
           metadata: request.metadata || {},
+          // notification_url removida para usar apenas configuração do painel
         };
 
-        const preference = await this.preference.create({ body: preferenceData });
+        console.log('🔄 Criando pagamento via Payment API para cartão:', {
+          amount: paymentData.transaction_amount,
+          installments: paymentData.installments,
+          method: paymentData.payment_method_id
+        });
 
-        if (preference.id) {
+        const payment = await this.payment.create({ body: paymentData });
+
+        if (payment.id) {
+          const status = this.mapToStandardStatus(payment.status || 'pending');
+          
+          console.log(`✅ Pagamento criado: ${payment.id}, status: ${payment.status} -> ${status}`);
+          
           return {
             success: true,
-            paymentId: preference.id,
-            orderId: preference.id,
-            status: 'PENDING',
+            paymentId: payment.id.toString(),
+            status,
             paymentData: {
-              checkoutUrl: preference.init_point,
-              sandboxUrl: preference.sandbox_init_point,
+              // Para cartão aprovado, não precisa de dados extras
+              transactionId: payment.id.toString(),
+              authorizationCode: payment.authorization_code,
+              lastFourDigits: payment.card?.last_four_digits,
             }
           };
         }
@@ -133,7 +161,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
           success: false,
           paymentId: '',
           status: 'REJECTED',
-          error: 'Falha ao criar preferência de pagamento para cartão'
+          error: 'Falha ao criar pagamento via cartão'
         };
       }
 
@@ -216,20 +244,77 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     try {
       console.log(`🔍 Buscando status do pagamento ${paymentId} na API do Mercado Pago`);
       
-      const payment = await this.payment.get({ id: paymentId });
+      // Com Payment API, todos os IDs são Payment IDs diretos (PIX e Cartão)
+      // Apenas Boleto ainda usa Preference
+      const isPreferenceId = paymentId.includes('-');
       
-      if (payment) {
-        const status = this.mapToStandardStatus(payment.status || 'pending');
+      if (isPreferenceId) {
+        console.log(`📋 ID identificado como Preference (Boleto): ${paymentId}`);
         
-        console.log(`✅ Status encontrado: ${payment.status} -> ${status}`);
+        // Para Boleto (Preference), buscar pagamentos associados
+        try {
+          const searchResponse = await fetch(`https://api.mercadopago.com/v1/payments/search?external_reference=${paymentId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (searchResponse.ok) {
+            const searchData = await searchResponse.json();
+            
+            if (searchData.results && searchData.results.length > 0) {
+              const latestPayment = searchData.results[0];
+              const status = this.mapToStandardStatus(latestPayment.status || 'pending');
+              
+              console.log(`✅ Pagamento encontrado via search: ${latestPayment.id}, status: ${latestPayment.status} -> ${status}`);
+              
+              return {
+                success: true,
+                status,
+                paymentId: latestPayment.id?.toString() || paymentId,
+                amount: latestPayment.transaction_amount || 0,
+                metadata: latestPayment.metadata || {},
+              };
+            } else {
+              console.log(`📋 Nenhum pagamento encontrado para Preference: ${paymentId} (aguardando)`);
+              
+              // Preference existe mas ainda não foi paga
+              return {
+                success: true,
+                status: 'PENDING',
+                paymentId: paymentId,
+                amount: 0,
+                metadata: {},
+              };
+            }
+          } else {
+            throw new Error(`Search API returned ${searchResponse.status}`);
+          }
+        } catch (searchError) {
+          console.error(`❌ Erro ao buscar pagamentos da Preference ${paymentId}:`, searchError);
+          throw searchError;
+        }
+      } else {
+        console.log(`💳 ID identificado como Payment (PIX/Cartão): ${paymentId}`);
         
-        return {
-          success: true,
-          status,
-          paymentId: payment.id?.toString() || paymentId,
-          amount: payment.transaction_amount || 0,
-          metadata: payment.metadata || {},
-        };
+        // Para Payment IDs diretos (PIX e Cartão)
+        const payment = await this.payment.get({ id: paymentId });
+        
+        if (payment) {
+          const status = this.mapToStandardStatus(payment.status || 'pending');
+          
+          console.log(`✅ Status encontrado: ${payment.status} -> ${status}`);
+          
+          return {
+            success: true,
+            status,
+            paymentId: payment.id?.toString() || paymentId,
+            amount: payment.transaction_amount || 0,
+            metadata: payment.metadata || {},
+          };
+        }
       }
 
       return {

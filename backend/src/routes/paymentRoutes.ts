@@ -197,10 +197,95 @@ export async function paymentRoutes(fastify: FastifyInstance) {
   // Rota para ganhos do instrutor
   fastify.get('/instructor/earnings', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
-  }, paymentController.getInstructorEarnings.bind(paymentController));
-
-  // Rota para configuração do webhook (desenvolvimento)
+  }, paymentController.getInstructorEarnings.bind(paymentController));  // Rota para configuração do webhook (desenvolvimento)
   fastify.get('/webhook-config', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
   }, paymentController.getWebhookConfig.bind(paymentController));
+
+  // Rota para simular aprovação PIX (apenas desenvolvimento)
+  fastify.post('/dev/simulate-pix/:paymentId', {
+    config: {
+      skipAuth: true // Para facilitar o teste
+    },
+    schema: {
+      params: {
+        type: 'object',
+        required: ['paymentId'],
+        properties: {
+          paymentId: { type: 'string' }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          status: { 
+            type: 'string', 
+            enum: ['approved', 'rejected'],
+            default: 'approved'
+          }
+        }
+      }
+    }  }, paymentController.simulatePixPayment.bind(paymentController));
+
+  // === ROTAS DE ADMINISTRAÇÃO ===
+    // Listar todos os pagamentos (admin)
+  fastify.get('/admin/all', {
+    preHandler: [
+      authMiddleware.authenticate.bind(authMiddleware),
+      authMiddleware.requireAdmin()
+    ],
+    schema: {
+      querystring: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', enum: ['PENDING', 'COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'] },
+          page: { type: 'number', default: 1 },
+          limit: { type: 'number', default: 20 }
+        }
+      }
+    }
+  }, paymentController.getAllPayments.bind(paymentController));  // Aprovar pagamento manualmente (admin)
+  fastify.post('/admin/:paymentId/approve', {
+    preHandler: [
+      authMiddleware.authenticate.bind(authMiddleware),
+      authMiddleware.requireAdmin()
+    ],
+    schema: {
+      params: {
+        type: 'object',
+        required: ['paymentId'],
+        properties: {
+          paymentId: { type: 'string' }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          reason: { type: 'string' }
+        }
+      }
+    }
+  }, paymentController.adminApprovePayment.bind(paymentController));
+  // Rejeitar pagamento manualmente (admin)
+  fastify.post('/admin/:paymentId/reject', {
+    preHandler: [
+      authMiddleware.authenticate.bind(authMiddleware),
+      authMiddleware.requireAdmin()
+    ],
+    schema: {
+      params: {
+        type: 'object',
+        required: ['paymentId'],
+        properties: {
+          paymentId: { type: 'string' }
+        }
+      },
+      body: {
+        type: 'object',
+        properties: {
+          reason: { type: 'string' }
+        }
+      }
+    }
+  }, paymentController.adminRejectPayment.bind(paymentController));
 }

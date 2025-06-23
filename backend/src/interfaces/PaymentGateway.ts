@@ -33,6 +33,10 @@ export interface CreatePaymentRequest {
     installments?: number;
     identificationType?: string;
     identificationNumber?: string;
+    // Campos para Payment API direta
+    token?: string; // Token gerado pelo MercadoPago.js no frontend
+    paymentMethodId?: string; // visa, mastercard, etc
+    issuerId?: string; // ID do banco emissor
   };
 }
 

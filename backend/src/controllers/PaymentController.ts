@@ -170,7 +170,7 @@ export class PaymentController {
       if (!userInfo) {
         reply.status(401).send({
           success: false,
-          error: 'Você precisa estar logado para realizar pagamentos.',
+          error: 'Você precisa estar logado para realizar pagamentos.'
         });
         return;
       }
@@ -691,12 +691,334 @@ export class PaymentController {
           isUsingNgrok: !!process.env.NGROK_URL,
           environment: process.env.NODE_ENV || 'development',
         },
-      });
-    } catch (error) {
+      });    } catch (error) {
       req.log.error('Error fetching webhook config:', error);
       reply.status(500).send({
         success: false,
-        error: 'Erro ao buscar configuração de webhook.',
+        error: 'Erro ao buscar configuração de webhook.',      });
+    }
+  }
+
+  // Método para simular aprovação PIX em ambiente de desenvolvimento
+  async simulatePixPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { paymentId } = req.params as any;
+      const { status = 'approved' } = req.body as any;
+
+      console.log(`🎭 [DEV] Simulando ${status} para PIX ${paymentId}`);
+
+      // Buscar pagamento no banco
+      const payment = await this.paymentRepository.findById(paymentId);
+      if (!payment) {
+        reply.status(404).send({
+          success: false,
+          error: 'Pagamento não encontrado',
+        });
+        return;
+      }
+
+      if (payment.paymentMethod !== 'PIX') {
+        reply.status(400).send({
+          success: false,
+          error: 'Simulação só funciona para pagamentos PIX',
+        });
+        return;
+      }
+
+      if (!['PENDING'].includes(payment.status)) {
+        reply.status(400).send({
+          success: false,
+          error: `Pagamento já possui status: ${payment.status}`,
+        });
+        return;
+      }
+
+      // Simular mudança de status
+      const newStatus = status === 'approved' ? PaymentStatus.COMPLETED : PaymentStatus.FAILED;
+      
+      const updatedPayment = new Payment(
+        payment.id,
+        payment.userId,
+        payment.courseId,
+        payment.externalPaymentId,
+        payment.amount,
+        payment.currency,
+        newStatus,
+        payment.paymentType,
+        payment.createdAt,
+        new Date(), // updatedAt
+        payment.externalOrderId,
+        payment.paymentData,
+        payment.paymentMethod,
+        payment.platformFeeAmount,
+        payment.instructorAmount,
+        payment.gatewayProvider
+      );
+
+      await this.paymentRepository.update(updatedPayment);
+
+      console.log(`✅ [DEV] PIX ${paymentId} simulado como ${newStatus}`);
+
+      reply.status(200).send({
+        success: true,
+        message: `PIX ${status === 'approved' ? 'aprovado' : 'rejeitado'} com sucesso (simulação)`,
+        data: {
+          id: updatedPayment.id,
+          status: updatedPayment.status,
+          amount: updatedPayment.amount,
+          currency: updatedPayment.currency,
+          paymentType: updatedPayment.paymentType,
+          createdAt: updatedPayment.createdAt,
+          updatedAt: updatedPayment.updatedAt,
+        },
+      });
+    } catch (error) {
+      req.log.error('Error simulating PIX:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Não foi possível simular o PIX. Tente novamente.',      });
+    }
+  }
+
+  // === MÉTODOS DE ADMINISTRAÇÃO ===
+
+  async getAllPayments(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { status, page = 1, limit = 20 } = req.query as any;
+      const userInfo = (req as any).userInfo;
+
+      if (!userInfo) {
+        reply.status(401).send({
+          success: false,
+          error: 'Você precisa estar logado para acessar pagamentos.',
+        });
+        return;
+      }
+
+      // Verificar se é admin (você pode implementar sua lógica de admin aqui)
+      // Por enquanto, qualquer usuário logado pode ver (para desenvolvimento)
+      
+      console.log(`📋 Listando pagamentos - Status: ${status || 'todos'}, Página: ${page}, Limite: ${limit}`);
+
+      // Buscar todos os pagamentos com filtros
+      const payments = await this.paymentRepository.findAll({
+        status,
+        page: parseInt(page),
+        limit: parseInt(limit)
+      });      // Buscar informações adicionais dos usuários e cursos
+      const enrichedPayments = await Promise.all(
+        payments.map(async (payment: Payment) => {
+          const user = await this.userRepository.findById(payment.userId);
+          const course = await this.courseRepository.findById(payment.courseId);
+          
+          return {
+            id: payment.id,
+            userId: payment.userId,
+            userName: user?.name || 'Usuário não encontrado',
+            userEmail: user?.email || 'Email não encontrado',
+            courseId: payment.courseId,
+            courseTitle: course?.title || 'Curso não encontrado',
+            amount: payment.amount,
+            currency: payment.currency,
+            status: payment.status,
+            paymentType: payment.paymentType,
+            paymentMethod: payment.paymentMethod,
+            externalPaymentId: payment.externalPaymentId,
+            gatewayProvider: payment.gatewayProvider,
+            createdAt: payment.createdAt,
+            updatedAt: payment.updatedAt,
+          };
+        })
+      );
+
+      reply.status(200).send({
+        success: true,
+        data: {
+          payments: enrichedPayments,
+          pagination: {
+            page: parseInt(page),
+            limit: parseInt(limit),
+            total: enrichedPayments.length
+          }
+        },
+      });
+    } catch (error) {
+      req.log.error('Error fetching all payments:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Não foi possível carregar os pagamentos. Tente novamente.',
+      });
+    }
+  }
+  async adminApprovePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { paymentId } = req.params as any;
+      const { reason } = req.body as any;
+      const userInfo = (req as any).userInfo;
+
+      if (!userInfo) {
+        reply.status(401).send({
+          success: false,
+          error: 'Você precisa estar logado para aprovar pagamentos.',
+        });
+        return;
+      }
+
+      console.log(`🎭 Admin aprovando pagamento ${paymentId} por ${userInfo.email}`);
+
+      // Buscar pagamento no banco
+      const payment = await this.paymentRepository.findById(paymentId);
+      if (!payment) {
+        reply.status(404).send({
+          success: false,
+          error: 'Pagamento não encontrado',
+        });
+        return;
+      }
+
+      // Verificar se o pagamento pode ser alterado
+      if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(payment.status)) {
+        reply.status(400).send({
+          success: false,
+          error: `Pagamento já possui status final: ${payment.status}`,
+        });
+        return;
+      }
+
+      // Atualizar status do pagamento para COMPLETED
+      const updatedPayment = new Payment(
+        payment.id,
+        payment.userId,
+        payment.courseId,
+        payment.externalPaymentId,
+        payment.amount,
+        payment.currency,
+        PaymentStatus.COMPLETED,
+        payment.paymentType,
+        payment.createdAt,
+        new Date(), // updatedAt
+        payment.externalOrderId,
+        payment.paymentData,
+        payment.paymentMethod,
+        payment.platformFeeAmount,
+        payment.instructorAmount,
+        payment.gatewayProvider
+      );
+
+      await this.paymentRepository.update(updatedPayment);
+
+      console.log(`✅ Pagamento ${paymentId} aprovado pelo admin`);
+
+      reply.status(200).send({
+        success: true,
+        message: 'Pagamento aprovado com sucesso',
+        data: {
+          id: updatedPayment.id,
+          status: updatedPayment.status,
+          amount: updatedPayment.amount,
+          currency: updatedPayment.currency,
+          paymentType: updatedPayment.paymentType,
+          createdAt: updatedPayment.createdAt,
+          updatedAt: updatedPayment.updatedAt,
+          adminAction: {
+            action: 'approve',
+            reason,
+            adminUser: userInfo.email,
+            timestamp: new Date().toISOString()
+          }
+        },
+      });
+    } catch (error) {
+      req.log.error('Error in admin payment approval:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Não foi possível aprovar o pagamento. Tente novamente.',
+      });
+    }
+  }
+  async adminRejectPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { paymentId } = req.params as any;
+      const { reason } = req.body as any;
+      const userInfo = (req as any).userInfo;
+
+      if (!userInfo) {
+        reply.status(401).send({
+          success: false,
+          error: 'Você precisa estar logado para rejeitar pagamentos.',
+        });
+        return;
+      }
+
+      console.log(`🎭 Admin rejeitando pagamento ${paymentId} por ${userInfo.email}`);
+
+      // Buscar pagamento no banco
+      const payment = await this.paymentRepository.findById(paymentId);
+      if (!payment) {
+        reply.status(404).send({
+          success: false,
+          error: 'Pagamento não encontrado',
+        });
+        return;
+      }
+
+      // Verificar se o pagamento pode ser alterado
+      if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(payment.status)) {
+        reply.status(400).send({
+          success: false,
+          error: `Pagamento já possui status final: ${payment.status}`,
+        });
+        return;
+      }
+
+      // Atualizar status do pagamento para FAILED
+      const updatedPayment = new Payment(
+        payment.id,
+        payment.userId,
+        payment.courseId,
+        payment.externalPaymentId,
+        payment.amount,
+        payment.currency,
+        PaymentStatus.FAILED,
+        payment.paymentType,
+        payment.createdAt,
+        new Date(), // updatedAt
+        payment.externalOrderId,
+        payment.paymentData,
+        payment.paymentMethod,
+        payment.platformFeeAmount,
+        payment.instructorAmount,
+        payment.gatewayProvider
+      );
+
+      await this.paymentRepository.update(updatedPayment);
+
+      console.log(`❌ Pagamento ${paymentId} rejeitado pelo admin`);
+
+      reply.status(200).send({
+        success: true,
+        message: 'Pagamento rejeitado com sucesso',
+        data: {
+          id: updatedPayment.id,
+          status: updatedPayment.status,
+          amount: updatedPayment.amount,
+          currency: updatedPayment.currency,
+          paymentType: updatedPayment.paymentType,
+          createdAt: updatedPayment.createdAt,
+          updatedAt: updatedPayment.updatedAt,
+          adminAction: {
+            action: 'reject',
+            reason,
+            adminUser: userInfo.email,
+            timestamp: new Date().toISOString()
+          }
+        },
+      });
+    } catch (error) {
+      req.log.error('Error in admin payment rejection:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Não foi possível rejeitar o pagamento. Tente novamente.',
       });
     }
   }
