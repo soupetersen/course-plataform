@@ -11,4 +11,8 @@ export interface EnrollmentRepository {
   delete(id: string): Promise<void>;
   findActiveByUserId(userId: string): Promise<Enrollment[]>;
   findCompletedByUserId(userId: string): Promise<Enrollment[]>;
+  addUserToCourse(courseId: string, userId: string): Promise<Enrollment>;
+  pauseUserEnrollment(courseId: string, userId: string): Promise<void>;
+  resumeUserEnrollment(courseId: string, userId: string): Promise<void>;
+  removeUserFromCourse(courseId: string, userId: string): Promise<void>;
 }

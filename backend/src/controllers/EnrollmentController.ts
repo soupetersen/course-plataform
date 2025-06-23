@@ -23,7 +23,7 @@ export class EnrollmentController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'Voc� precisa estar logado para se inscrever em um curso.'
+          message: 'Você precisa estar logado para se inscrever em um curso.'
         });
       }
 
@@ -38,7 +38,7 @@ export class EnrollmentController {
       });    } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'N�o foi poss�vel realizar a inscri��o no curso. Tente novamente.'
+        message: error instanceof Error ? error.message : 'Não foi possível se inscrever no curso. Tente novamente.'
       });
     }
   }
@@ -48,7 +48,7 @@ export class EnrollmentController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'Voc� precisa estar logado para ver suas inscri��es.'
+          message: 'Você precisa estar logado para acessar suas inscriçõe.'
         });
       }
 
@@ -61,7 +61,7 @@ export class EnrollmentController {
       });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'N�o foi poss�vel carregar suas inscri��es. Tente novamente.'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar suas inscriçõe. Tente novamente.'
       });
     }
   }
@@ -71,7 +71,7 @@ export class EnrollmentController {
       const userInfo = (request as any).userInfo;      if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'Voc� precisa estar logado para acessar essas informa��es.'
+          message: 'Você precisa estar logado para ver as inscriçõe deste usuário.'
         });
       }
 
@@ -81,7 +81,7 @@ export class EnrollmentController {
       if (userInfo.userId !== userId && userInfo.role !== 'INSTRUCTOR' && userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'Voc� n�o tem permiss�o para ver as inscri��es deste usu�rio.'
+          message: 'Você não tem permissões para acessar as inscriçõe deste usuário.'
         });
       }
 
@@ -95,7 +95,7 @@ export class EnrollmentController {
     } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'N�o foi poss�vel carregar as inscri��es do usu�rio.'
+        message: error instanceof Error ? error.message : 'Não foi possível carregar as inscriçõe deste usuário. Tente novamente.'
       });
     }
   }
@@ -105,7 +105,7 @@ export class EnrollmentController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'Voc� precisa estar logado para ver as inscri��es do curso.'
+          message: 'Você precisa estar logado para acessar as inscrições de um curso.'
         });
       }
 

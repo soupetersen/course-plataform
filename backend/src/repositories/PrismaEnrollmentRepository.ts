@@ -162,4 +162,36 @@ export class PrismaEnrollmentRepository implements EnrollmentRepository {
       enrollment.updatedAt
     ));
   }
+
+  async addUserToCourse(courseId: string, userId: string): Promise<Enrollment> {
+    const enrollment = await this.create({
+      id: crypto.randomUUID(),
+      userId,
+      courseId,
+      enrolledAt: new Date(),
+      isActive: true,
+    });
+    return enrollment;
+  }
+
+  async removeUserFromCourse(courseId: string, userId: string): Promise<void> {
+    const enrollment = await this.findByUserAndCourse(userId, courseId);
+    if (enrollment) {
+      await this.delete(enrollment.id);
+    }
+  }
+
+  async pauseUserEnrollment(courseId: string, userId: string): Promise<void> {
+    const enrollment = await this.findByUserAndCourse(userId, courseId);
+    if (enrollment) {
+      await this.update(enrollment.id, { isActive: false });
+    }
+  }
+
+  async resumeUserEnrollment(courseId: string, userId: string): Promise<void> {
+    const enrollment = await this.findByUserAndCourse(userId, courseId);
+    if (enrollment) {
+      await this.update(enrollment.id, { isActive: true });
+    }
+  }
 }
