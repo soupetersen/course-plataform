@@ -13,11 +13,6 @@ import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 
-import { CouponRepository } from '@/domain/repositories/CouponRepository';
-import { CouponUsageRepository } from '@/domain/repositories/CouponUsageRepository';
-import { PlatformSettingRepository } from '@/domain/repositories/PlatformSettingRepository';
-import { RefundRequestRepository } from '@/domain/repositories/RefundRequestRepository';
-
 import { PrismaUserRepository } from '@/repositories/PrismaUserRepository';
 import { PrismaCourseRepository } from '@/repositories/PrismaCourseRepository';
 import { PrismaModuleRepository } from '@/repositories/PrismaModuleRepository';
@@ -30,10 +25,10 @@ import { PrismaCategoryRepository } from '@/repositories/PrismaCategoryRepositor
 import { PrismaReviewRepository } from '@/repositories/PrismaReviewRepository';
 import { PrismaSavedCardRepository } from '@/repositories/PrismaSavedCardRepository';
 
-import { PrismaCouponRepository } from '@/infrastructure/repositories/PrismaCouponRepository';
-import { PrismaCouponUsageRepository } from '@/infrastructure/repositories/PrismaCouponUsageRepository';
-import { PrismaPlatformSettingRepository } from '@/infrastructure/repositories/PrismaPlatformSettingRepository';
-import { PrismaRefundRequestRepository } from '@/infrastructure/repositories/PrismaRefundRequestRepository';
+import { PrismaCouponRepository } from '@/repositories/PrismaCouponRepository';
+import { PrismaCouponUsageRepository } from '@/repositories/PrismaCouponUsageRepository';
+import { PrismaPlatformSettingRepository } from '@/repositories/PrismaPlatformSettingRepository';
+import { PrismaRefundRequestRepository } from '@/repositories/PrismaRefundRequestRepository';
 
 import { CreateUserUseCase } from '@/use-cases/CreateUserUseCase';
 import { AuthenticateUserUseCase } from '@/use-cases/AuthenticateUserUseCase';
@@ -210,28 +205,28 @@ export function setupDependencies(): DIContainer {
   });
 
   container.register('ValidateCouponUseCase', () => {
-    const couponRepository = container.resolve<CouponRepository>('CouponRepository');
-    const couponUsageRepository = container.resolve<CouponUsageRepository>('CouponUsageRepository');
+    const couponRepository = container.resolve<PrismaCouponRepository>('CouponRepository');
+    const couponUsageRepository = container.resolve<PrismaCouponUsageRepository>('CouponUsageRepository');
     return new ValidateCouponUseCase(couponRepository, couponUsageRepository);
   });
   container.register('ApplyCouponUseCase', () => {
-    const couponRepository = container.resolve<CouponRepository>('CouponRepository');
-    const couponUsageRepository = container.resolve<CouponUsageRepository>('CouponUsageRepository');
+    const couponRepository = container.resolve<PrismaCouponRepository>('CouponRepository');
+    const couponUsageRepository = container.resolve<PrismaCouponUsageRepository>('CouponUsageRepository');
     return new ApplyCouponUseCase(couponRepository, couponUsageRepository);
   });
 
   container.register('CalculateFeesUseCase', () => {
-    const platformSettingRepository = container.resolve<PlatformSettingRepository>('PlatformSettingRepository');
+    const platformSettingRepository = container.resolve<PrismaPlatformSettingRepository>('PlatformSettingRepository');
     return new CalculateFeesUseCase(platformSettingRepository);
   });
 
   container.register('CreateRefundRequestUseCase', () => {
-    const refundRequestRepository = container.resolve<RefundRequestRepository>('RefundRequestRepository');
+    const refundRequestRepository = container.resolve<PrismaRefundRequestRepository>('RefundRequestRepository');
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
-    const platformSettingRepository = container.resolve<PlatformSettingRepository>('PlatformSettingRepository');
+    const platformSettingRepository = container.resolve<PrismaPlatformSettingRepository>('PlatformSettingRepository');
     return new CreateRefundRequestUseCase(refundRequestRepository, paymentRepository, platformSettingRepository);
   });  container.register('ManageCouponsUseCase', () => {
-    const couponRepository = container.resolve<CouponRepository>('CouponRepository');
+    const couponRepository = container.resolve<PrismaCouponRepository>('CouponRepository');
     return new ManageCouponsUseCase(couponRepository);
   });
 
