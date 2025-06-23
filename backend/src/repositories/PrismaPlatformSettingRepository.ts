@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PlatformSettingRepository } from '../../domain/repositories/PlatformSettingRepository';
-import { PlatformSetting } from '../../domain/models/PlatformSetting';
+import { PlatformSettingRepository } from '../interfaces/PlatformSettingRepository';
+import { PlatformSetting } from '../models/PlatformSetting';
 
 export class PrismaPlatformSettingRepository implements PlatformSettingRepository {
   constructor(private readonly prisma: PrismaClient) {}

@@ -50,7 +50,7 @@ export class SavedCardController {
         data: savedCard
       });
     } catch (error) {
-      console.error('Erro ao salvar cartão:', error);
+      req.log.error('Erro ao salvar cartão:', error);
       reply.status(400).send({
         success: false,
         error: error instanceof Error ? error.message : 'Erro interno do servidor'
@@ -77,7 +77,7 @@ export class SavedCardController {
         data: savedCards
       });
     } catch (error) {
-      console.error('Erro ao buscar cartões salvos:', error);
+      req.log.error('Erro ao buscar cartões salvos:', error);
       reply.status(400).send({
         success: false,
         error: error instanceof Error ? error.message : 'Erro interno do servidor'
@@ -105,7 +105,7 @@ export class SavedCardController {
         message: 'Cartão deletado com sucesso'
       });
     } catch (error) {
-      console.error('Erro ao deletar cartão:', error);
+      req.log.error('Erro ao deletar cartão:', error);
       reply.status(400).send({
         success: false,
         error: error instanceof Error ? error.message : 'Erro interno do servidor'
@@ -134,7 +134,7 @@ export class SavedCardController {
         message: 'Cartão definido como padrão'
       });
     } catch (error) {
-      console.error('Erro ao definir cartão padrão:', error);
+      req.log.error('Erro ao definir cartão padrão:', error);
       reply.status(400).send({
         success: false,
         error: error instanceof Error ? error.message : 'Erro interno do servidor'

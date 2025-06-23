@@ -1,4 +1,4 @@
-import { PlatformSettingRepository } from '../domain/repositories/PlatformSettingRepository';
+import { PlatformSettingRepository } from '../interfaces/PlatformSettingRepository';
 
 export interface CalculateFeesRequest {
   coursePrice: number;

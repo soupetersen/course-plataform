@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { CouponUsageRepository } from '@/domain/repositories/CouponUsageRepository';
-import { CouponUsage } from '@/domain/models/CouponUsage';
+import { CouponUsageRepository } from '../interfaces/CouponUsageRepository';
+import { CouponUsage } from '../models/CouponUsage';
 
 export class PrismaCouponUsageRepository implements CouponUsageRepository {
   constructor(private prisma: PrismaClient) {}
@@ -74,6 +74,14 @@ export class PrismaCouponUsageRepository implements CouponUsageRepository {
     return this.prisma.couponUsage.count({
       where: { couponId },
     });
+  }
+
+  async findByPaymentId(paymentId: string): Promise<CouponUsage | null> {
+    const usage = await this.prisma.couponUsage.findFirst({
+      where: { paymentId },
+    });
+
+    return usage ? this.toDomain(usage) : null;
   }
 
   async findByPayment(paymentId: string): Promise<CouponUsage[]> {

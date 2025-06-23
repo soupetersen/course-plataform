@@ -50,11 +50,10 @@ export class CategoryController {
       reply.status(201).send({
         success: true,
         data: category
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to create category'
+        message: error instanceof Error ? error.message : 'Falha ao criar categoria'
       });
     }
   }
@@ -67,11 +66,10 @@ export class CategoryController {
       reply.send({
         success: true,
         data: categories
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to fetch categories'
+        message: error instanceof Error ? error.message : 'Falha ao buscar categorias'
       });
     }
   }
@@ -120,15 +118,13 @@ export class CategoryController {
       }
 
       const { id } = request.params;
-      const updateCategoryDto = request.body as UpdateCategoryDto;
-
-      const categoryRepository = this.container.resolve<CategoryRepository>('CategoryRepository');
+      const updateCategoryDto = request.body as UpdateCategoryDto;      const categoryRepository = this.container.resolve<CategoryRepository>('CategoryRepository');
       
       const existingCategory = await categoryRepository.findById(id);
       if (!existingCategory) {
         return reply.status(404).send({
           success: false,
-          message: 'Category not found'
+          message: 'Categoria não encontrada'
         });
       }
 
@@ -137,11 +133,10 @@ export class CategoryController {
       reply.send({
         success: true,
         data: updatedCategory
-      });
-    } catch (error) {
+      });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to update category'
+        message: error instanceof Error ? error.message : 'Falha ao atualizar categoria'
       });
     }
   }
@@ -163,15 +158,13 @@ export class CategoryController {
         });
       }
 
-      const { id } = request.params;
-
-      const categoryRepository = this.container.resolve<CategoryRepository>('CategoryRepository');
+      const { id } = request.params;      const categoryRepository = this.container.resolve<CategoryRepository>('CategoryRepository');
       
       const existingCategory = await categoryRepository.findById(id);
       if (!existingCategory) {
         return reply.status(404).send({
           success: false,
-          message: 'Category not found'
+          message: 'Categoria não encontrada'
         });
       }
 
@@ -179,12 +172,11 @@ export class CategoryController {
 
       reply.send({
         success: true,
-        message: 'Category deleted successfully'
-      });
-    } catch (error) {
+        message: 'Categoria deletada com sucesso'
+      });    } catch (error) {
       reply.status(500).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Failed to delete category'
+        message: error instanceof Error ? error.message : 'Falha ao deletar categoria'
       });
     }
   }

@@ -123,7 +123,7 @@ export class AdminCouponController {
       req.log.error('Error updating coupon:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to update coupon'
+        error: 'Falha ao atualizar cupom'
       });
     }
   }
@@ -144,13 +144,13 @@ export class AdminCouponController {
 
       reply.status(200).send({
         success: true,
-        message: 'Coupon deleted successfully'
+        message: 'Cupom deletado com sucesso'
       });
     } catch (error) {
       req.log.error('Error deleting coupon:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to delete coupon'
+        error: 'Falha ao deletar cupom'
       });
     }
   }

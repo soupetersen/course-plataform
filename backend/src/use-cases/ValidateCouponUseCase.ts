@@ -1,7 +1,7 @@
-import { CouponRepository } from '../domain/repositories/CouponRepository';
-import { CouponUsageRepository } from '../domain/repositories/CouponUsageRepository';
-import { Coupon } from '../domain/models/Coupon';
-import { CouponUsage } from '../domain/models/CouponUsage';
+import { CouponRepository } from '../interfaces/CouponRepository';
+import { CouponUsageRepository } from '../interfaces/CouponUsageRepository';
+import { Coupon } from '../models/Coupon';
+import { CouponUsage } from '../models/CouponUsage';
 
 export interface ValidateCouponRequest {
   code: string;

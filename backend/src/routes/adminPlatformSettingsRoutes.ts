@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { AdminPlatformSettingsController } from '@/controllers/AdminPlatformSettingsController';
 import { AuthMiddleware } from '@/middlewares/AuthMiddleware';
 import { DIContainer } from '@/shared/utils/DIContainer';
-import { PlatformSettingRepository } from '@/domain/repositories/PlatformSettingRepository';
+import { PlatformSettingRepository } from '@/interfaces/PlatformSettingRepository';
 
 export async function adminPlatformSettingsRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;

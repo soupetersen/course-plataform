@@ -27,11 +27,10 @@ export class AuthController {
           email: user.email,
           role: user.role,
           isActive: user.isActive
-        }
-      });    } catch (error) {
+        }      });    } catch (error) {
       reply.status(400).send({
         success: false,
-        message: error instanceof Error ? error.message : 'Falha no cadastro. Verifique os dados informados e tente novamente.'
+        message: error instanceof Error ? error.message : 'Falha no registro. Tente novamente.'
       });
     }
   }

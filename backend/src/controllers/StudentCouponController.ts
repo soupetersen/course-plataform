@@ -18,7 +18,7 @@ export class StudentCouponController {
       if (!userInfo) {
         return reply.status(401).send({ 
           success: false, 
-          error: 'Authentication required' 
+          error: 'Autenticação necessária' 
         });
       }
 
@@ -96,7 +96,7 @@ export class StudentCouponController {
       console.error('Error fetching available coupons:', error);
       return reply.status(500).send({
         success: false,
-        error: error.message || 'Failed to fetch available coupons'
+        error: error.message || 'Falha ao buscar cupons disponíveis'
       });
     }
   }

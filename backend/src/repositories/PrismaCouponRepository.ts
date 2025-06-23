@@ -1,11 +1,11 @@
-import { Coupon } from '@/models/Coupon';
-import { CouponUsage } from '@/models/CouponUsage';
+import { Coupon } from '../models/Coupon';
+import { CouponRepository } from '../interfaces/CouponRepository';
 import { PrismaClient } from '@prisma/client';
 
-export class PrismaCouponRepository implements PrismaCouponRepository {
+export class PrismaCouponRepository implements CouponRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async create(coupon: CouponUsage): Promise<Coupon> {
+  async create(coupon: Coupon): Promise<Coupon> {
     const created = await this.prisma.coupon.create({
       data: {
         code: coupon.code,
@@ -65,6 +65,15 @@ export class PrismaCouponRepository implements PrismaCouponRepository {
     return coupons.map(this.toDomain);
   }
 
+  async findByCreatedById(createdById: string): Promise<Coupon[]> {
+    const coupons = await this.prisma.coupon.findMany({
+      where: { createdById },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return coupons.map(this.toDomain);
+  }
+
   async findActive(): Promise<Coupon[]> {
     const coupons = await this.prisma.coupon.findMany({
       where: {
@@ -108,7 +117,7 @@ export class PrismaCouponRepository implements PrismaCouponRepository {
     });
   }
 
-  async incrementUsage(id: string): Promise<void> {
+  async incrementUsedCount(id: string): Promise<void> {
     await this.prisma.coupon.update({
       where: { id },
       data: {

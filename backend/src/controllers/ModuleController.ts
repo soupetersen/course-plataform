@@ -145,12 +145,11 @@ export class ModuleController {
       const updateModuleDto = request.body as UpdateModuleDto;
 
       const moduleRepository = this.container.resolve<ModuleRepository>('ModuleRepository');
-      
-      const existingModule = await moduleRepository.findById(id);
+        const existingModule = await moduleRepository.findById(id);
       if (!existingModule) {
         return reply.status(404).send({
           success: false,
-          message: 'Module not found'
+          message: 'Módulo não encontrado'
         });
       }
 
@@ -182,12 +181,11 @@ export class ModuleController {
       const { id } = request.params;
 
       const moduleRepository = this.container.resolve<ModuleRepository>('ModuleRepository');
-      
-      const existingModule = await moduleRepository.findById(id);
+        const existingModule = await moduleRepository.findById(id);
       if (!existingModule) {
         return reply.status(404).send({
           success: false,
-          message: 'Module not found'
+          message: 'Módulo não encontrado'
         });
       }
 
@@ -195,7 +193,7 @@ export class ModuleController {
 
       reply.send({
         success: true,
-        message: 'Module deleted successfully'
+        message: 'Módulo deletado com sucesso'
       });
     } catch (error) {
       reply.status(500).send({

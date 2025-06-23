@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ManageCouponsUseCase } from '@/use-cases/ManageCouponsUseCase';
+import { ManageCouponsUseCase } from '../use-cases/ManageCouponsUseCase';
 
 interface AuthenticatedRequest extends FastifyRequest {
   user?: {
@@ -114,7 +114,7 @@ export class InstructorCouponController {
       if (!req.user || (req.user.role !== 'INSTRUCTOR' && req.user.role !== 'ADMIN')) {
         reply.status(403).send({
           success: false,
-          error: 'Access denied. Only instructors can view their coupons.'
+          error: 'Acesso negado. Apenas instrutores podem ver seus cupons.'
         });
         return;
       }

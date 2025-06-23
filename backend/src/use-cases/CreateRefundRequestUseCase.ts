@@ -1,7 +1,7 @@
-import { RefundRequestRepository } from '../domain/repositories/RefundRequestRepository';
+import { RefundRequestRepository } from '../interfaces/RefundRequestRepository';
 import { PaymentRepository } from '../interfaces/PaymentRepository';
-import { PlatformSettingRepository } from '../domain/repositories/PlatformSettingRepository';
-import { RefundRequest } from '../domain/models/RefundRequest';
+import { PlatformSettingRepository } from '../interfaces/PlatformSettingRepository';
+import { RefundRequest } from '../models/RefundRequest';
 
 export interface CreateRefundRequestRequest {
   paymentId: string;
@@ -64,7 +64,7 @@ export class CreateRefundRequestUseCase {
       }
 
       const existingRefunds = await this.refundRequestRepository.findByPaymentId(paymentId);
-      const hasActiveRefund = existingRefunds.some(refund => 
+      const hasActiveRefund = existingRefunds.some((refund: RefundRequest) => 
         refund.status === 'PENDING' || refund.status === 'APPROVED'
       );
 

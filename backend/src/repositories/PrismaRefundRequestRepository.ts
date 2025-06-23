@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { RefundRequestRepository } from '../../domain/repositories/RefundRequestRepository';
-import { RefundRequest } from '../../domain/models/RefundRequest';
+import { RefundRequestRepository } from '../interfaces/RefundRequestRepository';
+import { RefundRequest } from '../models/RefundRequest';
 
 export class PrismaRefundRequestRepository implements RefundRequestRepository {
   constructor(private readonly prisma: PrismaClient) {}
@@ -126,8 +126,7 @@ export class PrismaRefundRequestRepository implements RefundRequestRepository {
 
   private toDomain(prismaData: any): RefundRequest {
     return new RefundRequest(
-      prismaData.id,
-      prismaData.paymentId,
+      prismaData.id,      prismaData.paymentId,
       prismaData.userId,
       prismaData.reason,
       prismaData.amount,
@@ -139,5 +138,11 @@ export class PrismaRefundRequestRepository implements RefundRequestRepository {
       prismaData.createdAt,
       prismaData.updatedAt
     );
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.refundRequest.delete({
+      where: { id }
+    });
   }
 }

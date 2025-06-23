@@ -310,19 +310,18 @@ export class CourseController {
       const updateCourseDto = request.body as UpdateCourseDto;
 
       const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
-      
-      const existingCourse = await courseRepository.findById(id);
+        const existingCourse = await courseRepository.findById(id);
       if (!existingCourse) {
         return reply.status(404).send({
           success: false,
-          message: 'Course not found'
+          message: 'Curso não encontrado'
         });
       }
 
       if (existingCourse.instructorId !== userInfo.userId && userInfo.role !== 'admin') {
         return reply.status(403).send({
           success: false,
-          message: 'Not authorized to update this course'
+          message: 'Não autorizado a atualizar este curso'
         });
       }
 
@@ -354,19 +353,18 @@ export class CourseController {
       const { id } = request.params;
 
       const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
-      
-      const existingCourse = await courseRepository.findById(id);
+        const existingCourse = await courseRepository.findById(id);
       if (!existingCourse) {
         return reply.status(404).send({
           success: false,
-          message: 'Course not found'
+          message: 'Curso não encontrado'
         });
       }
 
       if (existingCourse.instructorId !== userInfo.userId && userInfo.role !== 'admin') {
         return reply.status(403).send({
           success: false,
-          message: 'Not authorized to delete this course'
+          message: 'Não autorizado a deletar este curso'
         });
       }
 
@@ -374,7 +372,7 @@ export class CourseController {
 
       reply.send({
         success: true,
-        message: 'Course deleted successfully'
+        message: 'Curso deletado com sucesso'
       });
     } catch (error) {
       reply.status(500).send({
@@ -396,19 +394,18 @@ export class CourseController {
       const { id } = request.params;
 
       const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
-      
-      const existingCourse = await courseRepository.findById(id);
+        const existingCourse = await courseRepository.findById(id);
       if (!existingCourse) {
         return reply.status(404).send({
           success: false,
-          message: 'Course not found'
+          message: 'Curso não encontrado'
         });
       }
 
       if (existingCourse.instructorId !== userInfo.userId && userInfo.role !== 'admin') {
         return reply.status(403).send({
           success: false,
-          message: 'Not authorized to publish this course'
+          message: 'Não autorizado a publicar este curso'
         });
       }
 
@@ -440,19 +437,18 @@ export class CourseController {
       const { id } = request.params;
 
       const courseRepository = this.container.resolve<CourseRepository>('CourseRepository');
-      
-      const existingCourse = await courseRepository.findById(id);
+        const existingCourse = await courseRepository.findById(id);
       if (!existingCourse) {
         return reply.status(404).send({
           success: false,
-          message: 'Course not found'
+          message: 'Curso não encontrado'
         });
       }
 
       if (existingCourse.instructorId !== userInfo.userId && userInfo.role !== 'admin') {
         return reply.status(403).send({
           success: false,
-          message: 'Not authorized to unpublish this course'
+          message: 'Não autorizado a despublicar este curso'
         });
       }
 

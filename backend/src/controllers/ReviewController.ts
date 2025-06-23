@@ -146,21 +146,21 @@ export class ReviewController {
       if (!existingReview) {
         return reply.status(404).send({
           success: false,
-          message: 'Review not found'
+          message: 'Avaliação não encontrada'
         });
       }
 
       if (existingReview.userId !== userInfo.userId) {
         return reply.status(403).send({
           success: false,
-          message: 'You can only update your own reviews'
+          message: 'Você só pode atualizar suas próprias avaliações'
         });
       }
 
       if (data.rating && (data.rating < 1 || data.rating > 5)) {
         return reply.status(400).send({
           success: false,
-          message: 'Rating must be between 1 and 5'
+          message: 'A nota deve estar entre 1 e 5'
         });
       }
 
@@ -206,14 +206,14 @@ export class ReviewController {
       if (!existingReview) {
         return reply.status(404).send({
           success: false,
-          message: 'Review not found'
+          message: 'Avaliação não encontrada'
         });
       }
 
       if (existingReview.userId !== userInfo.userId && userInfo.role !== 'ADMIN') {
         return reply.status(403).send({
           success: false,
-          message: 'You can only delete your own reviews'
+          message: 'Você só pode deletar suas próprias avaliações'
         });
       }
 
@@ -221,7 +221,7 @@ export class ReviewController {
 
       reply.send({
         success: true,
-        message: 'Review deleted successfully'
+        message: 'Avaliação deletada com sucesso'
       });
     } catch (error) {
       reply.status(500).send({

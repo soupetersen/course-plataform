@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { PlatformSettingRepository } from '@/domain/repositories/PlatformSettingRepository';
-import { PlatformSetting } from '@/domain/models/PlatformSetting';
+import { PlatformSettingRepository } from '@/interfaces/PlatformSettingRepository';
+import { PlatformSetting } from '@/models/PlatformSetting';
 
 export class AdminPlatformSettingsController {
   constructor(private platformSettingRepository: PlatformSettingRepository) {}
@@ -12,7 +12,7 @@ export class AdminPlatformSettingsController {
       reply.status(200).send({
         success: true,
         data: {
-          settings: settings.map(setting => ({
+          settings: settings.map((setting: PlatformSetting) => ({
             id: setting.id,
             key: setting.key,
             value: setting.value,
@@ -28,7 +28,7 @@ export class AdminPlatformSettingsController {
       req.log.error('Error fetching platform settings:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to fetch platform settings'
+        error: 'Falha ao buscar configurações da plataforma'
       });
     }
   }
@@ -42,7 +42,7 @@ export class AdminPlatformSettingsController {
       if (!setting) {
         reply.status(404).send({
           success: false,
-          error: 'Setting not found'
+          error: 'Configuração não encontrada'
         });
         return;
       }
@@ -61,7 +61,7 @@ export class AdminPlatformSettingsController {
       req.log.error('Error fetching platform setting:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to fetch platform setting'
+        error: 'Falha ao buscar configuração da plataforma'
       });
     }
   }
@@ -75,7 +75,7 @@ export class AdminPlatformSettingsController {
       if (!value && value !== '0' && value !== 'false') {
         reply.status(400).send({
           success: false,
-          error: 'Value is required'
+          error: 'Valor é obrigatório'
         });
         return;
       }
@@ -84,7 +84,7 @@ export class AdminPlatformSettingsController {
       if (!existingSetting) {
         reply.status(404).send({
           success: false,
-          error: 'Setting not found'
+          error: 'Configuração não encontrada'
         });
         return;
       }
@@ -94,7 +94,7 @@ export class AdminPlatformSettingsController {
         if (isNaN(numValue)) {
           reply.status(400).send({
             success: false,
-            error: 'Invalid number value'
+            error: 'Valor numérico inválido'
           });
           return;
         }
@@ -102,7 +102,7 @@ export class AdminPlatformSettingsController {
         if (key === 'PLATFORM_FEE_PERCENTAGE' && (numValue < 0 || numValue > 100)) {
           reply.status(400).send({
             success: false,
-            error: 'Platform fee percentage must be between 0 and 100'
+            error: 'Porcentagem da taxa da plataforma deve estar entre 0 e 100'
           });
           return;
         }
@@ -110,7 +110,7 @@ export class AdminPlatformSettingsController {
         if (key === 'STRIPE_FEE_PERCENTAGE' && (numValue < 0 || numValue > 10)) {
           reply.status(400).send({
             success: false,
-            error: 'Stripe fee percentage must be between 0 and 10'
+            error: 'Porcentagem da taxa do Stripe deve estar entre 0 e 10'
           });
           return;
         }
@@ -118,7 +118,7 @@ export class AdminPlatformSettingsController {
         if (key === 'REFUND_DAYS_LIMIT' && (numValue < 0 || numValue > 365)) {
           reply.status(400).send({
             success: false,
-            error: 'Refund days limit must be between 0 and 365'
+            error: 'Limite de dias para reembolso deve estar entre 0 e 365'
           });
           return;
         }
@@ -126,7 +126,7 @@ export class AdminPlatformSettingsController {
         if (key === 'MINIMUM_PAYOUT_AMOUNT' && (numValue < 0 || numValue > 10000)) {
           reply.status(400).send({
             success: false,
-            error: 'Minimum payout amount must be between 0 and 10000'
+            error: 'Valor mínimo de saque deve estar entre 0 e 10000'
           });
           return;
         }
@@ -137,7 +137,7 @@ export class AdminPlatformSettingsController {
         if (lowerValue !== 'true' && lowerValue !== 'false') {
           reply.status(400).send({
             success: false,
-            error: 'Boolean value must be "true" or "false"'
+            error: 'Valor booleano deve ser "true" ou "false"'
           });
           return;
         }
@@ -167,13 +167,13 @@ export class AdminPlatformSettingsController {
           createdAt: updatedSetting.createdAt,
           updatedAt: updatedSetting.updatedAt
         },
-        message: 'Setting updated successfully'
+        message: 'Configuração atualizada com sucesso'
       });
     } catch (error) {
       req.log.error('Error updating platform setting:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to update platform setting'
+        error: 'Falha ao atualizar configuração da plataforma'
       });
     }
   }
@@ -192,10 +192,12 @@ export class AdminPlatformSettingsController {
         description?: string;
       };
 
+      const userInfo = (req as any).userInfo;
+
       if (!key || !value || !type) {
         reply.status(400).send({
           success: false,
-          error: 'Key, value, and type are required'
+          error: 'Chave, valor e tipo são obrigatórios'
         });
         return;
       }
@@ -204,7 +206,7 @@ export class AdminPlatformSettingsController {
       if (existingSetting) {
         reply.status(400).send({
           success: false,
-          error: 'Setting with this key already exists'
+          error: 'Configuração com esta chave já existe'
         });
         return;
       }
@@ -214,7 +216,7 @@ export class AdminPlatformSettingsController {
         if (isNaN(numValue)) {
           reply.status(400).send({
             success: false,
-            error: 'Invalid number value'
+            error: 'Valor numérico inválido'
           });
           return;
         }
@@ -225,7 +227,7 @@ export class AdminPlatformSettingsController {
         if (lowerValue !== 'true' && lowerValue !== 'false') {
           reply.status(400).send({
             success: false,
-            error: 'Boolean value must be "true" or "false"'
+            error: 'Valor booleano deve ser "true" ou "false"'
           });
           return;
         }
@@ -236,7 +238,7 @@ export class AdminPlatformSettingsController {
         value,
         type,
         description,
-        updatedBy: (req as any).user.id
+        updatedBy: userInfo.userId
       });
 
       const createdSetting = await this.platformSettingRepository.create(setting);
@@ -250,13 +252,13 @@ export class AdminPlatformSettingsController {
           description: createdSetting.description,
           createdAt: createdSetting.createdAt
         },
-        message: 'Setting created successfully'
+        message: 'Configuração criada com sucesso'
       });
     } catch (error) {
       req.log.error('Error creating platform setting:', error);
       reply.status(500).send({
         success: false,
-        error: 'Failed to create platform setting'
+        error: 'Falha ao criar configuração da plataforma'
       });
     }
   }

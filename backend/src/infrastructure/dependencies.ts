@@ -13,22 +13,22 @@ import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 
-import { PrismaUserRepository } from '@/repositories/PrismaUserRepository';
-import { PrismaCourseRepository } from '@/repositories/PrismaCourseRepository';
-import { PrismaModuleRepository } from '@/repositories/PrismaModuleRepository';
-import { PrismaLessonRepository } from '@/repositories/PrismaLessonRepository';
-import { PrismaLessonCommentRepository } from '@/repositories/PrismaLessonCommentRepository';
-import { PrismaEnrollmentRepository } from '@/repositories/PrismaEnrollmentRepository';
-import { PrismaPaymentRepository } from '@/repositories/PrismaPaymentRepository';
-import { PrismaSubscriptionRepository } from '@/repositories/PrismaSubscriptionRepository';
-import { PrismaCategoryRepository } from '@/repositories/PrismaCategoryRepository';
-import { PrismaReviewRepository } from '@/repositories/PrismaReviewRepository';
-import { PrismaSavedCardRepository } from '@/repositories/PrismaSavedCardRepository';
+import { PrismaUserRepository } from '../repositories/PrismaUserRepository';
+import { PrismaCourseRepository } from '../repositories/PrismaCourseRepository';
+import { PrismaModuleRepository } from '../repositories/PrismaModuleRepository';
+import { PrismaLessonRepository } from '../repositories/PrismaLessonRepository';
+import { PrismaLessonCommentRepository } from '../repositories/PrismaLessonCommentRepository';
+import { PrismaEnrollmentRepository } from '../repositories/PrismaEnrollmentRepository';
+import { PrismaPaymentRepository } from '../repositories/PrismaPaymentRepository';
+import { PrismaSubscriptionRepository } from '../repositories/PrismaSubscriptionRepository';
+import { PrismaCategoryRepository } from '../repositories/PrismaCategoryRepository';
+import { PrismaReviewRepository } from '../repositories/PrismaReviewRepository';
+import { PrismaSavedCardRepository } from '../repositories/PrismaSavedCardRepository';
 
-import { PrismaCouponRepository } from '@/repositories/PrismaCouponRepository';
-import { PrismaCouponUsageRepository } from '@/repositories/PrismaCouponUsageRepository';
-import { PrismaPlatformSettingRepository } from '@/repositories/PrismaPlatformSettingRepository';
-import { PrismaRefundRequestRepository } from '@/repositories/PrismaRefundRequestRepository';
+import { PrismaCouponRepository } from '../repositories/PrismaCouponRepository';
+import { PrismaCouponUsageRepository } from '../repositories/PrismaCouponUsageRepository';
+import { PrismaPlatformSettingRepository } from '../repositories/PrismaPlatformSettingRepository';
+import { PrismaRefundRequestRepository } from '../repositories/PrismaRefundRequestRepository';
 
 import { CreateUserUseCase } from '@/use-cases/CreateUserUseCase';
 import { AuthenticateUserUseCase } from '@/use-cases/AuthenticateUserUseCase';

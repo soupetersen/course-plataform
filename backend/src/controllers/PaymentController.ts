@@ -386,8 +386,7 @@ export class PaymentController {
       }
       const userId = userInfo.userId;
 
-      const course = await this.courseRepository.findById(courseId);
-      if (!course) {
+      const course = await this.courseRepository.findById(courseId);      if (!course) {
         reply.status(404).send({
           success: false,
           error: 'Curso não encontrado'
