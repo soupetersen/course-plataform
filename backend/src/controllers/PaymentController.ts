@@ -10,6 +10,7 @@ import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { Payment, PaymentStatus } from '@/models/Payment';
 import { PaymentGatewayStatus } from '@/interfaces/PaymentGateway';
+import { EnrollInCourseUseCase } from '@/use-cases/EnrollInCourseUseCase';
 
 export class PaymentController {
   constructor(
@@ -21,7 +22,8 @@ export class PaymentController {
     private paymentRepository: PaymentRepository,
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
-    private paymentGatewayFactory: PaymentGatewayFactory
+    private paymentGatewayFactory: PaymentGatewayFactory,
+    private enrollInCourseUseCase: EnrollInCourseUseCase
   ) {}
 
   private mapGatewayStatusToDomain(gatewayStatus: PaymentGatewayStatus): PaymentStatus {
@@ -849,6 +851,7 @@ export class PaymentController {
         error: 'Não foi possível carregar os pagamentos. Tente novamente.',
       });
     }
+    
   }
   async adminApprovePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
@@ -906,6 +909,7 @@ export class PaymentController {
       );
 
       await this.paymentRepository.update(updatedPayment);
+      await this.enrollInCourseUseCase.execute(updatedPayment.userId, updatedPayment.courseId);
 
       console.log(`✅ Pagamento ${paymentId} aprovado pelo admin`);
 
@@ -935,6 +939,7 @@ export class PaymentController {
         error: 'Não foi possível aprovar o pagamento. Tente novamente.',
       });
     }
+
   }
   async adminRejectPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {

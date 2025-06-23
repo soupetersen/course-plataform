@@ -1,11 +1,11 @@
+import { Coupon } from '@/models/Coupon';
+import { CouponUsage } from '@/models/CouponUsage';
 import { PrismaClient } from '@prisma/client';
-import { CouponRepository } from '../../domain/repositories/CouponRepository';
-import { Coupon } from '../../domain/models/Coupon';
 
-export class PrismaCouponRepository implements CouponRepository {
+export class PrismaCouponRepository implements PrismaCouponRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async create(coupon: Coupon): Promise<Coupon> {
+  async create(coupon: CouponUsage): Promise<Coupon> {
     const created = await this.prisma.coupon.create({
       data: {
         code: coupon.code,
