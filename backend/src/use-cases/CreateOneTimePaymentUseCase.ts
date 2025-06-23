@@ -97,16 +97,9 @@ export class CreateOneTimePaymentUseCase {
     const platformFeeAmount = (amount * platformFeePercentage) / 100;
     const instructorAmount = amount - platformFeeAmount;
 
-    // Determinar a notification URL - usar ngrok se disponível para desenvolvimento
-    console.log('DEBUG - Environment variables:');
-    console.log('  NGROK_URL:', process.env.NGROK_URL);
-    console.log('  API_BASE_URL:', process.env.API_BASE_URL);
-    
-    const baseUrl = process.env.NGROK_URL || process.env.API_BASE_URL || 'http://localhost:3000';
-    const notificationUrl = `${baseUrl}/api/payments/webhook`;
+    // Determinar URLs
     const returnUrl = `${process.env.FRONTEND_URL}/courses/${courseId}?payment=success`;
 
-    console.log('Notification URL para MercadoPago:', notificationUrl);
     console.log('Return URL para MercadoPago:', returnUrl);
 
     // Processar dados do cartão (novo ou salvo)
@@ -151,10 +144,7 @@ export class CreateOneTimePaymentUseCase {
       }
     }
 
-    // Criar pagamento no gateway - sempre usar notification_url se ngrok estiver configurado
-    const shouldUseNotification = Boolean(process.env.NGROK_URL);
-    console.log('Should use notification:', shouldUseNotification);
-    
+    // Criar pagamento no gateway
     const gatewayRequest = {
       amount: amount,
       currency: finalCurrency,
@@ -171,7 +161,6 @@ export class CreateOneTimePaymentUseCase {
         instructorAmount: instructorAmount.toString(),
         ...(couponCode && { couponCode })
       },
-      ...(shouldUseNotification && { notificationUrl: notificationUrl }),
       returnUrl: returnUrl,
       ...(finalCardData && { cardData: finalCardData })
     };

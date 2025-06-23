@@ -74,7 +74,6 @@ export class PrismaPaymentRepository implements PaymentRepository {
 
     return results.map(this.toDomain);
   }
-
   async findByUserAndCourse(userId: string, courseId: string): Promise<Payment[]> {
     const results = await this.prisma.payment.findMany({
       where: { 
@@ -85,6 +84,19 @@ export class PrismaPaymentRepository implements PaymentRepository {
     });
 
     return results.map(this.toDomain);
+  }
+
+  async findPendingByCourseAndUser(courseId: string, userId: string): Promise<Payment | null> {
+    const result = await this.prisma.payment.findFirst({
+      where: { 
+        userId,
+        courseId,
+        status: 'PENDING',
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return result ? this.toDomain(result) : null;
   }
 
   async update(payment: Payment): Promise<Payment> {

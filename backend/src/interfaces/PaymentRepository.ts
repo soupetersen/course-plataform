@@ -6,7 +6,9 @@ export interface PaymentRepository {
   findByExternalPaymentId(externalPaymentId: string): Promise<Payment | null>; 
   findByStripePaymentId(stripePaymentId: string): Promise<Payment | null>;
   findByUserId(userId: string): Promise<Payment[]>;
-  findByCourseId(courseId: string): Promise<Payment[]>;  findByUserAndCourse(userId: string, courseId: string): Promise<Payment[]>;
+  findByCourseId(courseId: string): Promise<Payment[]>;  
+  findByUserAndCourse(userId: string, courseId: string): Promise<Payment[]>;
+  findPendingByCourseAndUser(courseId: string, userId: string): Promise<Payment | null>;
   update(payment: Payment): Promise<Payment>;
   delete(id: string): Promise<void>;
 }

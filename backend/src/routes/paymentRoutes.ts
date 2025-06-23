@@ -44,6 +44,26 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
   }, paymentController.handleWebhook.bind(paymentController));
 
+  // Rota GET para webhook apenas para debug/informação
+  fastify.get('/webhook', {
+    config: {
+      skipAuth: true
+    }
+  }, async (request, reply) => {
+    return {
+      message: 'Webhook endpoint está funcionando',
+      method: 'POST',
+      contentType: 'application/json',
+      description: 'Use POST para enviar notificações de pagamento',
+      example: {
+        type: 'payment',
+        data: {
+          id: 'payment_id_here'
+        }
+      }
+    };
+  });
+
     fastify.post('/one-time', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {
@@ -92,8 +112,20 @@ export async function paymentRoutes(fastify: FastifyInstance) {
           paymentId: { type: 'string' }
         }
       }
+    }  }, paymentController.getPaymentStatus.bind(paymentController));
+  
+  fastify.get('/course/:courseId/pending', {
+    preHandler: authMiddleware.authenticate.bind(authMiddleware),
+    schema: {
+      params: {
+        type: 'object',
+        properties: {
+          courseId: { type: 'string' }
+        }
+      }
     }
-  }, paymentController.getPaymentStatus.bind(paymentController));
+  }, paymentController.getCoursePendingPayment.bind(paymentController));
+  
   fastify.post('/validate-coupon', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware),
     schema: {

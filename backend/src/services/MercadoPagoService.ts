@@ -3,7 +3,6 @@ import {
   PaymentGateway,
   CreatePaymentRequest,
   CreatePaymentResponse,
-  PaymentStatusResponse,
   CreateCustomerRequest,
   CreateCustomerResponse,
   WebhookResponse,
@@ -13,7 +12,8 @@ import {
   CreateSubscriptionResponse,
   SubscriptionStatusResponse,
   CancelSubscriptionResponse,
-  SubscriptionGatewayStatus
+  SubscriptionGatewayStatus,
+  PaymentStatusResponse
 } from '../interfaces/PaymentGateway';
 
 export class MercadoPagoService implements PaymentGateway, StatusMapper {
@@ -56,7 +56,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
           },
           description: request.description,
           metadata: request.metadata || {},
-          ...(request.notificationUrl && { notification_url: request.notificationUrl }),
+          // notification_url removida para usar apenas configuração do painel
         };
 
         const payment = await this.payment.create({ body: paymentData });
@@ -82,50 +82,49 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         };
       }
 
-      // Para cartão de crédito - verificar se tem dados do cartão para checkout transparente
-      if (request.paymentMethod === 'CREDIT_CARD' && request.cardData) {
-        // Checkout Transparente - usar Payment API
-        const paymentData = {
-          transaction_amount: request.amount,
-          payment_method_id: 'visa', // Será detectado automaticamente pelo MP
+      if (request.paymentMethod === 'CREDIT_CARD') {
+        const preferenceData = {
+          items: [
+            {
+              id: `course_${Date.now()}`,
+              title: request.description,
+              currency_id: request.currency,
+              quantity: 1,
+              unit_price: request.amount,
+            }
+          ],
           payer: {
             email: request.customerEmail,
-            first_name: request.customerName.split(' ')[0],
-            last_name: request.customerName.split(' ').slice(1).join(' ') || '',
-            identification: {
-              type: request.cardData.identificationType || 'CPF',
-              number: request.cardData.identificationNumber || '',
-            },
+            name: request.customerName,
           },
-          card: {
-            card_number: request.cardData.cardNumber.replace(/\s+/g, ''),
-            security_code: request.cardData.securityCode,
-            expiration_month: request.cardData.expirationMonth,
-            expiration_year: request.cardData.expirationYear,
-            cardholder: {
-              name: request.cardData.cardHolderName,
-              identification: {
-                type: request.cardData.identificationType || 'CPF',
-                number: request.cardData.identificationNumber || '',
-              },
-            },
+          payment_methods: {
+            excluded_payment_methods: [],
+            excluded_payment_types: [
+              { id: 'ticket' }, 
+              { id: 'bank_transfer' },
+            ],
+            installments: request.cardData?.installments || 12,
           },
-          installments: request.cardData.installments || 1,
-          description: request.description,
+          back_urls: {
+            success: request.returnUrl,
+            failure: request.returnUrl,
+            pending: request.returnUrl,
+          },
+          // notification_url removida para usar apenas configuração do painel
           metadata: request.metadata || {},
-          ...(request.notificationUrl && { notification_url: request.notificationUrl }),
         };
 
-        const payment = await this.payment.create({ body: paymentData });
+        const preference = await this.preference.create({ body: preferenceData });
 
-        if (payment.id) {
+        if (preference.id) {
           return {
             success: true,
-            paymentId: payment.id.toString(),
-            status: this.mapToStandardStatus(payment.status || 'pending'),
+            paymentId: preference.id,
+            orderId: preference.id,
+            status: 'PENDING',
             paymentData: {
-              transactionId: payment.id.toString(),
-              authorizationCode: payment.authorization_code,
+              checkoutUrl: preference.init_point,
+              sandboxUrl: preference.sandbox_init_point,
             }
           };
         }
@@ -134,52 +133,64 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
           success: false,
           paymentId: '',
           status: 'REJECTED',
-          error: 'Falha ao criar pagamento com cartão'
+          error: 'Falha ao criar preferência de pagamento para cartão'
         };
       }
 
-      // Para outros métodos ou cartão sem dados - usar Preference API (checkout pro)
+      // Para outros métodos (boleto) - usar Preference API (checkout pro)
+      if (request.paymentMethod === 'BOLETO') {
+        const preferenceData = {
+          items: [
+            {
+              id: `course_${Date.now()}`,
+              title: request.description,
+              currency_id: request.currency,
+              quantity: 1,
+              unit_price: request.amount,
+            }
+          ],
+          payer: {
+            email: request.customerEmail,
+            name: request.customerName,
+          },
+          payment_methods: {
+            excluded_payment_methods: [],
+            excluded_payment_types: [
+              { id: 'credit_card' }, // Excluir cartão de crédito
+              { id: 'debit_card' }, // Excluir cartão de débito
+              { id: 'bank_transfer' }, // Excluir transferência
+            ],
+            installments: 1,
+          },
+          back_urls: {
+            success: request.returnUrl,
+            failure: request.returnUrl,
+            pending: request.returnUrl,
+          },
+          // notification_url removida para usar apenas configuração do painel
+          metadata: request.metadata || {},
+        };
 
-      const preferenceData = {
-        items: [
-          {
-            id: `course_${Date.now()}`,
-            title: request.description,
-            currency_id: request.currency,
-            quantity: 1,
-            unit_price: request.amount,
-          }
-        ],
-        payer: {
-          email: request.customerEmail,
-          name: request.customerName,
-        },
-        payment_methods: {
-          excluded_payment_methods: [],
-          excluded_payment_types: this.getExcludedPaymentTypes(request.paymentMethod || 'CREDIT_CARD'),
-          installments: request.paymentMethod === 'CREDIT_CARD' ? 12 : 1,
-        },
-        back_urls: {
-          success: request.returnUrl,
-          failure: request.returnUrl,
-          pending: request.returnUrl,
-        },
-        ...(request.notificationUrl && { notification_url: request.notificationUrl }),
-        metadata: request.metadata || {},
-      };
+        const preference = await this.preference.create({ body: preferenceData });
 
-      const preference = await this.preference.create({ body: preferenceData });
+        if (preference.id) {
+          return {
+            success: true,
+            paymentId: preference.id,
+            orderId: preference.id,
+            status: 'PENDING',
+            paymentData: {
+              checkoutUrl: preference.init_point,
+              sandboxUrl: preference.sandbox_init_point,
+            }
+          };
+        }
 
-      if (preference.id) {
         return {
-          success: true,
-          paymentId: preference.id,
-          orderId: preference.id,
-          status: 'PENDING',
-          paymentData: {
-            checkoutUrl: preference.init_point,
-            sandboxUrl: preference.sandbox_init_point,
-          }
+          success: false,
+          paymentId: '',
+          status: 'REJECTED',
+          error: 'Falha ao criar preferência de pagamento para boleto'
         };
       }
 
@@ -187,7 +198,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         success: false,
         paymentId: '',
         status: 'REJECTED',
-        error: 'Falha ao criar preferência de pagamento'
+        error: `Método de pagamento ${request.paymentMethod} não suportado`
       };
 
     } catch (error) {
@@ -203,30 +214,45 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
 
   async getPaymentStatus(paymentId: string): Promise<PaymentStatusResponse> {
     try {
+      console.log(`🔍 Buscando status do pagamento ${paymentId} na API do Mercado Pago`);
+      
       const payment = await this.payment.get({ id: paymentId });
+      
+      if (payment) {
+        const status = this.mapToStandardStatus(payment.status || 'pending');
+        
+        console.log(`✅ Status encontrado: ${payment.status} -> ${status}`);
+        
+        return {
+          success: true,
+          status,
+          paymentId: payment.id?.toString() || paymentId,
+          amount: payment.transaction_amount || 0,
+          metadata: payment.metadata || {},
+        };
+      }
 
       return {
-        success: true,
-        paymentId: payment.id?.toString() || paymentId,
-        status: this.mapToStandardStatus(payment.status || 'pending'),
-        amount: payment.transaction_amount || 0,
-        paidAmount: payment.transaction_details?.net_received_amount || 0,
-        metadata: payment.metadata || {},
+        success: false,
+        error: 'Payment not found',
+        status: 'REJECTED',
+        paymentId,
+        amount: 0,
       };
     } catch (error) {
-      console.error('Erro ao buscar status do pagamento:', error);
+      console.error('❌ Erro ao buscar status do pagamento:', error);
       return {
         success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        status: 'REJECTED',
         paymentId,
-        status: 'PENDING',
-        error: error instanceof Error ? error.message : 'Erro desconhecido'
+        amount: 0,
       };
     }
   }
 
   async processWebhook(payload: any): Promise<WebhookResponse> {
     try {
-      // Mercado Pago envia diferentes tipos de webhook
       if (payload.type === 'payment') {
         const paymentId = payload.data?.id;
         
@@ -255,7 +281,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     }
   }
 
-  // Mapeamento de status do Mercado Pago para status padronizado
   mapToStandardStatus(mercadoPagoStatus: string): PaymentGatewayStatus {
     const statusMap: Record<string, PaymentGatewayStatus> = {
       'pending': 'PENDING',
@@ -284,17 +309,13 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     return statusMap[standardStatus] || 'pending';
   }
 
-  // ===============================
-  // MÉTODOS PARA ASSINATURAS (PREAPPROVAL)
-  // ===============================
-
   async createSubscription(request: CreateSubscriptionRequest): Promise<CreateSubscriptionResponse> {
     try {
       const preApprovalData = {
         reason: request.description,
         payer_email: request.customerEmail,
         back_url: request.returnUrl,
-        ...(request.notificationUrl && { notification_url: request.notificationUrl }),
+        // notification_url removida para usar apenas configuração do painel
         auto_recurring: {
           frequency: request.frequency,
           frequency_type: request.frequencyType,
@@ -366,7 +387,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
 
   async cancelSubscription(subscriptionId: string): Promise<CancelSubscriptionResponse> {
     try {
-      // Para cancelar uma assinatura no Mercado Pago, precisamos atualizar o status para 'cancelled'
       const updateData = {
         status: 'cancelled',
       };
@@ -392,7 +412,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     }
   }
 
-  // Mapeamento de status de assinatura do Mercado Pago para status padronizado
   private mapToStandardSubscriptionStatus(mercadoPagoStatus: string): SubscriptionGatewayStatus {
     const statusMap: Record<string, SubscriptionGatewayStatus> = {
       'pending': 'PENDING',
@@ -403,47 +422,5 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
     };
 
     return statusMap[mercadoPagoStatus] || 'PENDING';
-  }
-
-  private getExcludedPaymentTypes(paymentMethod: string): { id: string }[] {
-    // No MercadoPago:
-    // - credit_card: Cartões de crédito
-    // - debit_card: Cartões de débito  
-    // - ticket: Boleto bancário
-    // - bank_transfer: PIX e transferências
-    
-    switch (paymentMethod) {
-      case 'PIX':
-        // Só permite PIX (bank_transfer), exclui outros
-        return [
-          { id: 'credit_card' },
-          { id: 'debit_card' }, 
-          { id: 'ticket' }
-        ];
-      case 'CREDIT_CARD':
-        // Só permite cartão de crédito
-        return [
-          { id: 'debit_card' },
-          { id: 'ticket' },
-          { id: 'bank_transfer' }
-        ];
-      case 'DEBIT_CARD':
-        // Só permite cartão de débito
-        return [
-          { id: 'credit_card' },
-          { id: 'ticket' },
-          { id: 'bank_transfer' }
-        ];
-      case 'BOLETO':
-        // Só permite boleto (ticket)
-        return [
-          { id: 'credit_card' },
-          { id: 'debit_card' },
-          { id: 'bank_transfer' }
-        ];
-      default:
-        // Se não especificado, permite todos
-        return [];
-    }
   }
 }

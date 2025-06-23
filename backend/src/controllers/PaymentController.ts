@@ -8,8 +8,11 @@ import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
+import { Payment, PaymentStatus } from '@/models/Payment';
+import { PaymentGatewayStatus } from '@/interfaces/PaymentGateway';
 
-export class PaymentController {  constructor(
+export class PaymentController {
+  constructor(
     private createOneTimePaymentUseCase: CreateOneTimePaymentUseCase,
     private createSubscriptionPaymentUseCase: CreateSubscriptionPaymentUseCase,
     private validateCouponUseCase: ValidateCouponUseCase,
@@ -19,7 +22,19 @@ export class PaymentController {  constructor(
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
     private paymentGatewayFactory: PaymentGatewayFactory
-  ) {}async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  ) {}
+
+  private mapGatewayStatusToDomain(gatewayStatus: PaymentGatewayStatus): PaymentStatus {
+    const statusMap: Record<PaymentGatewayStatus, PaymentStatus> = {
+      'PENDING': PaymentStatus.PENDING,
+      'APPROVED': PaymentStatus.COMPLETED,
+      'REJECTED': PaymentStatus.FAILED,
+      'CANCELLED': PaymentStatus.CANCELLED,
+      'REFUNDED': PaymentStatus.REFUNDED,
+    };
+    
+    return statusMap[gatewayStatus] || PaymentStatus.PENDING;
+  }async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId, currency, paymentMethod = 'PIX', gatewayType, couponCode, cardData } = req.body as any;
       const userInfo = (req as any).userInfo;
@@ -97,9 +112,18 @@ export class PaymentController {  constructor(
         error: error instanceof Error ? error.message : 'Não foi possível processar a assinatura.',
       });
     }
-  }// Webhook genérico para processamento de notificações de pagamento
+  }  // Webhook genérico para processamento de notificações de pagamento
   async handleWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
+      // Log detalhado do webhook recebido
+      console.log('🔔 Webhook recebido:', {
+        method: req.method,
+        headers: req.headers,
+        body: req.body,
+        query: req.query,
+        url: req.url
+      });
+
       const gatewayType = req.headers['x-gateway-type'] as string || 'MERCADOPAGO';
       const gateway = this.paymentGatewayFactory.getGateway(gatewayType as any);
       
@@ -207,7 +231,88 @@ export class PaymentController {  constructor(
         return;
       }
 
-      // Retornar status atualizado do banco (webhook já atualiza automaticamente)
+      console.log(`📋 Consultando status do pagamento ${paymentId} (provider: ${payment.gatewayProvider})`);
+
+      // Se o pagamento já está finalizado (approved/rejected/cancelled), retorna do banco
+      if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(payment.status)) {
+        console.log(`✅ Pagamento ${paymentId} já finalizado com status: ${payment.status}`);
+        reply.status(200).send({
+          success: true,
+          data: {
+            id: payment.id,
+            status: payment.status,
+            amount: payment.amount,
+            currency: payment.currency,
+            paymentType: payment.paymentType,
+            createdAt: payment.createdAt,
+            updatedAt: payment.updatedAt,
+          },
+        });
+        return;
+      }
+
+      // Para pagamentos pendentes, buscar status atualizado na API do gateway
+      try {
+        if (payment.gatewayProvider === 'MERCADOPAGO' && payment.externalPaymentId) {
+          const gateway = this.paymentGatewayFactory.getGateway('MERCADOPAGO');
+          const statusResponse = await gateway.getPaymentStatus(payment.externalPaymentId);
+          
+          if (statusResponse.success) {
+            console.log(`🔄 Status do Mercado Pago: ${statusResponse.status} para pagamento ${paymentId}`);
+              // Se o status mudou, atualizar no banco
+            const domainStatus = this.mapGatewayStatusToDomain(statusResponse.status);
+            if (domainStatus !== payment.status) {
+              console.log(`🔄 Atualizando status do pagamento ${paymentId}: ${payment.status} -> ${domainStatus}`);
+              
+              // Criar um novo objeto Payment com o status atualizado
+              const updatedPayment = new Payment(
+                payment.id,
+                payment.userId,
+                payment.courseId,
+                payment.externalPaymentId,
+                payment.amount,
+                payment.currency,
+                domainStatus,
+                payment.paymentType,
+                payment.createdAt,
+                new Date(), // updatedAt
+                payment.externalOrderId,
+                payment.paymentData,
+                payment.paymentMethod,
+                payment.platformFeeAmount,
+                payment.instructorAmount,
+                payment.gatewayProvider
+              );
+              
+              await this.paymentRepository.update(updatedPayment);
+              
+              console.log(`✅ Status do pagamento ${paymentId} atualizado no banco para: ${domainStatus}`);
+              
+              // Retornar o status atualizado
+              reply.status(200).send({
+                success: true,
+                data: {
+                  id: updatedPayment.id,
+                  status: updatedPayment.status,
+                  amount: updatedPayment.amount,
+                  currency: updatedPayment.currency,
+                  paymentType: updatedPayment.paymentType,
+                  createdAt: updatedPayment.createdAt,
+                  updatedAt: updatedPayment.updatedAt,
+                },
+              });
+              return;
+            }
+          } else {
+            console.log(`⚠️ Erro ao consultar status no Mercado Pago: ${statusResponse.error}`);
+          }
+        }
+      } catch (gatewayError) {
+        console.error(`❌ Erro ao consultar gateway para pagamento ${paymentId}:`, gatewayError);
+        // Continua e retorna o status do banco mesmo se houver erro no gateway
+      }
+
+      // Retornar status atual do banco (não houve mudança ou erro no gateway)
       reply.status(200).send({
         success: true,
         data: {
@@ -219,14 +324,59 @@ export class PaymentController {  constructor(
           createdAt: payment.createdAt,
           updatedAt: payment.updatedAt,
         },
-      });
-    } catch (error) {
+      });} catch (error) {
       req.log.error('Error fetching payment status:', error);reply.status(500).send({
         success: false,
         error: 'Não foi possível carregar payment status. Tente novamente.',
       });
     }
-  }  async validateCoupon(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  }
+
+  async getCoursePendingPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+    try {
+      const { courseId } = req.params as any;
+      const userInfo = (req as any).userInfo;
+      
+      if (!userInfo) {
+        reply.status(401).send({ 
+          success: false, 
+          error: 'Você precisa estar logado para consultar pagamentos.' 
+        });
+        return;
+      }
+
+      // Buscar pagamento pendente para este curso e usuário
+      const pendingPayment = await this.paymentRepository.findPendingByCourseAndUser(courseId, userInfo.userId);
+      
+      if (pendingPayment) {
+        reply.status(200).send({
+          success: true,
+          data: {
+            id: pendingPayment.id,
+            status: pendingPayment.status,
+            amount: pendingPayment.amount,
+            currency: pendingPayment.currency,
+            paymentType: pendingPayment.paymentType,
+            createdAt: pendingPayment.createdAt,
+            updatedAt: pendingPayment.updatedAt,
+          },
+        });
+      } else {
+        reply.status(200).send({
+          success: true,
+          data: null,
+        });
+      }
+    } catch (error) {
+      req.log.error('Error fetching course pending payment:', error);
+      reply.status(500).send({
+        success: false,
+        error: 'Não foi possível verificar pagamentos pendentes. Tente novamente.',
+      });
+    }
+  }
+
+  async validateCoupon(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { code, courseId } = req.body as { code: string; courseId: string };
       const userInfo = (req as any).userInfo;

@@ -1,11 +1,17 @@
 version: 2
+authtoken: 2i1OpGKztCC3EM34SlEE6OwL5sA_4PoCW6fg8KzybH5nKULev
 web_addr: localhost:4040
 tunnels:
   api:
     proto: http
     addr: 3000
-    bind_tls: true
     inspect: false
     schemes:
       - https
     host_header: rewrite
+    request_header:
+      add:
+        - "ngrok-skip-browser-warning: true"
+    response_header:
+      add:
+        - "ngrok-skip-browser-warning: true"
