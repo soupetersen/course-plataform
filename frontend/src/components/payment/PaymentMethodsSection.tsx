@@ -16,6 +16,7 @@ interface PaymentMethodsSectionProps {
   onNewCardSelected: () => void;
   isProcessingPayment: boolean;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
+  creditCardData?: CreditCardData | null; // Nova prop para dados existentes
 }
 
 export function PaymentMethodsSection({
@@ -27,6 +28,7 @@ export function PaymentMethodsSection({
   onNewCardSelected,
   isProcessingPayment,
   paymentType,
+  creditCardData,
 }: PaymentMethodsSectionProps) {
   const getMethodIcon = (method: string) => {
     switch (method) {
@@ -120,6 +122,7 @@ export function PaymentMethodsSection({
                     onCardDataChange={onCreditCardDataChange}
                     maxInstallments={paymentType === "ONE_TIME" ? 12 : 1}
                     isLoading={isProcessingPayment}
+                    initialData={creditCardData || undefined}
                   />
                 </div>
               )}

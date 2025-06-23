@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,32 +27,47 @@ interface CreditCardFormProps {
   onCardDataChange: (cardData: CreditCardData) => void;
   maxInstallments?: number;
   isLoading?: boolean;
+  initialData?: CreditCardData;
 }
 
 export function CreditCardForm({
   onCardDataChange,
   maxInstallments = 12,
   isLoading = false,
+  initialData,
 }: CreditCardFormProps) {
-  const [cardData, setCardData] = useState<CreditCardData>({
-    cardNumber: "",
-    cardHolderName: "",
-    expirationMonth: "",
-    expirationYear: "",
-    securityCode: "",
-    installments: 1,
-    identificationType: "CPF",
-    identificationNumber: "",
-    saveCard: false,
-  });
+  const [cardData, setCardData] = useState<CreditCardData>(
+    initialData || {
+      cardNumber: "",
+      cardHolderName: "",
+      expirationMonth: "",
+      expirationYear: "",
+      securityCode: "",
+      installments: 1,
+      identificationType: "CPF",
+      identificationNumber: "",
+      saveCard: false,
+    }
+  );
 
   const [errors, setErrors] = useState<Partial<CreditCardData>>({});
+
+  useEffect(() => {
+    if (initialData) {
+      setCardData(initialData);
+    }
+  }, [initialData]);
 
   const updateCardData = (
     field: keyof CreditCardData,
     value: string | number | boolean
   ) => {
     const updatedData = { ...cardData, [field]: value };
+
+    if (field === "saveCard") {
+      console.log("💾 SaveCard changed:", value, "Full data:", updatedData);
+    }
+
     setCardData(updatedData);
     onCardDataChange(updatedData);
 

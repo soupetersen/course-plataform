@@ -9,10 +9,12 @@ import { CartStep } from "./CartStep";
 import { PaymentStep } from "./PaymentStep";
 import { CheckoutStep } from "./CheckoutStep";
 import { PixPaymentModal } from "./PixPaymentModal";
+import { PaymentWaitingModal } from "./PaymentWaitingModal";
 
 // Types and services
 import { CreditCardData } from "./CreditCardForm";
 import { SavedCard } from "@/services/savedCards";
+import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 
 interface Course {
   id: string;
@@ -88,7 +90,83 @@ export function PaymentCheckout({
     paymentId: string;
   } | null>(null);
   const [showPixModal, setShowPixModal] = useState(false);
+
+  // Payment waiting states
+  const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
+  const [showWaitingModal, setShowWaitingModal] = useState(false);
+  const [pendingPayments, setPendingPayments] = useState<Set<string>>(
+    new Set()
+  );
+
+  // Payment status hook
+  const { payment, isPolling, startPolling, stopPolling } =
+    usePaymentStatus(currentPaymentId);
+
   const { toast } = useToast();
+
+  // Verificar se já existe pagamento pendente para este curso
+  const checkPendingPayment = useCallback(async () => {
+    try {
+      const response = await api.get(
+        `/api/payments/course/${course.id}/pending`
+      );
+      if (response.data.success && response.data.data) {
+        const pendingPayment = response.data.data;
+        console.log("Pagamento pendente encontrado:", pendingPayment);
+
+        // Adicionar à lista de pagamentos pendentes
+        setPendingPayments((prev) => new Set(prev).add(course.id));
+        setCurrentPaymentId(pendingPayment.id);
+        setShowWaitingModal(true);
+
+        // Iniciar polling para este pagamento
+        startPolling(
+          pendingPayment.id,
+          (status) => {
+            console.log("Callback do polling:", status);
+            setPendingPayments((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(course.id);
+              return newSet;
+            });
+            setShowWaitingModal(false);
+
+            if (status.status === "COMPLETED") {
+              onPaymentSuccess(status.id);
+            } else {
+              setCurrentPaymentId(null);
+            }
+          },
+          () => {
+            // Callback para quando pagamento não for encontrado
+            console.log(
+              "Pagamento pendente não encontrado, cancelando operação"
+            );
+            setPendingPayments((prev) => {
+              const newSet = new Set(prev);
+              newSet.delete(course.id);
+              return newSet;
+            });
+            setShowWaitingModal(false);
+            setCurrentPaymentId(null);
+            toast({
+              title: "Pagamento não encontrado",
+              description:
+                "O pagamento não foi encontrado no sistema. Tente novamente.",
+              variant: "destructive",
+            });
+          }
+        );
+      }
+    } catch (error) {
+      console.error("Erro ao verificar pagamento pendente:", error);
+    }
+  }, [course.id, startPolling, onPaymentSuccess, toast]);
+
+  // Verificar pagamento pendente ao carregar o componente
+  useEffect(() => {
+    checkPendingPayment();
+  }, [checkPendingPayment]);
 
   useEffect(() => {
     if (
@@ -186,9 +264,30 @@ export function PaymentCheckout({
   };
 
   const processPayment = async () => {
+    console.log("🎯 ProcessPayment - Dados atuais:", {
+      selectedPaymentMethod,
+      useNewCard,
+      creditCardData,
+      selectedSavedCard,
+      savedCardCvv,
+    });
+
+    // Verificar se já existe pagamento pendente para este curso
+    if (pendingPayments.has(course.id)) {
+      toast({
+        title: "Pagamento em andamento",
+        description:
+          "Já existe um pagamento sendo processado para este curso. Aguarde a confirmação.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsProcessingPayment(true);
 
     try {
+      console.log("Processing payment with credit card data:", creditCardData);
+
       const endpoint =
         paymentType === "SUBSCRIPTION"
           ? "/api/payments/subscription"
@@ -226,6 +325,8 @@ export function PaymentCheckout({
         }),
       };
 
+      console.log("Payment data being sent:", paymentData);
+
       const response = await api.post(endpoint, paymentData);
 
       if (response.data) {
@@ -254,6 +355,67 @@ export function PaymentCheckout({
           console.log("Not PIX or no payment data");
           console.log("Is PIX?", selectedPaymentMethod === "PIX");
           console.log("Has payment data?", !!responseData.paymentData);
+        }
+
+        // Para cartão de crédito, iniciar o polling e aguardar confirmação do webhook
+        if (selectedPaymentMethod === "CREDIT_CARD" && responseData.paymentId) {
+          console.log(
+            "Iniciando polling para pagamento:",
+            responseData.paymentId
+          );
+
+          // Adicionar à lista de pagamentos pendentes
+          setPendingPayments((prev) => new Set(prev).add(course.id));
+          setCurrentPaymentId(responseData.paymentId);
+          setShowWaitingModal(true);
+
+          // Iniciar polling
+          startPolling(
+            responseData.paymentId,
+            (status) => {
+              console.log("Polling finalizado com status:", status);
+
+              // Remover da lista de pendentes
+              setPendingPayments((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(course.id);
+                return newSet;
+              });
+
+              setShowWaitingModal(false);
+              setIsProcessingPayment(false);
+
+              if (status.status === "COMPLETED") {
+                onPaymentSuccess(status.id);
+              } else {
+                // Para status de falha, permitir nova tentativa
+                setCurrentPaymentId(null);
+                onPaymentError(`Pagamento ${status.status.toLowerCase()}`);
+              }
+            },
+            () => {
+              // Callback para quando pagamento não for encontrado
+              console.log(
+                "Pagamento não encontrado durante polling, cancelando operação"
+              );
+              setPendingPayments((prev) => {
+                const newSet = new Set(prev);
+                newSet.delete(course.id);
+                return newSet;
+              });
+              setShowWaitingModal(false);
+              setIsProcessingPayment(false);
+              setCurrentPaymentId(null);
+              toast({
+                title: "Pagamento não encontrado",
+                description:
+                  "O pagamento não foi encontrado no sistema. Tente novamente.",
+                variant: "destructive",
+              });
+            }
+          );
+
+          return; // Não chamar onPaymentSuccess imediatamente
         }
 
         if (responseData.url) {
@@ -291,7 +453,10 @@ export function PaymentCheckout({
       });
       onPaymentError(errorMessage);
     } finally {
-      setIsProcessingPayment(false);
+      // Só resetar isProcessingPayment se não estiver aguardando confirmação
+      if (!showWaitingModal) {
+        setIsProcessingPayment(false);
+      }
     }
   };
 
@@ -387,6 +552,9 @@ export function PaymentCheckout({
                 formatDiscount={formatDiscount}
                 onContinue={goToNextStep}
                 onBack={goToPreviousStep}
+                creditCardData={creditCardData}
+                selectedSavedCard={selectedSavedCard}
+                savedCardCvv={savedCardCvv}
               />
             </div>
           )}
@@ -400,7 +568,8 @@ export function PaymentCheckout({
                 appliedCoupon={appliedCoupon}
                 formatCurrency={formatCurrency}
                 paymentType={paymentType}
-                isProcessingPayment={isProcessingPayment}
+                isProcessingPayment={isProcessingPayment || isPolling}
+                hasPendingPayment={pendingPayments.has(course.id)}
                 onProcessPayment={processPayment}
                 onBack={goToPreviousStep}
               />
@@ -421,6 +590,40 @@ export function PaymentCheckout({
           }}
         />
       )}
+
+      {/* Payment Waiting Modal */}
+      <PaymentWaitingModal
+        isOpen={showWaitingModal}
+        paymentStatus={payment?.status || null}
+        paymentId={currentPaymentId}
+        onClose={() => {
+          setShowWaitingModal(false);
+          setCurrentPaymentId(null);
+          stopPolling();
+          setPendingPayments((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(course.id);
+            return newSet;
+          });
+        }}
+        onSuccess={() => {
+          setShowWaitingModal(false);
+          if (currentPaymentId) {
+            onPaymentSuccess(currentPaymentId);
+          }
+        }}
+        onError={() => {
+          setShowWaitingModal(false);
+          setCurrentPaymentId(null);
+          stopPolling();
+          setPendingPayments((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(course.id);
+            return newSet;
+          });
+          setIsProcessingPayment(false);
+        }}
+      />
     </div>
   );
 }

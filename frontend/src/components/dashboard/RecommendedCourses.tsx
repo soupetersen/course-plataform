@@ -79,8 +79,12 @@ export const RecommendedCourses = ({
               )}
 
               <div className="flex flex-col flex-1 p-4">
-                <div className="flex items-center justify-between mb-3">                  <Badge
-                    className={`text-xs font-medium transition-colors ${getLevelColor(course.level)}`}
+                <div className="flex items-center justify-between mb-3">
+                  {" "}
+                  <Badge
+                    className={`text-xs font-medium transition-colors ${getLevelColor(
+                      course.level
+                    )}`}
                   >
                     {getLevelText(course.level)}
                   </Badge>

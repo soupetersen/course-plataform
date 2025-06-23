@@ -37,6 +37,10 @@ interface PaymentStepProps {
 
   onContinue: () => void;
   onBack: () => void;
+
+  creditCardData?: CreditCardData | null;
+  selectedSavedCard?: SavedCard | null;
+  savedCardCvv?: string;
 }
 
 export function PaymentStep({
@@ -57,10 +61,45 @@ export function PaymentStep({
   formatDiscount,
   onContinue,
   onBack,
+  creditCardData,
+  selectedSavedCard,
+  savedCardCvv,
 }: PaymentStepProps) {
-  const canContinue =
-    selectedPaymentMethod &&
-    (selectedPaymentMethod !== "CREDIT_CARD" || useNewCard);
+  // Atualizada lógica para considerar cartões salvos
+  const canContinue = () => {
+    if (!selectedPaymentMethod) return false;
+
+    if (selectedPaymentMethod !== "CREDIT_CARD") {
+      return true; // PIX ou Boleto podem continuar
+    }
+
+    if (useNewCard) {
+      // Para novo cartão, verificar se dados básicos estão preenchidos
+      const isValid =
+        creditCardData &&
+        creditCardData.cardNumber &&
+        creditCardData.cardHolderName &&
+        creditCardData.expirationMonth &&
+        creditCardData.expirationYear &&
+        creditCardData.securityCode &&
+        creditCardData.identificationType &&
+        creditCardData.identificationNumber;
+
+      console.log("🎯 PaymentStep - Novo cartão:", { isValid, creditCardData });
+      return isValid;
+    } else {
+      // Para cartão salvo, verificar se cartão foi selecionado e CVV preenchido
+      const isValid =
+        selectedSavedCard && savedCardCvv && savedCardCvv.length >= 3;
+
+      console.log("🎯 PaymentStep - Cartão salvo:", {
+        isValid,
+        selectedSavedCard: selectedSavedCard?.id,
+        savedCardCvv: savedCardCvv?.length,
+      });
+      return isValid;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -84,6 +123,7 @@ export function PaymentStep({
             onNewCardSelected={onNewCardSelected}
             isProcessingPayment={isProcessingPayment}
             paymentType={paymentType}
+            creditCardData={creditCardData}
           />
         </div>
 
@@ -113,7 +153,7 @@ export function PaymentStep({
         </Button>
         <Button
           onClick={onContinue}
-          disabled={!canContinue || isProcessingPayment}
+          disabled={!canContinue() || isProcessingPayment}
           className="flex-1 group hover:scale-[1.02] transition-transform"
         >
           Continuar

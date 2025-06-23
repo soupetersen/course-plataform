@@ -26,7 +26,8 @@ export const CourseStats = ({ course }: CourseStatsProps) => {
       label: "Avaliação",
       value: course.averageRating?.toFixed(1) || "0.0",
       color: "text-yellow-600",
-    },    {
+    },
+    {
       icon: Award,
       label: "Nível",
       value: getLevelText(course.level),

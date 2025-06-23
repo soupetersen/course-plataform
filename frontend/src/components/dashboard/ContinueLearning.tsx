@@ -38,8 +38,14 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
             key={enrollment.id}
             className="course-card hover:shadow-lg transition-shadow duration-200 group fade-in-up flex flex-col h-full"
           >
-            <CardHeader className="card-header pb-3 p-3 sm:p-4 lg:p-6 sm:pb-3 flex-1">              <div className="flex items-center justify-between mb-2">
-                <Badge className={`badge-responsive ${getLevelColor(enrollment.course.level)}`}>
+            <CardHeader className="card-header pb-3 p-3 sm:p-4 lg:p-6 sm:pb-3 flex-1">
+              {" "}
+              <div className="flex items-center justify-between mb-2">
+                <Badge
+                  className={`badge-responsive ${getLevelColor(
+                    enrollment.course.level
+                  )}`}
+                >
                   {getLevelText(enrollment.course.level)}
                 </Badge>
                 <div className="text-xs sm:text-sm text-gray-500">

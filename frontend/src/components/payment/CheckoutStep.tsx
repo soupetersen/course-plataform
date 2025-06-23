@@ -48,6 +48,7 @@ interface CheckoutStepProps {
   formatCurrency: (amount: number) => string;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
   isProcessingPayment: boolean;
+  hasPendingPayment?: boolean;
   onProcessPayment: () => void;
   onBack: () => void;
 }
@@ -60,6 +61,7 @@ export function CheckoutStep({
   formatCurrency,
   paymentType,
   isProcessingPayment,
+  hasPendingPayment = false,
   onProcessPayment,
   onBack,
 }: CheckoutStepProps) {
@@ -326,7 +328,7 @@ export function CheckoutStep({
             </Button>
             <Button
               onClick={onProcessPayment}
-              disabled={isProcessingPayment}
+              disabled={isProcessingPayment || hasPendingPayment}
               size="lg"
               className="flex-1 font-semibold hover:scale-[1.02] transition-transform"
             >
@@ -334,6 +336,11 @@ export function CheckoutStep({
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Processando...
+                </>
+              ) : hasPendingPayment ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Pagamento Pendente...
                 </>
               ) : (
                 <>

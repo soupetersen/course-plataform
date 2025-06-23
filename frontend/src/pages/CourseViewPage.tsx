@@ -28,7 +28,8 @@ export const CourseViewPage = () => {
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
-  }  const isInstructor = user?.id === course.instructorId;
+  }
+  const isInstructor = user?.id === course.instructorId;
 
   const totalLessons =
     course.modules?.reduce(
@@ -66,7 +67,8 @@ export const CourseViewPage = () => {
               <div className="flex items-center space-x-2 mb-2">
                 <Badge variant="secondary">
                   {course.category?.name || "Sem categoria"}
-                </Badge>                <Badge className={getLevelColor(course.level)}>
+                </Badge>{" "}
+                <Badge className={getLevelColor(course.level)}>
                   {getLevelText(course.level)}
                 </Badge>
                 <Badge

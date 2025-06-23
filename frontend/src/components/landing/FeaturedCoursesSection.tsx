@@ -62,7 +62,12 @@ export const FeaturedCoursesSection = () => {
                       ) : (
                         <BookOpen className="h-12 w-12 sm:h-16 sm:w-16 text-white" />
                       )}
-                    </div>                    <Badge className={`absolute top-2 sm:top-4 left-2 sm:left-4 text-xs px-2 py-1 max-w-[calc(100%-4rem)] truncate ${getLevelColor(course.level)}`}>
+                    </div>{" "}
+                    <Badge
+                      className={`absolute top-2 sm:top-4 left-2 sm:left-4 text-xs px-2 py-1 max-w-[calc(100%-4rem)] truncate ${getLevelColor(
+                        course.level
+                      )}`}
+                    >
                       {getLevelText(course.level)}
                     </Badge>
                     {course.price > 0 && (
