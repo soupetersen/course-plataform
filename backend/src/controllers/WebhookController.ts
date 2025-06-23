@@ -3,12 +3,16 @@ import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentStatus } from '@/models/Payment';
+import { AutoEnrollStudentUseCase } from '@/use-cases/AutoEnrollStudentUseCase';
+import { ManageEnrollmentStatusUseCase } from '@/use-cases/ManageEnrollmentStatusUseCase';
 
 export class WebhookController {
   constructor(
     private paymentGatewayFactory: PaymentGatewayFactory,
     private paymentRepository: PaymentRepository,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    private autoEnrollStudentUseCase: AutoEnrollStudentUseCase,
+    private manageEnrollmentStatusUseCase: ManageEnrollmentStatusUseCase
   ) {}
 
   async handleMercadoPagoWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -93,7 +97,26 @@ export class WebhookController {
         const updatedPayment = payment.updateStatus(newStatus);
         await this.paymentRepository.update(updatedPayment);
 
-        // Se pagamento foi aprovado, creditar saldo do instrutor
+        // Gerenciar status da matrícula baseado no status do pagamento
+        const enrollmentResult = await this.manageEnrollmentStatusUseCase.execute({
+          paymentId: payment.id,
+          newStatus: newStatus
+        });
+
+        if (enrollmentResult.success) {
+          const actionMessages = {
+            'enrolled': `Aluno matriculado automaticamente no curso ${payment.courseId}`,
+            'resumed': `Matrícula do aluno reativada no curso ${payment.courseId}`,
+            'paused': `Matrícula do aluno pausada no curso ${payment.courseId}`,
+            'no_action': `Nenhuma ação necessária para a matrícula`
+          };
+          
+          console.log(`✅ ${actionMessages[enrollmentResult.action || 'no_action']}`);
+        } else {
+          console.error(`❌ Erro ao gerenciar matrícula: ${enrollmentResult.error}`);
+        }
+
+        // Creditar saldo do instrutor se pagamento foi aprovado
         if (newStatus === PaymentStatus.COMPLETED && payment.instructorAmount) {
           await this.creditInstructorBalance(payment.courseId, payment.instructorAmount);
         }

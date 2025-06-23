@@ -7,6 +7,8 @@ import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscription
 import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
 import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
 import { CreateRefundRequestUseCase } from '@/use-cases/CreateRefundRequestUseCase';
+import { AutoEnrollStudentUseCase } from '@/use-cases/AutoEnrollStudentUseCase';
+import { ManageEnrollmentStatusUseCase } from '@/use-cases/ManageEnrollmentStatusUseCase';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
@@ -14,18 +16,25 @@ import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 
 export async function paymentRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;
-  const authMiddleware = new AuthMiddleware();    const createOneTimePaymentUseCase = container.resolve<CreateOneTimePaymentUseCase>('CreateOneTimePaymentUseCase');
+  const authMiddleware = new AuthMiddleware();  const createOneTimePaymentUseCase = container.resolve<CreateOneTimePaymentUseCase>('CreateOneTimePaymentUseCase');
   const createSubscriptionPaymentUseCase = container.resolve<CreateSubscriptionPaymentUseCase>('CreateSubscriptionPaymentUseCase');
   const validateCouponUseCase = container.resolve<ValidateCouponUseCase>('ValidateCouponUseCase');
-  const calculateFeesUseCase = container.resolve<CalculateFeesUseCase>('CalculateFeesUseCase');  const createRefundRequestUseCase = container.resolve<CreateRefundRequestUseCase>('CreateRefundRequestUseCase');const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
+  const calculateFeesUseCase = container.resolve<CalculateFeesUseCase>('CalculateFeesUseCase');
+  const createRefundRequestUseCase = container.resolve<CreateRefundRequestUseCase>('CreateRefundRequestUseCase');
+  const autoEnrollStudentUseCase = container.resolve<AutoEnrollStudentUseCase>('AutoEnrollStudentUseCase');
+  const manageEnrollmentStatusUseCase = container.resolve<ManageEnrollmentStatusUseCase>('ManageEnrollmentStatusUseCase');
+  const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
   const courseRepository = container.resolve<CourseRepository>('CourseRepository');
   const userRepository = container.resolve<UserRepository>('UserRepository');
-  const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');  const paymentController = new PaymentController(
+  const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
+    const paymentController = new PaymentController(
     createOneTimePaymentUseCase,
     createSubscriptionPaymentUseCase,
     validateCouponUseCase,
     calculateFeesUseCase,
     createRefundRequestUseCase,
+    autoEnrollStudentUseCase,
+    manageEnrollmentStatusUseCase,
     paymentRepository,
     courseRepository,
     userRepository,

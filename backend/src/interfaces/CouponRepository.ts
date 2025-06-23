@@ -1,4 +1,4 @@
-import { Coupon } from '../models/Coupon';
+import { Coupon } from '@/models/Coupon';
 
 export interface CouponRepository {
   create(coupon: Coupon): Promise<Coupon>;

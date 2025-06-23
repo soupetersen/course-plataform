@@ -1,5 +1,5 @@
-import { CouponRepository } from '../interfaces/CouponRepository';
-import { Coupon } from '../models/Coupon';
+import { CouponRepository } from '@/interfaces/CouponRepository';
+import { Coupon } from '@/models/Coupon';
 
 export interface CreateCouponRequest {
   code: string;

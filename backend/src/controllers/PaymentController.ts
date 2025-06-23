@@ -4,6 +4,8 @@ import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscription
 import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
 import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
 import { CreateRefundRequestUseCase } from '@/use-cases/CreateRefundRequestUseCase';
+import { AutoEnrollStudentUseCase } from '@/use-cases/AutoEnrollStudentUseCase';
+import { ManageEnrollmentStatusUseCase } from '@/use-cases/ManageEnrollmentStatusUseCase';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
@@ -18,6 +20,8 @@ export class PaymentController {
     private validateCouponUseCase: ValidateCouponUseCase,
     private calculateFeesUseCase: CalculateFeesUseCase,
     private createRefundRequestUseCase: CreateRefundRequestUseCase,
+    private autoEnrollStudentUseCase: AutoEnrollStudentUseCase,
+    private manageEnrollmentStatusUseCase: ManageEnrollmentStatusUseCase,
     private paymentRepository: PaymentRepository,
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
@@ -128,8 +132,7 @@ export class PaymentController {
       const gateway = this.paymentGatewayFactory.getGateway(gatewayType as any);
       
       if (gateway.processWebhook) {
-        const result = await gateway.processWebhook(req.body);
-          if (result.success && result.paymentId) {
+        const result = await gateway.processWebhook(req.body);        if (result.success && result.paymentId) {
           // Atualizar status do pagamento no banco
           const payment = await this.paymentRepository.findByExternalPaymentId(result.paymentId);
           if (payment && result.status) {
@@ -151,6 +154,19 @@ export class PaymentController {
             
             const updatedPayment = payment.updateStatus(internalStatus as any);
             await this.paymentRepository.update(updatedPayment);
+
+            // Se pagamento foi aprovado, matricular aluno automaticamente
+            if (internalStatus === 'COMPLETED') {
+              const enrollResult = await this.autoEnrollStudentUseCase.execute({
+                paymentId: payment.id
+              });
+
+              if (enrollResult.success) {
+                console.log(`✅ Aluno matriculado automaticamente via webhook no curso ${payment.courseId}`);
+              } else {
+                console.error(`❌ Erro ao matricular aluno via webhook: ${enrollResult.error}`);
+              }
+            }
           }
         }
       }
@@ -902,9 +918,26 @@ export class PaymentController {
         payment.platformFeeAmount,
         payment.instructorAmount,
         payment.gatewayProvider
-      );
+      );      await this.paymentRepository.update(updatedPayment);
 
-      await this.paymentRepository.update(updatedPayment);
+      // Gerenciar status da matrícula quando pagamento é aprovado pelo admin
+      const enrollmentResult = await this.manageEnrollmentStatusUseCase.execute({
+        paymentId: updatedPayment.id,
+        newStatus: PaymentStatus.COMPLETED
+      });
+
+      if (enrollmentResult.success) {
+        const actionMessages = {
+          'enrolled': `Aluno matriculado automaticamente no curso ${updatedPayment.courseId}`,
+          'resumed': `Matrícula do aluno reativada no curso ${updatedPayment.courseId}`,
+          'paused': `Matrícula do aluno pausada no curso ${updatedPayment.courseId}`,
+          'no_action': `Nenhuma ação necessária para a matrícula`
+        };
+        
+        console.log(`✅ ${actionMessages[enrollmentResult.action || 'no_action']}`);
+      } else {
+        console.error(`❌ Erro ao gerenciar matrícula: ${enrollmentResult.error}`);
+      }
 
       console.log(`✅ Pagamento ${paymentId} aprovado pelo admin`);
 

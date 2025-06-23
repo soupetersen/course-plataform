@@ -1,4 +1,4 @@
-﻿import { Enrollment } from '../models/Enrollment';
+﻿import { Enrollment } from '@/models/Enrollment';
 
 export interface EnrollmentRepository {
   create(enrollment: Enrollment): Promise<Enrollment>;

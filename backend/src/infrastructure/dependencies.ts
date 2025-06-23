@@ -13,22 +13,22 @@ import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 
-import { PrismaUserRepository } from '../repositories/PrismaUserRepository';
-import { PrismaCourseRepository } from '../repositories/PrismaCourseRepository';
-import { PrismaModuleRepository } from '../repositories/PrismaModuleRepository';
-import { PrismaLessonRepository } from '../repositories/PrismaLessonRepository';
-import { PrismaLessonCommentRepository } from '../repositories/PrismaLessonCommentRepository';
-import { PrismaEnrollmentRepository } from '../repositories/PrismaEnrollmentRepository';
-import { PrismaPaymentRepository } from '../repositories/PrismaPaymentRepository';
-import { PrismaSubscriptionRepository } from '../repositories/PrismaSubscriptionRepository';
-import { PrismaCategoryRepository } from '../repositories/PrismaCategoryRepository';
-import { PrismaReviewRepository } from '../repositories/PrismaReviewRepository';
-import { PrismaSavedCardRepository } from '../repositories/PrismaSavedCardRepository';
+import { PrismaUserRepository } from '@/repositories/PrismaUserRepository';
+import { PrismaCourseRepository } from '@/repositories/PrismaCourseRepository';
+import { PrismaModuleRepository } from '@/repositories/PrismaModuleRepository';
+import { PrismaLessonRepository } from '@/repositories/PrismaLessonRepository';
+import { PrismaLessonCommentRepository } from '@/repositories/PrismaLessonCommentRepository';
+import { PrismaEnrollmentRepository } from '@/repositories/PrismaEnrollmentRepository';
+import { PrismaPaymentRepository } from '@/repositories/PrismaPaymentRepository';
+import { PrismaSubscriptionRepository } from '@/repositories/PrismaSubscriptionRepository';
+import { PrismaCategoryRepository } from '@/repositories/PrismaCategoryRepository';
+import { PrismaReviewRepository } from '@/repositories/PrismaReviewRepository';
+import { PrismaSavedCardRepository } from '@/repositories/PrismaSavedCardRepository';
 
-import { PrismaCouponRepository } from '../repositories/PrismaCouponRepository';
-import { PrismaCouponUsageRepository } from '../repositories/PrismaCouponUsageRepository';
-import { PrismaPlatformSettingRepository } from '../repositories/PrismaPlatformSettingRepository';
-import { PrismaRefundRequestRepository } from '../repositories/PrismaRefundRequestRepository';
+import { PrismaCouponRepository } from '@/repositories/PrismaCouponRepository';
+import { PrismaCouponUsageRepository } from '@/repositories/PrismaCouponUsageRepository';
+import { PrismaPlatformSettingRepository } from '@/repositories/PrismaPlatformSettingRepository';
+import { PrismaRefundRequestRepository } from '@/repositories/PrismaRefundRequestRepository';
 
 import { CreateUserUseCase } from '@/use-cases/CreateUserUseCase';
 import { AuthenticateUserUseCase } from '@/use-cases/AuthenticateUserUseCase';
@@ -46,6 +46,8 @@ import { ApplyCouponUseCase } from '@/use-cases/ApplyCouponUseCase';
 import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
 import { CreateRefundRequestUseCase } from '@/use-cases/CreateRefundRequestUseCase';
 import { ManageCouponsUseCase } from '@/use-cases/ManageCouponsUseCase';
+import { AutoEnrollStudentUseCase } from '@/use-cases/AutoEnrollStudentUseCase';
+import { ManageEnrollmentStatusUseCase } from '@/use-cases/ManageEnrollmentStatusUseCase';
 
 import { JwtService } from '@/services/JwtService';
 import { PasswordService } from '@/services/PasswordService';
@@ -100,11 +102,17 @@ export function setupDependencies(): DIContainer {
   container.registerSingleton('SubscriptionRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     return new PrismaSubscriptionRepository(prisma);
-  });
-  container.registerSingleton('CategoryRepository', () => {
+  });  container.registerSingleton('CategoryRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     return new PrismaCategoryRepository(prisma);
-  });  container.registerSingleton('ReviewRepository', () => {
+  });
+
+  container.registerSingleton('LessonCommentRepository', () => {
+    const prisma = container.resolve<PrismaClient>('PrismaClient');
+    return new PrismaLessonCommentRepository(prisma);
+  });
+
+  container.registerSingleton('ReviewRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     return new PrismaReviewRepository(prisma);
   });
@@ -228,6 +236,21 @@ export function setupDependencies(): DIContainer {
   });  container.register('ManageCouponsUseCase', () => {
     const couponRepository = container.resolve<PrismaCouponRepository>('CouponRepository');
     return new ManageCouponsUseCase(couponRepository);
+  });
+  container.register('AutoEnrollStudentUseCase', () => {
+    const enrollmentRepository = container.resolve<EnrollmentRepository>('EnrollmentRepository');
+    const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
+    const courseRepository = container.resolve<CourseRepository>('CourseRepository');
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    return new AutoEnrollStudentUseCase(enrollmentRepository, paymentRepository, courseRepository, userRepository);
+  });
+
+  container.register('ManageEnrollmentStatusUseCase', () => {
+    const enrollmentRepository = container.resolve<EnrollmentRepository>('EnrollmentRepository');
+    const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
+    const courseRepository = container.resolve<CourseRepository>('CourseRepository');
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    return new ManageEnrollmentStatusUseCase(enrollmentRepository, paymentRepository, courseRepository, userRepository);
   });
 
   return container;

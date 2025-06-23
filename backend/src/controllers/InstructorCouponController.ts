@@ -1,5 +1,5 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { ManageCouponsUseCase } from '../use-cases/ManageCouponsUseCase';
+import { ManageCouponsUseCase } from '@/use-cases/ManageCouponsUseCase';
 
 interface AuthenticatedRequest extends FastifyRequest {
   user?: {

@@ -1,5 +1,5 @@
-import { Coupon } from '../models/Coupon';
-import { CouponRepository } from '../interfaces/CouponRepository';
+import { Coupon } from '@/models/Coupon';
+import { CouponRepository } from '@/interfaces/CouponRepository';
 import { PrismaClient } from '@prisma/client';
 
 export class PrismaCouponRepository implements CouponRepository {

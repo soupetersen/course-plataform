@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { RefundRequestRepository } from '../interfaces/RefundRequestRepository';
-import { RefundRequest } from '../models/RefundRequest';
+import { RefundRequestRepository } from '@/interfaces/RefundRequestRepository';
+import { RefundRequest } from '@/models/RefundRequest';
 
 export class PrismaRefundRequestRepository implements RefundRequestRepository {
   constructor(private readonly prisma: PrismaClient) {}

@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { CouponUsageRepository } from '../interfaces/CouponUsageRepository';
-import { CouponUsage } from '../models/CouponUsage';
+import { CouponUsageRepository } from '@/interfaces/CouponUsageRepository';
+import { CouponUsage } from '@/models/CouponUsage';
 
 export class PrismaCouponUsageRepository implements CouponUsageRepository {
   constructor(private prisma: PrismaClient) {}
