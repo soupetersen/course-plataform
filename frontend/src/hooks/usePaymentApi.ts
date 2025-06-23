@@ -25,6 +25,62 @@ import {
   CouponUsage,
 } from '@/types/payment';
 
+interface PaymentApprovalResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: string;
+    status: string;
+    amount: number;
+    currency: string;
+    paymentType: string;
+    createdAt: string;
+    updatedAt: string;
+    adminAction: {
+      action: string;
+      reason?: string;
+      adminUser: string;
+      timestamp: string;
+    };
+  };
+}
+
+interface PaymentListItem {
+  id: string;
+  userId: string;
+  courseId: string;
+  amount: number;
+  currency: string;
+  status: string;
+  paymentType: string;
+  paymentMethod?: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+  course?: {
+    id: string;
+    title: string;
+  };
+}
+
+interface PaymentListData {
+  payments: PaymentListItem[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+interface PaymentListResponse {
+  success: boolean;
+  data: PaymentListData;
+}
+
 export function usePaymentApi() {
   const validateCoupon = useCallback(
     async (request: CouponValidationRequest): Promise<CouponValidationResponse | null> => {
@@ -126,6 +182,73 @@ export function usePaymentApi() {
     []
   );
 
+  // Admin payment functions
+  const approvePayment = useCallback(
+    async (paymentId: string, reason?: string): Promise<PaymentApprovalResponse | null> => {
+      try {
+        const response = await apiRequest<PaymentApprovalResponse>({
+          method: 'POST',
+          url: `/api/payments/admin/${paymentId}/approve`,
+          data: { reason: reason || '' },
+        });
+        return response;
+      } catch (error) {
+        console.error('Approve payment error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const rejectPayment = useCallback(
+    async (paymentId: string, reason?: string): Promise<PaymentApprovalResponse | null> => {
+      try {
+        const response = await apiRequest<PaymentApprovalResponse>({
+          method: 'POST',
+          url: `/api/payments/admin/${paymentId}/reject`,
+          data: { reason: reason || '' },
+        });
+        return response;
+      } catch (error) {
+        console.error('Reject payment error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const getAllPayments = useCallback(
+    async (filters?: {
+      status?: string;
+      page?: number;
+      limit?: number;
+    }): Promise<PaymentListResponse | null> => {
+      try {
+        console.log("🔍 Iniciando getAllPayments com filtros:", filters);
+        
+        const params = new URLSearchParams();
+        if (filters?.status) params.append('status', filters.status);
+        if (filters?.page) params.append('page', filters.page.toString());
+        if (filters?.limit) params.append('limit', filters.limit.toString());
+        
+        const url = `/api/payments/admin/all${params.toString() ? '?' + params.toString() : ''}`;
+        console.log("📡 URL da requisição:", url);
+        
+        const response = await apiRequest<PaymentListResponse>({
+          method: 'GET',
+          url,
+        });
+        
+        console.log("✅ Resposta bruta do apiRequest:", response);
+        return response;
+      } catch (error) {
+        console.error('❌ Erro em getAllPayments:', error);
+        return null;
+      }
+    },
+    []
+  );
+
   return {
     validateCoupon,
     calculateFees,
@@ -133,6 +256,10 @@ export function usePaymentApi() {
     requestRefund,
     getUserPayments,
     getUserRefundRequests,
+    // Admin functions
+    approvePayment,
+    rejectPayment,
+    getAllPayments,
   };
 }
 
@@ -403,6 +530,65 @@ export function useAdminApi() {
     []
   );
 
+  const approvePayment = useCallback(
+    async (paymentId: string, reason?: string) => {
+      try {
+        const response = await apiRequest<ApiResponse<PaymentApprovalResponse>>({
+          method: 'POST',
+          url: `/api/payments/admin/${paymentId}/approve`,
+          data: { reason: reason || '' },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Approve payment error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const rejectPayment = useCallback(
+    async (paymentId: string, reason?: string) => {
+      try {
+        const response = await apiRequest<ApiResponse<PaymentApprovalResponse>>({
+          method: 'POST',
+          url: `/api/payments/admin/${paymentId}/reject`,
+          data: { reason: reason || '' },
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Reject payment error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const getAllPayments = useCallback(
+    async (filters?: {
+      status?: string;
+      page?: number;
+      limit?: number;
+    }) => {
+      try {
+        const params = new URLSearchParams();
+        if (filters?.status) params.append('status', filters.status);
+        if (filters?.page) params.append('page', filters.page.toString());
+        if (filters?.limit) params.append('limit', filters.limit.toString());
+        
+        const response = await apiRequest<ApiResponse<PaymentListResponse>>({
+          method: 'GET',
+          url: `/api/payments/admin/all${params.toString() ? '?' + params.toString() : ''}`,
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Get all payments error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
   return {
     getPlatformSettings,
     updatePlatformSetting,
@@ -410,6 +596,9 @@ export function useAdminApi() {
     getCoupons,
     updateCoupon,
     deleteCoupon,
+    approvePayment,
+    rejectPayment,
+    getAllPayments,
   };
 }
 

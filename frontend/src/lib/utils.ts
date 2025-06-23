@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const getLevelText = (level: string) => {
+export const getLevelText = (level?: string) => {
   switch (level) {
     case "BEGINNER":
       return "Iniciante";
@@ -18,7 +18,7 @@ export const getLevelText = (level: string) => {
   }
 }
 
-export const getLevelColor = (level: string) => {
+export const getLevelColor = (level?: string) => {
     switch (level) {
       case "BEGINNER":
         return "bg-green-100 text-green-800";

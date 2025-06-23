@@ -1,13 +1,7 @@
-﻿import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+﻿import { Card, CardDescription, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { BookOpen, Users, Play } from "lucide-react";
+import { BookOpen, Users, Play, User } from "lucide-react";
 import { getLevelText, getLevelColor } from "../../lib/utils";
 import { Link } from "react-router-dom";
 import type { Enrollment } from "../../types/api";
@@ -32,67 +26,113 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
           </Button>
         </Link>
       </div>{" "}
-      <div className="course-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-        {enrollments.slice(0, 3).map((enrollment) => (
-          <Card
-            key={enrollment.id}
-            className="course-card hover:shadow-lg transition-shadow duration-200 group fade-in-up flex flex-col h-full"
-          >
-            <CardHeader className="card-header pb-3 p-3 sm:p-4 lg:p-6 sm:pb-3 flex-1">
-              {" "}
-              <div className="flex items-center justify-between mb-2">
-                <Badge
-                  className={`badge-responsive ${getLevelColor(
-                    enrollment.course.level
-                  )}`}
-                >
-                  {getLevelText(enrollment.course.level)}
-                </Badge>
-                <div className="text-xs sm:text-sm text-gray-500">
-                  {enrollment.progress}% completo
-                </div>
-              </div>{" "}
-              <CardTitle className="group-hover:text-primary transition-colors text-sm md:text-base lg:text-lg leading-tight hyphens-auto break-words min-h-[2.5rem] md:min-h-[3rem] mb-2">
-                {enrollment.course.title}
-              </CardTitle>
-              <CardDescription className="text-xs md:text-sm leading-relaxed break-words flex-1">
-                {enrollment.course.description}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="card-content p-3 sm:p-4 lg:p-6 pt-0 mt-auto">
-              <div className="space-y-3">
-                <div className="progress-bar-container">
-                  <div
-                    className="progress-bar"
-                    style={{ width: `${enrollment.progress}%` }}
+      <div className="course-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        {enrollments
+          .filter((enrollment) => enrollment.course && enrollment.course.id)
+          .slice(0, 4)
+          .map((enrollment) => (
+            <Card
+              key={enrollment.id}
+              variant="elevated"
+              padding="none"
+              className="course-card group overflow-hidden flex flex-col h-full hover:scale-[1.02] transition-all duration-300"
+            >
+              {/* Course Image */}
+              <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+                {enrollment.course?.imageUrl ? (
+                  <img
+                    src={enrollment.course.imageUrl}
+                    alt={enrollment.course.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    loading="lazy"
                   />
-                </div>
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                    <BookOpen className="w-16 h-16 text-primary/30" />
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 
-                <div className="card-stats">
-                  <div className="flex items-center min-w-0 flex-1">
-                    <Users className="stats-icon" />
-                    <span className="truncate text-xs sm:text-sm text-gray-600">
-                      {enrollment.course.enrollments?.length || 0} estudantes
+                {/* Progress overlay */}
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
+                  <div className="flex items-center justify-between text-white text-sm">
+                    <span>{enrollment.progress}% completo</span>
+                    {enrollment.course?.level && (
+                      <Badge
+                        className={`${getLevelColor(
+                          enrollment.course.level
+                        )} text-xs`}
+                      >
+                        {getLevelText(enrollment.course.level)}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="mt-1 bg-white/20 rounded-full h-1.5 overflow-hidden">
+                    <div
+                      className="bg-gradient-to-r from-blue-400 to-blue-500 rounded-full h-full transition-all duration-500 ease-out"
+                      style={{ width: `${enrollment.progress}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col flex-1 p-4">
+                {/* Category Badge */}
+                {enrollment.course?.category && (
+                  <div className="flex items-center mb-3">
+                    <Badge variant="secondary" className="text-xs">
+                      {enrollment.course.category.name}
+                    </Badge>
+                  </div>
+                )}
+
+                <CardTitle className="group-hover:text-primary transition-colors duration-200 text-base md:text-lg leading-tight mb-2 line-clamp-2 min-h-[3rem]">
+                  {enrollment.course?.title || "Título não disponível"}
+                </CardTitle>
+
+                {/* Instructor */}
+                {enrollment.course?.instructor && (
+                  <div className="flex items-center text-xs text-gray-600 mb-3">
+                    <User className="w-3 h-3 mr-1" />
+                    <span>Por {enrollment.course.instructor.name}</span>
+                  </div>
+                )}
+
+                <CardDescription className="text-sm leading-relaxed flex-1 mb-4 line-clamp-3">
+                  {enrollment.course?.description || "Descrição não disponível"}
+                </CardDescription>
+
+                {/* Course Stats */}
+                <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-2 border-t border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-4 h-4" />
+                    <span>
+                      {enrollment.course?.enrollments?.length || 0} estudantes
                     </span>
                   </div>
-                  <div className="flex items-center min-w-0 flex-1 justify-end">
-                    <BookOpen className="stats-icon" />
-                    <span className="truncate text-xs sm:text-sm text-gray-600">
-                      {enrollment.course.modules?.length || 0} módulos
+                  <div className="flex items-center gap-1">
+                    <BookOpen className="w-4 h-4" />
+                    <span>
+                      {enrollment.course?.modules?.length || 0} módulos
                     </span>
                   </div>
                 </div>
 
-                <Link to={`/courses/${enrollment.course.id}`} className="block">
-                  <Button className="btn-responsive w-full hover:bg-primary/90 transition-colors">
-                    <Play className="stats-icon" />
-                    Continuar
-                  </Button>
+                <Link
+                  to={`/courses/${enrollment.course?.id || ""}`}
+                  className="block"
+                >
+                  <Button
+                    variant="outline"
+                    className="w-full group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-200"
+                  >
+                    <Play className="w-4 h-4 mr-2" />
+                    Continuar Aprendendo
+                  </Button>{" "}
                 </Link>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </Card>
+          ))}
       </div>
     </div>
   );

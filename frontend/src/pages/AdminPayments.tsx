@@ -19,21 +19,21 @@ import {
   Users,
   RefreshCw,
 } from "lucide-react";
-import { api } from "@/lib/api";
+import { usePaymentApi } from "@/hooks/usePaymentApi";
 
-interface Payment {
+interface PaymentListItem {
   id: string;
   userId: string;
   userName?: string;
   userEmail?: string;
   courseId: string;
   courseTitle?: string;
-  externalPaymentId: string;
   amount: number;
   currency: string;
-  status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED" | "REFUNDED";
+  status: string;
   paymentType: string;
   paymentMethod?: string;
+  externalPaymentId?: string;
   gatewayProvider?: string;
   createdAt: string;
   updatedAt: string;
@@ -48,7 +48,7 @@ interface PaymentStats {
 }
 
 export function AdminPayments() {
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [payments, setPayments] = useState<PaymentListItem[]>([]);
   const [stats, setStats] = useState<PaymentStats>({
     total: 0,
     pending: 0,
@@ -59,42 +59,66 @@ export function AdminPayments() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const { toast } = useToast();
-
+  const {
+    getAllPayments,
+    approvePayment: adminApprovePayment,
+    rejectPayment: adminRejectPayment,
+  } = usePaymentApi();
   const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get("/api/payments/admin/all");
+      console.log("🔄 Iniciando busca de pagamentos...");
 
-      console.log("Resposta da API:", response.data);
+      const response = await getAllPayments();
+      console.log("📊 Resposta completa da API:", response);
+      console.log("✅ response.success:", response?.success);
+      console.log("📦 response.data:", response?.data);
+      console.log("💳 response.data.payments:", response?.data?.payments);
 
-      if (response.data.success) {
-        // O backend retorna { data: { payments: [...], pagination: {...} } }
-        const responseData = response.data.data;
-        const paymentsArray = Array.isArray(responseData?.payments)
-          ? responseData.payments
+      if (
+        response &&
+        response.success &&
+        response.data &&
+        response.data.payments
+      ) {
+        console.log("✅ Estrutura de dados válida encontrada");
+
+        const paymentsArray = Array.isArray(response.data.payments)
+          ? response.data.payments.map((item: PaymentListItem) => ({
+              ...item,
+              userName: item.userName || "N/A",
+              userEmail: item.userEmail || "N/A",
+              courseTitle: item.courseTitle || "N/A",
+            }))
           : [];
 
+        console.log("🔄 Pagamentos processados:", paymentsArray);
+        console.log("📊 Quantidade de pagamentos:", paymentsArray.length);
         setPayments(paymentsArray);
+        console.log("💾 Pagamentos salvos no state:", paymentsArray);
 
-        // Calcular estatísticas
         const stats: PaymentStats = {
           total: paymentsArray.length,
-          pending: paymentsArray.filter((p: Payment) => p.status === "PENDING")
-            .length,
-          completed: paymentsArray.filter(
-            (p: Payment) => p.status === "COMPLETED"
+          pending: paymentsArray.filter(
+            (p: PaymentListItem) => p.status === "PENDING"
           ).length,
-          failed: paymentsArray.filter((p: Payment) =>
+          completed: paymentsArray.filter(
+            (p: PaymentListItem) => p.status === "COMPLETED"
+          ).length,
+          failed: paymentsArray.filter((p: PaymentListItem) =>
             ["FAILED", "CANCELLED", "REFUNDED"].includes(p.status)
           ).length,
           totalAmount: paymentsArray
-            .filter((p: Payment) => p.status === "COMPLETED")
-            .reduce((sum: number, p: Payment) => sum + p.amount, 0),
+            .filter((p: PaymentListItem) => p.status === "COMPLETED")
+            .reduce((sum: number, p: PaymentListItem) => sum + p.amount, 0),
         };
 
+        console.log("📈 Estatísticas calculadas:", stats);
         setStats(stats);
       } else {
-        // Se não houver sucesso, definir array vazio
+        console.warn("⚠️ Estrutura de dados inválida ou vazia");
+        console.log("response:", response);
+        // Se não houver resposta válida, definir array vazio
         setPayments([]);
         setStats({
           total: 0,
@@ -105,7 +129,7 @@ export function AdminPayments() {
         });
       }
     } catch (error) {
-      console.error("Erro ao buscar pagamentos:", error);
+      console.error("❌ Erro ao buscar pagamentos:", error);
 
       // Em caso de erro, definir array vazio
       setPayments([]);
@@ -125,17 +149,18 @@ export function AdminPayments() {
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [getAllPayments, toast]);
 
   const approvePayment = async (paymentId: string) => {
     try {
       setActionLoading(paymentId);
 
-      const response = await api.post(
-        `/api/payments/admin/${paymentId}/approve`
+      const response = await adminApprovePayment(
+        paymentId,
+        "Aprovado pelo administrador"
       );
 
-      if (response.data.success) {
+      if (response?.success) {
         toast({
           title: "Sucesso",
           description: "Pagamento aprovado com sucesso!",
@@ -143,6 +168,13 @@ export function AdminPayments() {
 
         // Recarregar lista
         await fetchPayments();
+      } else {
+        toast({
+          title: "Erro",
+          description:
+            response?.message || "Não foi possível aprovar o pagamento",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Erro ao aprovar pagamento:", error);
@@ -160,11 +192,12 @@ export function AdminPayments() {
     try {
       setActionLoading(paymentId);
 
-      const response = await api.post(
-        `/api/payments/admin/${paymentId}/reject`
+      const response = await adminRejectPayment(
+        paymentId,
+        "Rejeitado pelo administrador"
       );
 
-      if (response.data.success) {
+      if (response?.success) {
         toast({
           title: "Sucesso",
           description: "Pagamento rejeitado com sucesso!",
@@ -172,6 +205,13 @@ export function AdminPayments() {
 
         // Recarregar lista
         await fetchPayments();
+      } else {
+        toast({
+          title: "Erro",
+          description:
+            response?.message || "Não foi possível rejeitar o pagamento",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Erro ao rejeitar pagamento:", error);
@@ -184,10 +224,17 @@ export function AdminPayments() {
       setActionLoading(null);
     }
   };
-
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
+
+  // Log para debug na renderização
+  console.log("🎨 Renderizando AdminPayments:", {
+    loading,
+    paymentsCount: payments?.length,
+    payments: payments,
+    stats,
+  });
 
   const formatCurrency = (amount: number, currency: string = "BRL") => {
     return new Intl.NumberFormat("pt-BR", {
@@ -200,7 +247,7 @@ export function AdminPayments() {
     return new Date(dateString).toLocaleString("pt-BR");
   };
 
-  const getStatusBadge = (status: Payment["status"]) => {
+  const getStatusBadge = (status: string) => {
     const configs = {
       PENDING: { label: "Pendente", variant: "default" as const, icon: Clock },
       COMPLETED: {
@@ -225,7 +272,7 @@ export function AdminPayments() {
       },
     };
 
-    const config = configs[status];
+    const config = configs[status as keyof typeof configs];
     const Icon = config.icon;
 
     return (

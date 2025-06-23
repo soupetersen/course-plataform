@@ -2,15 +2,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Search,
@@ -37,24 +30,27 @@ export function MyLearningPage() {
 
   const filteredEnrollments = enrollments.filter((enrollment: Enrollment) => {
     const course = enrollment.course;
+    if (!course) return false;
+
+    const searchLower = searchTerm.toLowerCase();
     return (
-      course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.instructor.name.toLowerCase().includes(searchTerm.toLowerCase())
+      course.title?.toLowerCase().includes(searchLower) ||
+      course.description?.toLowerCase().includes(searchLower) ||
+      course.instructor?.name?.toLowerCase().includes(searchLower)
     );
   });
 
   const completedCourses = enrollments.filter(
-    (enrollment: Enrollment) => enrollment.progress === 100
+    (enrollment: Enrollment) => enrollment.course && enrollment.progress === 100
   );
 
   const inProgressCourses = enrollments.filter(
     (enrollment: Enrollment) =>
-      enrollment.progress > 0 && enrollment.progress < 100
+      enrollment.course && enrollment.progress > 0 && enrollment.progress < 100
   );
 
   const notStartedCourses = enrollments.filter(
-    (enrollment: Enrollment) => enrollment.progress === 0
+    (enrollment: Enrollment) => enrollment.course && enrollment.progress === 0
   );
 
   const formatDate = (dateString: string) => {
@@ -68,73 +64,104 @@ export function MyLearningPage() {
   const renderCourseCard = (enrollment: Enrollment) => {
     const course = enrollment.course;
 
+    if (!course) return null;
+
     return (
       <Card
         key={enrollment.id}
-        className="hover:shadow-lg transition-shadow cursor-pointer"
+        className="hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
       >
-        <div className="aspect-video bg-gray-200 rounded-t-lg flex items-center justify-center overflow-hidden">
+        {/* Imagem do curso - altura reduzida */}
+        <div className="h-32 bg-gray-200 flex items-center justify-center overflow-hidden">
           {course.imageUrl ? (
             <img
               src={course.imageUrl}
-              alt={course.title}
+              alt={course.title || "Curso"}
               className="w-full h-full object-cover"
             />
           ) : (
-            <BookOpen className="h-12 w-12 text-gray-400" />
+            <BookOpen className="h-8 w-8 text-gray-400" />
           )}
         </div>
 
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-start mb-2">
-            <Badge variant="secondary" className="text-xs">
-              {course.category.name}
-            </Badge>
+        {/* Header compacto */}
+        <CardHeader className="pb-2 pt-3">
+          <div className="flex justify-between items-start gap-2 mb-2">
+            {/* Badge de categoria - só exibe se tiver dados */}
+            {course.category?.name && (
+              <Badge variant="secondary" className="text-xs shrink-0">
+                {course.category.name}
+              </Badge>
+            )}
+            {/* Badge de conclusão - só exibe se estiver concluído */}
             {enrollment.progress === 100 && (
-              <Badge variant="default" className="text-xs bg-green-500">
+              <Badge
+                variant="default"
+                className="text-xs bg-green-500 shrink-0"
+              >
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Concluído
               </Badge>
             )}
           </div>
-          <CardTitle className="text-lg line-clamp-2">{course.title}</CardTitle>
-          <CardDescription className="line-clamp-2">
-            {course.description}
-          </CardDescription>
+
+          <CardTitle className="text-base font-semibold line-clamp-2 leading-tight">
+            {course.title || "Título não disponível"}
+          </CardTitle>
+
+          {/* Instrutor */}
+          <div className="text-xs text-gray-600">
+            por {course.instructor?.name || "Instrutor não definido"}
+          </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
-          <div className="text-sm text-gray-600 mb-3">
-            por {course.instructor.name}
-          </div>
-
-          <div className="space-y-2 mb-4">
-            <div className="flex justify-between items-center text-sm">
-              <span>Progresso</span>
-              <span className="font-medium">{enrollment.progress}%</span>
+        {/* Content compacto */}
+        <CardContent className="pt-0 pb-3">
+          {/* Barra de progresso melhorada */}
+          <div className="space-y-1 mb-3">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-gray-600">Progresso</span>
+              <span className="font-semibold text-gray-900">
+                {enrollment.progress}%
+              </span>
             </div>
-            <Progress value={enrollment.progress} className="h-2" />
+            <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${enrollment.progress}%` }}
+              />
+            </div>
           </div>
 
-          <div className="flex items-center justify-between text-sm text-gray-500">
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              <span>Inscrito em {formatDate(enrollment.enrolledAt)}</span>
+          {/* Footer com data e botão */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1 text-xs text-gray-500">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(enrollment.enrolledAt)}</span>
             </div>
 
             {enrollment.progress > 0 ? (
-              <Button size="sm" variant="outline" className="gap-1">
-                <PlayCircle className="h-4 w-4" />
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1 h-7 px-3 text-xs"
+              >
+                <PlayCircle className="h-3 w-3" />
                 Continuar
               </Button>
             ) : (
-              <Button size="sm" variant="default" className="gap-1">
-                <PlayCircle className="h-4 w-4" />
+              <Button
+                size="sm"
+                variant="default"
+                className="gap-1 h-7 px-3 text-xs"
+              >
+                <PlayCircle className="h-3 w-3" />
                 Começar
               </Button>
             )}
           </div>
 
+          {/* Data de conclusão - só exibe se tiver */}
           {enrollment.completedAt && (
             <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
               <Award className="h-3 w-3" />
