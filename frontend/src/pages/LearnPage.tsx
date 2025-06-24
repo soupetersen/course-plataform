@@ -246,12 +246,14 @@ export function LearnPage() {
                           </div>
                           <div className="flex items-center space-x-2 ml-2">
                             {hasLessons && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs px-2 py-0.5 font-medium"
-                              >
-                                Disponível
-                              </Badge>
+                              <div className="absolute top-2 right-2 z-10">
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-emerald-50 text-emerald-600 border-emerald-200 text-xs px-2 py-0.5 font-medium"
+                                >
+                                  Disponível
+                                </Badge>
+                              </div>
                             )}
                             {isOpen ? (
                               <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors flex-shrink-0" />
