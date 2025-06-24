@@ -16,6 +16,10 @@ export class CreateReviewUseCase {
       throw new Error('Você precisa estar inscrito neste curso para poder avaliá-lo.');
     }
 
+    if (enrollment.progress < 20) {
+      throw new Error('Você precisa completar pelo menos 20% do curso para poder avaliá-lo.');
+    }
+
     const existingReview = await this.reviewRepository.findByUserAndCourse(userId, data.courseId);
     if (existingReview) {
       throw new Error('Você já avaliou este curso. Apenas uma avaliação por curso é permitida.');

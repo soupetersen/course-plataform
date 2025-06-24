@@ -18,6 +18,9 @@ import {
 import { useCourse } from "@/hooks/useCourses";
 import { useModulesByCourse } from "@/hooks/useModulesAndLessons";
 import { useMyEnrollments } from "@/hooks/useCategoriesAndEnrollments";
+import { useMyReviews, useCreateReview } from "@/hooks/useReviews";
+import { useLessonWebSocket } from "@/hooks/useLessonWebSocket";
+import { CourseReviewSection } from "@/components/course/lesson-viewer/CourseReviewSection";
 import LessonViewer from "@/components/course/LessonViewer";
 
 export function LearnPage() {
@@ -27,19 +30,75 @@ export function LearnPage() {
     courseId!
   );
   const { data: enrollmentsData } = useMyEnrollments();
+  const { data: reviewsData } = useMyReviews();
+  const createReviewMutation = useCreateReview();
+
+  const token = localStorage.getItem("authToken") || "";
+  const { lessonProgress, isConnected } = useLessonWebSocket(token);
 
   const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
   const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewDismissed, setReviewDismissed] = useState(false);
 
   const course = courseData?.data;
   const modules = useMemo(() => modulesData?.data || [], [modulesData?.data]);
   const enrollments = enrollmentsData?.data || [];
+  const myReviews = reviewsData?.data || [];
 
   // Verificar se o usuário está matriculado
-  const isEnrolled = enrollments.some(
+  const currentEnrollment = enrollments.find(
     (enrollment) => enrollment.courseId === courseId
   );
+  const isEnrolled = !!currentEnrollment;
+
+  // Verificar se o usuário já avaliou este curso
+  const existingReview = myReviews.find(
+    (review) => review.courseId === courseId
+  );
+  const hasReviewed = !!existingReview;
+
+  // Calcular progresso (usar progresso base + informações do WebSocket se disponível)
+  const baseProgress = currentEnrollment?.progress || 0;
+  const progress = baseProgress; // Por enquanto, usar o progresso base
+
+  // Verificar se o usuário atingiu 20% de progresso
+  const canReview = progress >= 20 && !hasReviewed;
+
+  // Controlar quando mostrar o prompt de review
+  const shouldShowReviewPrompt =
+    canReview && !reviewDismissed && !showReviewForm;
+
+  // Verificar se a review foi dispensada para este curso
+  useEffect(() => {
+    if (courseId) {
+      const dismissed = localStorage.getItem(`review_dismissed_${courseId}`);
+      setReviewDismissed(dismissed === "true");
+    }
+  }, [courseId]);
+
+  // Detectar quando o progresso muda via WebSocket para mostrar review automaticamente
+  useEffect(() => {
+    if (lessonProgress?.isCompleted && canReview && !reviewDismissed) {
+      // Pequeno delay para dar tempo do progresso ser atualizado no backend
+      const timer = setTimeout(() => {
+        // Verificar novamente se ainda pode revisar depois da conclusão da lição
+        if (progress >= 20 && !hasReviewed && !reviewDismissed) {
+          setShowReviewForm(false); // Garantir que o form está fechado
+          // Forçar a exibição do prompt (o shouldShowReviewPrompt será true)
+        }
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [
+    lessonProgress?.isCompleted,
+    canReview,
+    reviewDismissed,
+    progress,
+    hasReviewed,
+  ]);
 
   // Selecionar o primeiro módulo por padrão
   useEffect(() => {
@@ -68,7 +127,42 @@ export function LearnPage() {
     );
   }, [modules]);
 
-  const completedLessons = 0; // TODO: Implementar lógica de progresso
+  // Função para submeter a review
+  const handleReviewSubmit = async (data: {
+    rating: number;
+    comment: string;
+  }) => {
+    try {
+      await createReviewMutation.mutateAsync({
+        courseId: courseId!,
+        rating: data.rating,
+        comment: data.comment,
+      });
+      setShowReviewForm(false);
+      // Remover o estado de dispensado quando a review for enviada
+      localStorage.removeItem(`review_dismissed_${courseId}`);
+      setReviewDismissed(false);
+    } catch (error) {
+      console.error("Erro ao enviar avaliação:", error);
+    }
+  };
+
+  // Função para dispensar o prompt de review temporariamente
+  const handleDismissReview = () => {
+    if (courseId) {
+      localStorage.setItem(`review_dismissed_${courseId}`, "true");
+      setReviewDismissed(true);
+    }
+    setShowReviewForm(false);
+  };
+
+  // Função para mostrar o prompt de review manualmente
+  const handleShowReviewPrompt = () => {
+    if (canReview) {
+      setReviewDismissed(false);
+      setShowReviewForm(false);
+    }
+  };
 
   if (courseLoading || modulesLoading) {
     return (
@@ -119,8 +213,6 @@ export function LearnPage() {
     );
   }
 
-  const token = localStorage.getItem("authToken") || "";
-
   return (
     <div className="h-full bg-gradient-to-br from-gray-50 to-blue-50/30 flex">
       {/* Sidebar - Módulos */}
@@ -156,19 +248,42 @@ export function LearnPage() {
               {/* Barra de Progresso */}
               <div className="pt-3 border-t border-gray-200/50">
                 <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                  <span>Progresso do curso</span>
-                  <span>
-                    {Math.round((completedLessons / totalLessons) * 100) || 0}%
-                  </span>
+                  <div className="flex items-center space-x-2">
+                    <span>Progresso do curso</span>
+                    {isConnected && (
+                      <div className="flex items-center">
+                        <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-green-600 ml-1 text-xs">
+                          Ao vivo
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <span>{Math.round(progress)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
                   <div
                     className="bg-gradient-to-r from-primary to-primary/80 h-1.5 rounded-full transition-all duration-300"
                     style={{
-                      width: `${(completedLessons / totalLessons) * 100 || 0}%`,
+                      width: `${progress}%`,
                     }}
                   ></div>
                 </div>
+                {progress >= 20 && !hasReviewed && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="text-xs text-amber-600 font-medium">
+                      ⭐ Você pode avaliar este curso!
+                    </div>
+                    {reviewDismissed && (
+                      <button
+                        onClick={handleShowReviewPrompt}
+                        className="text-xs text-primary hover:text-primary/80 font-medium underline"
+                      >
+                        Avaliar agora
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -356,6 +471,19 @@ export function LearnPage() {
 
       {/* Conteúdo Principal */}
       <div className="flex-1 overflow-y-auto bg-white">
+        {/* Seção de Avaliação */}
+        {shouldShowReviewPrompt && (
+          <div className="p-6 pb-0">
+            <CourseReviewSection
+              courseTitle={course.title}
+              progress={progress}
+              onSubmit={handleReviewSubmit}
+              onDismiss={handleDismissReview}
+              isLoading={createReviewMutation.isPending}
+            />
+          </div>
+        )}
+
         {selectedLessonId && courseId ? (
           <LessonViewer
             lessonId={selectedLessonId}
