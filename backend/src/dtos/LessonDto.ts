@@ -1,10 +1,12 @@
 ﻿import { LessonType } from '@/models/Lesson';
+import { QuestionResponseDto } from './QuestionDto';
 
 export interface CreateLessonDto {
   title: string;
-  content: string;
+  content?: string;
   description?: string;
   videoUrl?: string;
+  videoDuration?: number;
   duration?: number;
   order?: number;
   moduleId: string;
@@ -12,6 +14,10 @@ export interface CreateLessonDto {
   type: LessonType;
   isPreview?: boolean;
   isLocked?: boolean;
+  // Campos específicos para quiz
+  quizPassingScore?: number;
+  quizAttempts?: number;
+  allowReview?: boolean;
 }
 
 export interface UpdateLessonDto {
@@ -19,19 +25,25 @@ export interface UpdateLessonDto {
   content?: string;
   description?: string;
   videoUrl?: string;
+  videoDuration?: number;
   duration?: number;
   order?: number;
   type?: LessonType;
   isPreview?: boolean;
   isLocked?: boolean;
+  // Campos específicos para quiz
+  quizPassingScore?: number;
+  quizAttempts?: number;
+  allowReview?: boolean;
 }
 
 export interface LessonResponseDto {
   id: string;
   title: string;
   description?: string;
-  content: string;
+  content?: string;
   videoUrl?: string;
+  videoDuration?: number;
   duration?: number;
   order: number;
   moduleId: string;
@@ -40,6 +52,12 @@ export interface LessonResponseDto {
   isPreview: boolean;
   isLocked: boolean;
   isCompleted?: boolean;
+  // Campos específicos para quiz
+  quizPassingScore?: number;
+  quizAttempts?: number;
+  allowReview?: boolean;
+  questions?: QuestionResponseDto[];
+  // Dados de progresso
   progress?: any;
   createdAt?: Date;
   updatedAt?: Date;

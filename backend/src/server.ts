@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
+import websocket from '@fastify/websocket';
 import { setupDependencies } from './infrastructure/dependencies';
 import { authRoutes } from './routes/authRoutes';
 import { courseRoutes } from './routes/courseRoutes';
@@ -17,6 +18,9 @@ import { instructorAnalyticsRoutes } from './routes/instructorAnalyticsRoutes';
 import { studentCouponRoutes } from './routes/studentCouponRoutes';
 import { createUploadRoutes } from './routes/uploadRoutes';
 import { savedCardRoutes } from './routes/savedCardRoutes';
+import { questionRoutes } from './routes/questionRoutes';
+import { lessonProgressRoutes } from './routes/lessonProgressRoutes';
+import { lessonWebSocketRoutes } from './routes/lessonWebSocketRoutes';
 import { UploadController } from './controllers/UploadController';
 import { S3Service } from './services/S3Service';
 import { ErrorHandler } from './middlewares/ErrorHandler';
@@ -25,8 +29,10 @@ async function buildApp() {
   const fastify = Fastify({
     logger: {
       level: process.env.LOG_LEVEL || 'info'
-    }
-  });
+    }  });
+
+  // Registrar WebSocket plugin
+  await fastify.register(websocket);
 
   await fastify.addHook('onSend', async (request, reply) => {
     reply.header('X-Content-Type-Options', 'nosniff');
@@ -77,7 +83,12 @@ async function buildApp() {
   await fastify.register(adminPlatformSettingsRoutes, { prefix: '/api/admin/settings' });  
   await fastify.register(instructorCouponRoutes, { prefix: '/api' });
   await fastify.register(instructorAnalyticsRoutes, { prefix: '/api/instructor/analytics' });
-  await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });
+  await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });  await fastify.register(questionRoutes, { prefix: '/api' });
+  await fastify.register(lessonProgressRoutes, { prefix: '/api' });
+  
+  // Register WebSocket routes
+  await fastify.register(lessonWebSocketRoutes);
+  
     const s3Service = container.resolve<S3Service>('S3Service');
   const uploadController = new UploadController(s3Service);
   await fastify.register(createUploadRoutes(uploadController), { prefix: '/api/uploads' });
@@ -122,21 +133,22 @@ async function buildApp() {
         health: '/health'
       }
     };
-  });
-
-  return fastify;
+  });  return fastify;
 }
 
 async function start() {
   try {
     const app = await buildApp();
     const port = parseInt(process.env.PORT || '3000');
-    const host = process.env.HOST || '0.0.0.0';
-
-    await app.listen({ port, host });
+    const host = process.env.HOST || '0.0.0.0';    await app.listen({ port, host });
+    
+    // Aguardar o servidor estar pronto
+    await app.ready();
+    
     app.log.info(`🚀 Server listening on http://${host}:${port}`);
     app.log.info(`📚 API documentation available at http://${host}:${port}/api`);
     app.log.info(`❤️  Health check available at http://${host}:${port}/health`);
+    app.log.info(`🔌 WebSocket available at ws://${host}:${port}/ws/lessons`);
   } catch (error) {
     console.error('❌ Error starting server:', error);
     process.exit(1);

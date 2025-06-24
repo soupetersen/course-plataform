@@ -35,6 +35,9 @@ model User {
   instructorBalance       InstructorBalance? @relation("InstructorBalance")
   payoutRequestsProcessed PayoutRequest[]    @relation("PayoutProcessor")
   savedCards              SavedCard[]
+  // Novas relações para o sistema de lições
+  lessonProgress          LessonProgress[]
+  quizAttempts            QuizAttempt[]
 
   @@map("users")
 }
@@ -70,27 +73,30 @@ model Category {
 }
 
 model Course {
-  id              String       @id @default(cuid())
+  id              String           @id @default(cuid())
   title           String
   description     String?
   imageUrl        String?
-  price           Float        @default(0)
-  isPublished     Boolean      @default(false)
+  price           Float            @default(0)
+  isPublished     Boolean          @default(false)
   instructorId    String
   categoryId      String?
-  paymentType     PaymentType  @default(ONE_TIME)
-  stripeProductId String?      @unique
-  stripePriceId   String?      @unique
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  category        Category?    @relation(fields: [categoryId], references: [id])
-  instructor      User         @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+  paymentType     PaymentType      @default(ONE_TIME)
+  stripeProductId String?          @unique
+  stripePriceId   String?          @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  category        Category?        @relation(fields: [categoryId], references: [id])
+  instructor      User             @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
   enrollments     Enrollment[]
   lessons         Lesson[]
   modules         Module[]
   payments        Payment[]
   reviews         Review[]
   coupons         Coupon[]
+  // Novas relações para o sistema de lições
+  lessonProgress  LessonProgress[]
+  quizAttempts    QuizAttempt[]
 
   @@index([instructorId])
   @@index([categoryId])
@@ -115,29 +121,131 @@ model Module {
 }
 
 model Lesson {
-  id          String          @id @default(cuid())
-  title       String
-  content     String
-  videoUrl    String?
-  duration    Int?
-  order       Int             @default(0)
-  moduleId    String?
-  isCompleted Boolean         @default(false)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  courseId    String
-  description String?
-  isLocked    Boolean         @default(false)
-  isPreview   Boolean         @default(false)
-  type        LessonType      @default(VIDEO)
-  comments    LessonComment[]
-  course      Course          @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  module      Module?         @relation(fields: [moduleId], references: [id])
+  id                 String           @id @default(cuid())
+  title              String
+  content            String? // Para lições de texto (markdown)
+  videoUrl           String? // Para lições de vídeo
+  videoDuration      Int? // Duração em segundos
+  duration           Int? // Duração estimada da lição
+  order              Int              @default(0)
+  moduleId           String?
+  isCompleted        Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  courseId           String
+  description        String?
+  isLocked           Boolean          @default(false)
+  isPreview          Boolean          @default(false)
+  type               LessonType       @default(VIDEO)
+  // Campos específicos para quiz
+  quizPassingScore   Int? // Porcentagem mínima para passar (0-100)
+  quizAttempts       Int              @default(0) // Número de tentativas permitidas (0 = ilimitado)
+  allowReview        Boolean          @default(true) // Permitir revisar após concluir
+  // Relações
+  comments           LessonComment[]
+  course             Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  module             Module?          @relation(fields: [moduleId], references: [id])
+  questions          Question[] // Perguntas do quiz
+  lessonProgress     LessonProgress[] // Progresso dos estudantes nesta lição
+  quizAttemptRecords QuizAttempt[] // Tentativas de quiz dos estudantes
 
   @@index([moduleId])
   @@index([courseId])
   @@index([order])
   @@map("lessons")
+}
+
+// Nova tabela para perguntas de múltipla escolha
+model Question {
+  id          String           @id @default(cuid())
+  lessonId    String
+  question    String // Texto da pergunta
+  explanation String? // Explicação da resposta (opcional)
+  order       Int              @default(0)
+  points      Int              @default(1) // Pontos que vale a questão
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  lesson      Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  options     QuestionOption[]
+  answers     QuizAnswer[]
+
+  @@index([lessonId])
+  @@map("questions")
+}
+
+// Opções de resposta para cada pergunta
+model QuestionOption {
+  id              String       @id @default(cuid())
+  questionId      String
+  text            String // Texto da opção
+  isCorrect       Boolean      @default(false)
+  order           Int          @default(0)
+  createdAt       DateTime     @default(now())
+  question        Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedAnswers QuizAnswer[]
+
+  @@index([questionId])
+  @@map("question_options")
+}
+
+// Registro de progresso por lição por usuário
+model LessonProgress {
+  id           String    @id @default(cuid())
+  userId       String
+  lessonId     String
+  courseId     String
+  isCompleted  Boolean   @default(false)
+  watchTime    Int       @default(0) // Tempo assistido em segundos (para vídeos)
+  completedAt  DateTime?
+  lastAccessed DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson       Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  course       Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, courseId])
+  @@map("lesson_progress")
+}
+
+// Tentativas de quiz
+model QuizAttempt {
+  id             String       @id @default(cuid())
+  userId         String
+  lessonId       String
+  courseId       String
+  score          Float // Pontuação obtida (0-100)
+  totalQuestions Int // Total de questões
+  correctAnswers Int // Respostas corretas
+  isPassing      Boolean // Se passou ou não
+  completedAt    DateTime     @default(now())
+  timeSpent      Int // Tempo gasto em segundos
+  lesson         Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course         Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  answers        QuizAnswer[]
+
+  @@index([userId, lessonId])
+  @@index([userId, courseId])
+  @@map("quiz_attempts")
+}
+
+// Respostas específicas do usuário para cada pergunta
+model QuizAnswer {
+  id               String          @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String? // Opção selecionada pelo usuário
+  isCorrect        Boolean
+  timeSpent        Int             @default(0) // Tempo gasto nesta questão
+  createdAt        DateTime        @default(now())
+  attempt          QuizAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question         Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption   QuestionOption? @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([attemptId, questionId])
+  @@map("quiz_answers")
 }
 
 model Enrollment {
@@ -362,7 +470,6 @@ enum LessonType {
   VIDEO
   TEXT
   QUIZ
-  ASSIGNMENT
 }
 
 enum DiscountType {

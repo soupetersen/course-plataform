@@ -3,8 +3,7 @@ import {
   CreateLessonDto,
   UpdateLessonDto,
   LessonResponseDto,
-  CreateLessonCommentDto,
-  UpdateLessonProgressDto
+  CreateLessonCommentDto
 } from '@/dtos/LessonDto';
 import { CreateLessonUseCase } from '@/use-cases/CreateLessonUseCase';
 import { CompleteLessonUseCase } from '@/use-cases/CompleteLessonUseCase';
@@ -39,14 +38,14 @@ export class LessonController {
       }
       if (course.instructorId !== userInfo.userId && userInfo.role !== 'ADMIN') {
         return reply.status(403).send({ success: false, error: 'You do not have permission to create lessons for this course' });
-      }
-      const lesson = await this.createLessonUseCase.execute({ ...data, courseId });
+      }      const lesson = await this.createLessonUseCase.execute({ ...data, courseId });
       const response: LessonResponseDto = {
         id: lesson.id,
         title: lesson.title,
         description: lesson.description,
         content: lesson.content,
         videoUrl: lesson.videoUrl,
+        videoDuration: lesson.videoDuration,
         duration: lesson.duration,
         type: lesson.type,
         order: lesson.order,
@@ -54,6 +53,9 @@ export class LessonController {
         isLocked: lesson.isLocked,
         courseId: lesson.courseId,
         moduleId: lesson.moduleId,
+        quizPassingScore: lesson.quizPassingScore,
+        quizAttempts: lesson.quizAttempts,
+        allowReview: lesson.allowReview,
         createdAt: lesson.createdAt,
         updatedAt: lesson.updatedAt
       };
@@ -234,36 +236,8 @@ export class LessonController {
       return reply.status(500).send({ success: false, error: error.message || 'Failed to delete lesson' });
     }
   }
-
-  async updateProgress(request: FastifyRequest, reply: FastifyReply) {
-    try {
-      const userInfo = (request as any).userInfo as UserInfo;
-      const { id } = request.params as { id: string };
-      const data = request.body as UpdateLessonProgressDto;
-      if (!userInfo) {
-        return reply.status(401).send({ success: false, error: 'Authentication required' });
-      }
-      const lesson = await this.lessonRepository.findById(id);
-      if (!lesson) {
-        return reply.status(404).send({ success: false, error: 'Lesson not found' });
-      }
-      const enrollment = await this.enrollmentRepository.findByUserAndCourse(userInfo.userId, lesson.courseId);
-      if (!enrollment) {
-        return reply.status(403).send({ success: false, error: 'You are not enrolled in this course' });
-      }
-      if (lesson.isLocked && !lesson.isPreview) {
-        return reply.status(403).send({ success: false, error: 'This lesson is locked. Complete previous lessons to unlock it.' });
-      }
-      if (data.isCompleted && (this.completeLessonUseCase as any).execute) {
-        await (this.completeLessonUseCase as any).execute(enrollment.id, lesson.id, data.watchTime);
-      } else if ((this.enrollmentRepository as any).updateLessonProgress) {
-        await (this.enrollmentRepository as any).updateLessonProgress(enrollment.id, lesson.id, false, data.watchTime);
-      }
-      return reply.send({ success: true, message: 'Lesson progress updated successfully' });
-    } catch (error: any) {
-      return reply.status(500).send({ success: false, error: error.message || 'Failed to update lesson progress' });
-    }
-  }
+  // Progress methods moved to LessonProgressController
+  // updateProgress method removed - use LessonProgressController.updateVideoProgress instead
 
   async addComment(request: FastifyRequest, reply: FastifyReply) {
     try {

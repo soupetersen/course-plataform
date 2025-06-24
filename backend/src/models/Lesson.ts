@@ -1,13 +1,14 @@
 ﻿import { randomUUID } from 'crypto';
 
-export type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
+export type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ';
 
 export class Lesson {
   id: string;
   title: string;
-  content: string;
+  content?: string;
   description?: string;
   videoUrl?: string;
+  videoDuration?: number;
   duration?: number;
   order: number;
   moduleId: string;
@@ -16,15 +17,19 @@ export class Lesson {
   isPreview: boolean;
   isLocked: boolean;
   isCompleted?: boolean;
+  // Campos específicos para quiz
+  quizPassingScore?: number;
+  quizAttempts?: number;
+  allowReview?: boolean;
   createdAt: Date;
   updatedAt: Date;
-
   constructor(params: {
     id: string;
     title: string;
-    content: string;
+    content?: string;
     description?: string;
     videoUrl?: string;
+    videoDuration?: number;
     duration?: number;
     order: number;
     moduleId: string;
@@ -33,6 +38,9 @@ export class Lesson {
     isPreview?: boolean;
     isLocked?: boolean;
     isCompleted?: boolean;
+    quizPassingScore?: number;
+    quizAttempts?: number;
+    allowReview?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
   }) {
@@ -41,6 +49,7 @@ export class Lesson {
     this.content = params.content;
     this.description = params.description;
     this.videoUrl = params.videoUrl;
+    this.videoDuration = params.videoDuration;
     this.duration = params.duration;
     this.order = params.order;
     this.moduleId = params.moduleId;
@@ -49,6 +58,9 @@ export class Lesson {
     this.isPreview = params.isPreview ?? false;
     this.isLocked = params.isLocked ?? false;
     this.isCompleted = params.isCompleted ?? false;
+    this.quizPassingScore = params.quizPassingScore;
+    this.quizAttempts = params.quizAttempts ?? 0;
+    this.allowReview = params.allowReview ?? true;
     this.createdAt = params.createdAt || new Date();
     this.updatedAt = params.updatedAt || new Date();
   }

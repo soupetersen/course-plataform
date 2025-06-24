@@ -61,20 +61,47 @@ export class PrismaEnrollmentRepository implements EnrollmentRepository {
       enrollment.updatedAt
     ));
   }
-
-  async findByUserId(userId: string): Promise<Enrollment[]> {
-    const enrollments = await this.prisma.enrollment.findMany({ where: { userId } });
-    return enrollments.map(enrollment => new Enrollment(
-      enrollment.id,
-      enrollment.userId,
-      enrollment.courseId,
-      enrollment.enrolledAt,
-      enrollment.completedAt || undefined,
-      enrollment.progress,
-      enrollment.isActive,
-      enrollment.createdAt,
-      enrollment.updatedAt
-    ));
+  async findByUserId(userId: string): Promise<any[]> {
+    const enrollments = await this.prisma.enrollment.findMany({ 
+      where: { userId },
+      include: {
+        course: {
+          include: {
+            instructor: true,
+            category: true,
+            modules: {
+              include: {
+                lessons: true
+              }
+            }
+          }
+        },
+        user: true
+      }
+    });
+      return enrollments.map(enrollment => ({
+      id: enrollment.id,
+      userId: enrollment.userId,
+      courseId: enrollment.courseId,
+      enrolledAt: enrollment.enrolledAt,
+      completedAt: enrollment.completedAt || undefined,
+      progress: enrollment.progress,
+      isActive: enrollment.isActive,
+      createdAt: enrollment.createdAt,
+      updatedAt: enrollment.updatedAt,
+      course: {
+        ...enrollment.course,
+        instructor: enrollment.course.instructor ? {
+          id: enrollment.course.instructor.id,
+          name: enrollment.course.instructor.name,
+          email: enrollment.course.instructor.email,
+          role: enrollment.course.instructor.role,
+          isActive: enrollment.course.instructor.isActive,
+          createdAt: enrollment.course.instructor.createdAt,
+          updatedAt: enrollment.course.instructor.updatedAt,
+        } : null,
+      },
+    }));
   }
 
   async findByCourseId(courseId: string): Promise<Enrollment[]> {
@@ -131,36 +158,108 @@ export class PrismaEnrollmentRepository implements EnrollmentRepository {
 
   async delete(id: string): Promise<void> {
     await this.prisma.enrollment.delete({ where: { id } });
-  }
-
-  async findActiveByUserId(userId: string): Promise<Enrollment[]> {
-    const enrollments = await this.prisma.enrollment.findMany({ where: { userId, isActive: true } });
-    return enrollments.map(enrollment => new Enrollment(
-      enrollment.id,
-      enrollment.userId,
-      enrollment.courseId,
-      enrollment.enrolledAt,
-      enrollment.completedAt || undefined,
-      enrollment.progress,
-      enrollment.isActive,
-      enrollment.createdAt,
-      enrollment.updatedAt
-    ));
-  }
-
-  async findCompletedByUserId(userId: string): Promise<Enrollment[]> {
-    const enrollments = await this.prisma.enrollment.findMany({ where: { userId, completedAt: { not: null } } });
-    return enrollments.map(enrollment => new Enrollment(
-      enrollment.id,
-      enrollment.userId,
-      enrollment.courseId,
-      enrollment.enrolledAt,
-      enrollment.completedAt || undefined,
-      enrollment.progress,
-      enrollment.isActive,
-      enrollment.createdAt,
-      enrollment.updatedAt
-    ));
+  }  async findActiveByUserId(userId: string): Promise<any[]> {
+    const enrollments = await this.prisma.enrollment.findMany({ 
+      where: { userId, isActive: true },
+      include: {
+        course: {
+          include: {
+            instructor: true,
+            category: true,
+            modules: {
+              include: {
+                lessons: true
+              }
+            }
+          }
+        },
+        user: true
+      }
+    });
+    
+    return enrollments.map(enrollment => ({
+      id: enrollment.id,
+      userId: enrollment.userId,
+      courseId: enrollment.courseId,
+      enrolledAt: enrollment.enrolledAt,
+      completedAt: enrollment.completedAt || undefined,
+      progress: enrollment.progress,
+      isActive: enrollment.isActive,
+      createdAt: enrollment.createdAt,
+      updatedAt: enrollment.updatedAt,
+      course: {
+        ...enrollment.course,
+        instructor: enrollment.course.instructor ? {
+          id: enrollment.course.instructor.id,
+          name: enrollment.course.instructor.name,
+          email: enrollment.course.instructor.email,
+          role: enrollment.course.instructor.role,
+          isActive: enrollment.course.instructor.isActive,
+          createdAt: enrollment.course.instructor.createdAt,
+          updatedAt: enrollment.course.instructor.updatedAt,
+        } : null,
+      },
+      user: enrollment.user ? {
+        id: enrollment.user.id,
+        name: enrollment.user.name,
+        email: enrollment.user.email,
+        role: enrollment.user.role,
+        isActive: enrollment.user.isActive,
+        createdAt: enrollment.user.createdAt,
+        updatedAt: enrollment.user.updatedAt,
+      } : null
+    }));
+  }  async findCompletedByUserId(userId: string): Promise<any[]> {
+    const enrollments = await this.prisma.enrollment.findMany({ 
+      where: { userId, completedAt: { not: null } },
+      include: {
+        course: {
+          include: {
+            instructor: true,
+            category: true,
+            modules: {
+              include: {
+                lessons: true
+              }
+            }
+          }
+        },
+        user: true
+      }
+    });
+    
+    return enrollments.map(enrollment => ({
+      id: enrollment.id,
+      userId: enrollment.userId,
+      courseId: enrollment.courseId,
+      enrolledAt: enrollment.enrolledAt,
+      completedAt: enrollment.completedAt || undefined,
+      progress: enrollment.progress,
+      isActive: enrollment.isActive,
+      createdAt: enrollment.createdAt,
+      updatedAt: enrollment.updatedAt,
+      course: {
+        ...enrollment.course,
+        instructor: enrollment.course.instructor ? {
+          id: enrollment.course.instructor.id,
+          name: enrollment.course.instructor.name,
+          email: enrollment.course.instructor.email,
+          role: enrollment.course.instructor.role,
+          isActive: enrollment.course.instructor.isActive,
+          createdAt: enrollment.course.instructor.createdAt,
+          updatedAt: enrollment.course.instructor.updatedAt,
+        } : null,
+      },
+      user: enrollment.user ? {
+        id: enrollment.user.id,
+        name: enrollment.user.name,
+        email: enrollment.user.email,
+        role: enrollment.user.role,
+        isActive: enrollment.user.isActive,
+        createdAt: enrollment.user.createdAt,
+        updatedAt: enrollment.user.updatedAt,
+      } : null
+    }));
   }
 
   async addUserToCourse(courseId: string, userId: string): Promise<Enrollment> {

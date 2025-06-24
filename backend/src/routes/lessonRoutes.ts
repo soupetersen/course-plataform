@@ -92,24 +92,11 @@ export async function lessonRoutes(fastify: FastifyInstance) {
         required: ['id']
       }
     },
-    preHandler: [authMiddleware.authenticate.bind(authMiddleware)]
-  }, lessonController.delete.bind(lessonController));  fastify.put('/lessons/:id/progress', {
-    schema: {
-      params: {
-        type: 'object',
-        properties: { id: { type: 'string' } },
-        required: ['id']
-      },
-      body: {
-        type: 'object',
-        properties: {
-          isCompleted: { type: 'boolean' },
-          watchTime: { type: 'number' }
-        }
-      }
-    },
-    preHandler: [authMiddleware.authenticate.bind(authMiddleware)]
-  }, lessonController.updateProgress.bind(lessonController));  fastify.post('/lessons/:id/comments', {
+    preHandler: [authMiddleware.authenticate.bind(authMiddleware)]  }, lessonController.delete.bind(lessonController));
+
+  // Progress routes moved to progressRoutes.ts
+
+  fastify.post('/lessons/:id/comments', {
     schema: {
       params: {
         type: 'object',
