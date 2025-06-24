@@ -38,7 +38,9 @@ export class PaymentController {
     };
     
     return statusMap[gatewayStatus] || PaymentStatus.PENDING;
-  }async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  }
+  
+  async createOneTimePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId, currency, paymentMethod = 'PIX', gatewayType, couponCode, cardData } = req.body as any;
       const userInfo = (req as any).userInfo;
@@ -77,6 +79,7 @@ export class PaymentController {
       });
     }
   }
+
   async createSubscriptionPayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { courseId, frequency = 1, frequencyType = 'months', gatewayType = 'MERCADOPAGO', cardToken } = req.body as any;
@@ -116,10 +119,10 @@ export class PaymentController {
         error: error instanceof Error ? error.message : 'Não foi possível processar a assinatura.',
       });
     }
-  }  // Webhook genérico para processamento de notificações de pagamento
+  }  
+  
   async handleWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      // Log detalhado do webhook recebido
       console.log('🔔 Webhook recebido:', {
         method: req.method,
         headers: req.headers,
@@ -133,10 +136,8 @@ export class PaymentController {
       
       if (gateway.processWebhook) {
         const result = await gateway.processWebhook(req.body);        if (result.success && result.paymentId) {
-          // Atualizar status do pagamento no banco
           const payment = await this.paymentRepository.findByExternalPaymentId(result.paymentId);
           if (payment && result.status) {
-            // Mapear status do gateway para status interno
             let internalStatus;
             switch (result.status) {
               case 'APPROVED':
@@ -179,8 +180,7 @@ export class PaymentController {
         error: 'Erro ao processar notificação de pagamento.',
       });
     }
-  }
-  async getPaymentHistory(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  }  async getPaymentHistory(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const userInfo = (req as any).userInfo;
       if (!userInfo) {
@@ -192,22 +192,32 @@ export class PaymentController {
       }
 
       const userId = userInfo.userId; 
-      const payments = await this.paymentRepository.findByUserId(userId);reply.status(200).send({
-        success: true,
-        data: { 
-          payments: payments.map(payment => ({
+      const payments = await this.paymentRepository.findByUserId(userId);
+      
+      // Buscar os dados dos cursos para cada pagamento
+      const paymentsWithCourseInfo = await Promise.all(
+        payments.map(async (payment) => {
+          const course = await this.courseRepository.findById(payment.courseId);
+          return {
             id: payment.id,
             courseId: payment.courseId,
-            courseName: `Course ${payment.courseId}`,
+            courseName: course?.title || `Course ${payment.courseId}`,
             amount: payment.amount,
             currency: payment.currency,
             status: payment.status,
             paymentType: payment.paymentType,
             createdAt: payment.createdAt.toISOString(),
             refundRequests: [] 
-          }))
+          };
+        })
+      );
+
+      reply.status(200).send({
+        success: true,
+        data: { 
+          payments: paymentsWithCourseInfo
         }
-      });    } catch (error) {
+      });} catch (error) {
       req.log.error('Error fetching payment history:', error);
       console.error('Payment history error details:', error);
       reply.status(500).send({
@@ -795,8 +805,6 @@ export class PaymentController {
     }
   }
 
-  // === MÉTODOS DE ADMINISTRAÇÃO ===
-
   async getAllPayments(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { status, page = 1, limit = 20 } = req.query as any;
@@ -809,18 +817,13 @@ export class PaymentController {
         });
         return;
       }
-
-      // Verificar se é admin (você pode implementar sua lógica de admin aqui)
-      // Por enquanto, qualquer usuário logado pode ver (para desenvolvimento)
       
-      console.log(`📋 Listando pagamentos - Status: ${status || 'todos'}, Página: ${page}, Limite: ${limit}`);
-
-      // Buscar todos os pagamentos com filtros
       const payments = await this.paymentRepository.findAll({
         status,
         page: parseInt(page),
         limit: parseInt(limit)
-      });      // Buscar informações adicionais dos usuários e cursos
+      });     
+
       const enrichedPayments = await Promise.all(
         payments.map(async (payment: Payment) => {
           const user = await this.userRepository.findById(payment.userId);
@@ -865,6 +868,7 @@ export class PaymentController {
       });
     }
   }
+
   async adminApprovePayment(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const { paymentId } = req.params as any;
