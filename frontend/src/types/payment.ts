@@ -11,6 +11,7 @@ export interface Payment {
   gateway: 'MERCADOPAGO';
   createdAt: string;
   updatedAt: string;
+  courseName?: string;
   course?: {
     id: string;
     title: string;

@@ -40,17 +40,12 @@ export const QuestionOptions: React.FC<QuestionOptionsProps> = ({
 
       <div className="space-y-2">
         {options?.map((option, optionIndex) => (
-          <div
-            key={optionIndex}
-            className="flex items-center space-x-2"
-          >
+          <div key={optionIndex} className="flex items-center space-x-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() =>
-                onToggleCorrect(questionIndex, optionIndex)
-              }
+              onClick={() => onToggleCorrect(questionIndex, optionIndex)}
               className={`${
                 option.isCorrect
                   ? "text-green-600 hover:text-green-700"
@@ -78,9 +73,7 @@ export const QuestionOptions: React.FC<QuestionOptionsProps> = ({
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  onRemoveOption(questionIndex, optionIndex)
-                }
+                onClick={() => onRemoveOption(questionIndex, optionIndex)}
                 className="text-red-600 hover:text-red-700"
               >
                 <Trash2 className="w-4 h-4" />

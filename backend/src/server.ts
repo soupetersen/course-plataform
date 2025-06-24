@@ -70,12 +70,11 @@ async function buildApp() {
   (fastify as any).decorate('diContainer', container);
 
   fastify.setErrorHandler(ErrorHandler.handle);
-
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   await fastify.register(courseRoutes, { prefix: '/api/courses' });
   await fastify.register(moduleRoutes, { prefix: '/api/modules' });
-  await fastify.register(lessonRoutes, { prefix: '/api/lessons' });  
-  await fastify.register(enrollmentRoutes, { prefix: '/api/enrollments' });  
+  await fastify.register(lessonRoutes, { prefix: '/api' });  
+  await fastify.register(enrollmentRoutes, { prefix: '/api/enrollments' });
   await fastify.register(paymentRoutes, { prefix: '/api/payments' });  
   await fastify.register(categoryRoutes, { prefix: '/api/categories' });  
   await fastify.register(reviewRoutes, { prefix: '/api' });

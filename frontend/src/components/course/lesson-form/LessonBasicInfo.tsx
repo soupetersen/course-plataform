@@ -87,10 +87,7 @@ export const LessonBasicInfo: React.FC<LessonBasicInfoProps> = ({
 
         <div>
           <Label htmlFor="type">Tipo de Aula*</Label>
-          <Select
-            value={selectedType}
-            onValueChange={onTypeChange}
-          >
+          <Select value={selectedType} onValueChange={onTypeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo" />
             </SelectTrigger>
@@ -108,7 +105,9 @@ export const LessonBasicInfo: React.FC<LessonBasicInfoProps> = ({
             </SelectContent>
           </Select>
           {errors.type && (
-            <p className="text-red-500 text-sm mt-1">{String(errors.type.message)}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {String(errors.type.message)}
+            </p>
           )}
         </div>
 

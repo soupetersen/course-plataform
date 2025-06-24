@@ -22,7 +22,11 @@ export const MDXEditor: React.FC<MDXEditorProps> = ({
   return (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
-      <div className={`border rounded-lg overflow-hidden ${error ? "border-red-500" : ""}`}>
+      <div
+        className={`border rounded-lg overflow-hidden ${
+          error ? "border-red-500" : ""
+        }`}
+      >
         <MDEditor
           value={value}
           onChange={(val) => onChange(val || "")}
@@ -40,24 +44,28 @@ export const MDXEditor: React.FC<MDXEditorProps> = ({
           data-color-mode="light"
         />
       </div>
-      {error && (
-        <p className="text-red-500 text-sm mt-1">{error}</p>
-      )}
-      
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+
       {/* Preview da sintaxe Markdown */}
       <div className="text-xs text-gray-500 mt-2 p-3 bg-gray-50 rounded border">
         <strong>Dicas de formatação:</strong>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
           <div>
-            <code># Título</code> - Título principal<br/>
-            <code>## Subtítulo</code> - Subtítulo<br/>
-            <code>**negrito**</code> - <strong>negrito</strong><br/>
+            <code># Título</code> - Título principal
+            <br />
+            <code>## Subtítulo</code> - Subtítulo
+            <br />
+            <code>**negrito**</code> - <strong>negrito</strong>
+            <br />
             <code>*itálico*</code> - <em>itálico</em>
           </div>
           <div>
-            <code>- item</code> - Lista com marcadores<br/>
-            <code>1. item</code> - Lista numerada<br/>
-            <code>`código`</code> - <code>código inline</code><br/>
+            <code>- item</code> - Lista com marcadores
+            <br />
+            <code>1. item</code> - Lista numerada
+            <br />
+            <code>`código`</code> - <code>código inline</code>
+            <br />
             <code>[link](url)</code> - Link
           </div>
         </div>

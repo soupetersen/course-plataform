@@ -27,7 +27,7 @@ export function EnhancedPurchaseButton({
   onPurchaseSuccess,
 }: EnhancedPurchaseButtonProps) {
   const [isProcessing, setIsProcessing] = useState(false);
-  const { createPayment, isLoading } = usePaymentApi();
+  const { createPayment } = usePaymentApi();
   const { toast } = useToast();
 
   const handlePurchase = async () => {
@@ -106,7 +106,7 @@ export function EnhancedPurchaseButton({
           onClick={navigateToCheckout}
           className="w-full"
           size="lg"
-          disabled={isProcessing || isLoading}
+          disabled={isProcessing}
         >
           <ShoppingCart className="w-4 h-4 mr-2" />
           Comprar Agora - {paymentUtils.formatCurrency(course.price)}
@@ -117,9 +117,9 @@ export function EnhancedPurchaseButton({
           onClick={handlePurchase}
           variant="outline"
           className="w-full"
-          disabled={isProcessing || isLoading}
+          disabled={isProcessing}
         >
-          {isProcessing || isLoading ? (
+          {isProcessing ? (
             <>
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
               Processando...

@@ -7,9 +7,9 @@ export class Module {
   order: number;
   isLocked: boolean;
   courseId: string;
+  lessons?: any[];
   createdAt: Date;
   updatedAt: Date;
-
   constructor(params: {
     id: string;
     title: string;
@@ -17,6 +17,7 @@ export class Module {
     order: number;
     isLocked?: boolean;
     courseId: string;
+    lessons?: any[];
     createdAt?: Date;
     updatedAt?: Date;
   }) {
@@ -26,6 +27,7 @@ export class Module {
     this.order = params.order;
     this.isLocked = params.isLocked ?? false;
     this.courseId = params.courseId;
+    this.lessons = params.lessons;
     this.createdAt = params.createdAt || new Date();
     this.updatedAt = params.updatedAt || new Date();
   }

@@ -1,4 +1,4 @@
-﻿import { useParams, Link } from "react-router-dom";
+﻿import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Clock, Users, Star, BookOpen } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
@@ -11,16 +11,25 @@ import { Badge } from "../components/ui/badge";
 import { useCourse } from "../hooks/useCourses";
 import { useCurrentUser } from "../hooks/useAuth";
 import { useCourseRatingStats } from "../hooks/useReviews";
+import { useMyEnrollments } from "../hooks/useCategoriesAndEnrollments";
 import { getLevelText, getLevelColor } from "../lib/utils";
 
 export const CourseViewPage = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { data: courseData } = useCourse(id!);
   const { data: user } = useCurrentUser();
   const { data: ratingStatsData } = useCourseRatingStats(id!);
+  const { data: enrollmentsData } = useMyEnrollments();
 
   const course = courseData?.data;
   const ratingStats = ratingStatsData?.data;
+  const enrollments = enrollmentsData?.data || [];
+
+  // Verificar se o usuário está matriculado
+  const isEnrolled = enrollments.some(
+    (enrollment) => enrollment.courseId === id
+  );
 
   if (!course) {
     return (
@@ -116,13 +125,28 @@ export const CourseViewPage = () => {
                     : "Sem avaliações"}
                 </div>
               </div>
-            </div>
-
+            </div>{" "}
             <div className="ml-8">
               {isInstructor ? (
                 <Button asChild>
                   <Link to={`/course/${id}/edit`}>Editar Curso</Link>
                 </Button>
+              ) : isEnrolled ? (
+                <div className="text-right">
+                  <div className="mb-4">
+                    <Badge className="bg-green-100 text-green-700 border-green-200">
+                      ✓ Você já está matriculado
+                    </Badge>
+                  </div>
+                  <Button
+                    size="lg"
+                    className="bg-[#FF204E] hover:bg-[#A0153E] text-white"
+                    onClick={() => navigate(`/learn/${id}`)}
+                  >
+                    <Play className="mr-2 h-5 w-5" />
+                    Continuar Aprendendo
+                  </Button>
+                </div>
               ) : (
                 <div className="text-right">
                   <div className="text-3xl font-bold text-[#FF204E] mb-2">
@@ -133,6 +157,13 @@ export const CourseViewPage = () => {
                   <Button
                     size="lg"
                     className="bg-[#FF204E] hover:bg-[#A0153E] text-white"
+                    onClick={() => {
+                      if (!user) {
+                        navigate(`/login?redirect=/course/${id}`);
+                        return;
+                      }
+                      navigate(`/checkout/${id}`);
+                    }}
                   >
                     Inscrever-se
                   </Button>
@@ -187,11 +218,6 @@ export const CourseViewPage = () => {
                               <h3 className="font-medium text-gray-900 text-lg">
                                 {index + 1}. {module.title}
                               </h3>
-                              {module.description && (
-                                <p className="text-sm text-gray-600 mt-1">
-                                  {module.description}
-                                </p>
-                              )}
                             </div>
                             <div className="flex items-center space-x-2">
                               <Badge variant="outline">

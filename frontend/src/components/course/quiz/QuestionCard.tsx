@@ -75,7 +75,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
           />
           {errors.questions?.[questionIndex]?.text && (
             <p className="text-red-500 text-sm mt-1">
-              {errors.questions[questionIndex].text?.message}
+              {errors.questions?.[questionIndex]?.text?.message}
             </p>
           )}
         </div>

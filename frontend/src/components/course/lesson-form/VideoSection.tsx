@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, Upload } from "lucide-react";
 import type { LessonType } from "@/types/api";
-import type { FieldErrors, UseFormRegister, UseFormWatch } from "react-hook-form";
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormWatch,
+} from "react-hook-form";
 
 interface LessonFormData {
   title: string;

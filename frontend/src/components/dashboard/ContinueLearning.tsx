@@ -85,11 +85,9 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                     </Badge>
                   </div>
                 )}
-
                 <CardTitle className="group-hover:text-primary transition-colors duration-200 text-base md:text-lg leading-tight mb-2 line-clamp-2 min-h-[3rem]">
                   {enrollment.course?.title || "Título não disponível"}
                 </CardTitle>
-
                 {/* Instructor */}
                 {enrollment.course?.instructor && (
                   <div className="flex items-center text-xs text-gray-600 mb-3">
@@ -97,11 +95,9 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                     <span>Por {enrollment.course.instructor.name}</span>
                   </div>
                 )}
-
                 <CardDescription className="text-sm leading-relaxed flex-1 mb-4 line-clamp-3">
                   {enrollment.course?.description || "Descrição não disponível"}
                 </CardDescription>
-
                 {/* Course Stats */}
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-1">
@@ -116,7 +112,8 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                       {enrollment.course?.modules?.length || 0} módulos
                     </span>
                   </div>
-                </div>                <Link
+                </div>{" "}
+                <Link
                   to={`/learn/${enrollment.course?.id || ""}`}
                   className="block"
                 >

@@ -1,7 +1,14 @@
 ﻿import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { ShoppingCart, Users, Star, TrendingUp, Lock, Play } from "lucide-react";
+import {
+  ShoppingCart,
+  Users,
+  Star,
+  TrendingUp,
+  Lock,
+  Play,
+} from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import type { Course } from "../../../types/api";
@@ -20,12 +27,13 @@ export const EnrollmentCard = ({
   isEnrolling,
 }: EnrollmentCardProps) => {
   const { user } = useAuth();
-  const navigate = useNavigate();  const handleEnrollClick = () => {
+  const navigate = useNavigate();
+  const handleEnrollClick = () => {
     if (isEnrolled) {
       navigate(`/learn/${course.id}`);
       return;
     }
-    
+
     if (!user) {
       navigate(`/login?redirect=/courses/${course.id}`);
       return;
@@ -46,30 +54,45 @@ export const EnrollmentCard = ({
             {course.price === 0 ? "Gratuito" : `R$ ${course.price.toFixed(2)}`}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">          <Button
-            onClick={handleEnrollClick}
-            disabled={isEnrolling}
-            className="w-full bg-[#FF204E] hover:bg-[#A0153E] text-white h-12 text-lg font-semibold"
-          >
-            {isEnrolling ? (
-              "Processando..."
-            ) : isEnrolled ? (
-              <>
+        <CardContent className="space-y-4">
+          {" "}
+          {isEnrolled ? (
+            <div className="space-y-3">
+              <div className="text-center p-3 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex items-center justify-center gap-2 text-green-700 font-semibold">
+                  <Users className="h-5 w-5" />
+                  Você já está matriculado
+                </div>
+              </div>
+              <Button
+                onClick={handleEnrollClick}
+                className="w-full bg-[#FF204E] hover:bg-[#A0153E] text-white h-12 text-lg font-semibold"
+              >
                 <Play className="mr-2 h-5 w-5" />
-                Ir para o curso
-              </>
-            ) : !user ? (
-              <>
-                <Lock className="mr-2 h-5 w-5" />
-                Entrar para matricular
-              </>
-            ) : (
-              <>
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Matricular-se agora
-              </>
-            )}
-          </Button>
+                Continuar Aprendendo
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleEnrollClick}
+              disabled={isEnrolling}
+              className="w-full bg-[#FF204E] hover:bg-[#A0153E] text-white h-12 text-lg font-semibold"
+            >
+              {isEnrolling ? (
+                "Processando..."
+              ) : !user ? (
+                <>
+                  <Lock className="mr-2 h-5 w-5" />
+                  Entrar para matricular
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="mr-2 h-5 w-5" />
+                  Matricular-se agora
+                </>
+              )}
+            </Button>
+          )}
           <div className="space-y-3 pt-4 border-t">
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-gray-500" />

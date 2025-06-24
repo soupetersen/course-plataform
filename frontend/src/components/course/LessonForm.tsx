@@ -66,7 +66,13 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     },
   });
 
-  const { handleSubmit, register, watch, setValue, formState: { errors, isSubmitting } } = form;
+  const {
+    handleSubmit,
+    register,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = form;
   const selectedType = watch("type");
 
   const onSubmit = async (data: LessonFormData) => {
@@ -82,7 +88,8 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           type: data.type,
           isPreview: data.isPreview,
           isLocked: data.isLocked,
-          quizPassingScore: data.type === "QUIZ" ? data.quizPassingScore : undefined,
+          quizPassingScore:
+            data.type === "QUIZ" ? data.quizPassingScore : undefined,
         };
 
         await updateLesson.mutateAsync({
@@ -102,7 +109,8 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           type: data.type,
           isPreview: data.isPreview,
           isLocked: data.isLocked,
-          quizPassingScore: data.type === "QUIZ" ? data.quizPassingScore : undefined,
+          quizPassingScore:
+            data.type === "QUIZ" ? data.quizPassingScore : undefined,
         };
 
         await createLesson.mutateAsync(createData);
@@ -120,15 +128,15 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     if (!file) return;
 
     // Validar tipo de arquivo
-    if (!file.type.startsWith('video/')) {
-      alert('Por favor, selecione um arquivo de vídeo válido.');
+    if (!file.type.startsWith("video/")) {
+      alert("Por favor, selecione um arquivo de vídeo válido.");
       return;
     }
 
     // Validar tamanho (500MB máximo)
     const maxSize = 500 * 1024 * 1024; // 500MB
     if (file.size > maxSize) {
-      alert('O arquivo de vídeo deve ter no máximo 500MB.');
+      alert("O arquivo de vídeo deve ter no máximo 500MB.");
       return;
     }
 
@@ -136,10 +144,10 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     try {
       // Upload real para S3 via backend
       const response = await uploadVideo.mutateAsync(file);
-      
+
       if (response && response.data && response.data.url) {
         setValue("videoUrl", response.data.url);
-        
+
         // Obter duração do vídeo
         const video = document.createElement("video");
         video.preload = "metadata";
@@ -151,7 +159,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
       }
     } catch (error) {
       console.error("Video upload error:", error);
-      alert('Erro ao fazer upload do vídeo. Tente novamente.');
+      alert("Erro ao fazer upload do vídeo. Tente novamente.");
     } finally {
       setIsUploadingVideo(false);
     }
@@ -200,10 +208,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           setValue={setValue}
         />
 
-        <LessonSettings
-          watch={watch}
-          setValue={setValue}
-        />
+        <LessonSettings watch={watch} setValue={setValue} />
 
         <FormActions
           isSubmitting={isSubmitting}

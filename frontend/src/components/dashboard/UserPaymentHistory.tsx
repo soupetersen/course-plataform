@@ -60,7 +60,10 @@ export const UserPaymentHistory: React.FC = () => {
           (payment: Payment) => ({
             id: payment.id,
             courseId: payment.courseId,
-            courseTitle: payment.course?.title || `Course ${payment.courseId}`,
+            courseTitle:
+              payment.courseName ||
+              payment.course?.title ||
+              `Course ${payment.courseId}`,
             amount: payment.amount,
             currency: payment.currency,
             status: payment.status,
@@ -110,7 +113,7 @@ export const UserPaymentHistory: React.FC = () => {
       COMPLETED: {
         variant: "default" as const,
         label: "Concluído",
-        color: "text-green-600",
+        color: "text-white",
       },
       PENDING: {
         variant: "secondary" as const,
@@ -241,6 +244,7 @@ export const UserPaymentHistory: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Curso</TableHead>
+                    <TableHead>ID</TableHead>
                     <TableHead>Valor</TableHead>
                     <TableHead>Tipo</TableHead>
                     <TableHead>Status</TableHead>
@@ -254,9 +258,11 @@ export const UserPaymentHistory: React.FC = () => {
                       <TableCell>
                         <div>
                           <p className="font-medium">{payment.courseTitle}</p>
-                          <p className="text-sm text-gray-600">
-                            ID: {payment.id.slice(0, 8)}...
-                          </p>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="text-sm text-gray-600">{payment.id}</p>
                         </div>
                       </TableCell>
                       <TableCell className="font-semibold">
@@ -301,7 +307,7 @@ export const UserPaymentHistory: React.FC = () => {
                             {payment.courseTitle}
                           </h3>
                           <p className="text-xs text-gray-500">
-                            ID: {payment.id.slice(0, 8)}...
+                            ID: {payment.id}
                           </p>
                         </div>
                         <div className="flex-shrink-0 ml-2">

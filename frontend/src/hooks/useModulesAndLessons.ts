@@ -164,7 +164,7 @@ export const useCreateLesson = () => {
     mutationFn: async (lessonData: CreateLessonInput): Promise<ApiResponse<Lesson>> => {
       return apiRequest({
         method: 'POST',
-        url: '/api/lessons',
+        url: `/api/courses/${lessonData.courseId}/lessons`,
         data: lessonData,
       });
     },

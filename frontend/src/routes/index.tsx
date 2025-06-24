@@ -60,7 +60,8 @@ export const router = createBrowserRouter([
             <MyLearningPage />
           </ProtectedRoute>
         ),
-      },      {
+      },
+      {
         path: "courses/:id",
         element: <CourseDetailPage />,
       },

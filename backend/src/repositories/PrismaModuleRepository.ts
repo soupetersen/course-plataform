@@ -56,9 +56,16 @@ export class PrismaModuleRepository implements ModuleRepository {
       updatedAt: module.updatedAt,
     }));
   }
-
   async findByCourseId(courseId: string): Promise<Module[]> {
-    const modules = await this.prisma.module.findMany({ where: { courseId }, orderBy: { order: 'asc' } });
+    const modules = await this.prisma.module.findMany({ 
+      where: { courseId }, 
+      include: {
+        lessons: {
+          orderBy: { order: 'asc' }
+        }
+      },
+      orderBy: { order: 'asc' } 
+    });
     return modules.map(module => new Module({
       id: module.id,
       title: module.title,
@@ -66,6 +73,23 @@ export class PrismaModuleRepository implements ModuleRepository {
       order: module.order,
       isLocked: false,
       courseId: module.courseId,
+      lessons: module.lessons.map(lesson => ({
+        id: lesson.id,
+        title: lesson.title,
+        content: lesson.content,
+        description: lesson.description || undefined,
+        videoUrl: lesson.videoUrl || undefined,
+        duration: lesson.duration,
+        order: lesson.order,
+        moduleId: lesson.moduleId,
+        courseId: lesson.courseId,
+        type: lesson.type as any,
+        isPreview: lesson.isPreview,
+        isLocked: lesson.isLocked,
+        quizPassingScore: lesson.quizPassingScore || undefined,
+        createdAt: lesson.createdAt.toISOString(),
+        updatedAt: lesson.updatedAt.toISOString(),
+      })),
       createdAt: module.createdAt,
       updatedAt: module.updatedAt,
     }));

@@ -22,7 +22,10 @@ interface LessonSettingsProps {
   setValue: UseFormSetValue<LessonFormData>;
 }
 
-export const LessonSettings: React.FC<LessonSettingsProps> = ({ watch, setValue }) => {
+export const LessonSettings: React.FC<LessonSettingsProps> = ({
+  watch,
+  setValue,
+}) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-gray-50">
       <div>

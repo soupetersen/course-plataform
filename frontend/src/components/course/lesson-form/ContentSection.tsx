@@ -3,7 +3,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { MDXEditor } from "../MDXEditor";
 import type { LessonType } from "@/types/api";
-import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import type {
+  FieldErrors,
+  UseFormRegister,
+  UseFormSetValue,
+  UseFormWatch,
+} from "react-hook-form";
 
 interface LessonFormData {
   title: string;
@@ -26,24 +31,28 @@ interface ContentSectionProps {
   setValue: UseFormSetValue<LessonFormData>;
 }
 
-export const ContentSection: React.FC<ContentSectionProps> = ({ 
-  register, 
-  errors, 
-  selectedType, 
-  watch, 
-  setValue 
+export const ContentSection: React.FC<ContentSectionProps> = ({
+  register,
+  errors,
+  selectedType,
+  watch,
+  setValue,
 }) => {
   return (
     <div>
       <Label htmlFor="content">
-        {selectedType === "TEXT" ? "Conteúdo da Aula (Markdown)*" : "Conteúdo da Aula*"}
+        {selectedType === "TEXT"
+          ? "Conteúdo da Aula (Markdown)*"
+          : "Conteúdo da Aula*"}
       </Label>
       {selectedType === "TEXT" ? (
         <MDXEditor
           value={watch("content")}
           onChange={(value) => setValue("content", value)}
           placeholder="Digite o conteúdo da aula usando Markdown..."
-          error={errors.content?.message ? String(errors.content.message) : undefined}
+          error={
+            errors.content?.message ? String(errors.content.message) : undefined
+          }
           height={300}
         />
       ) : (

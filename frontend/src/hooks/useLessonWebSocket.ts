@@ -60,7 +60,7 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
       setConnectionState('connecting');
       setError(null);
       
-      const wsUrl = `${process.env.NODE_ENV === 'production' ? 'wss:' : 'ws:'}//localhost:3001/ws/lessons?token=${token}`;
+      const wsUrl = `${process.env.NODE_ENV === 'production' ? 'wss:' : 'ws:'}//localhost:3000/ws/lessons?token=${token}`;
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
