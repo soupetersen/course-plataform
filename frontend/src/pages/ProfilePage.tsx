@@ -299,11 +299,12 @@ export const ProfilePage = () => {
                               </Badge>
                             )}
                           </div>
-                        </div>
-                        <div className="ml-4">
-                          <Button variant="outline" size="sm">
-                            Continuar
-                          </Button>
+                        </div>                        <div className="ml-4">
+                          <Link to={`/learn/${enrollment.course?.id}`}>
+                            <Button variant="outline" size="sm">
+                              Continuar
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     </div>

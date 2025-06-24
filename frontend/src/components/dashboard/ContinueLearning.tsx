@@ -116,10 +116,8 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                       {enrollment.course?.modules?.length || 0} módulos
                     </span>
                   </div>
-                </div>
-
-                <Link
-                  to={`/courses/${enrollment.course?.id || ""}`}
+                </div>                <Link
+                  to={`/learn/${enrollment.course?.id || ""}`}
                   className="block"
                 >
                   <Button

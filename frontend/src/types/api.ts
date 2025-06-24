@@ -87,6 +87,7 @@ export interface Lesson {
   completions: LessonCompletion[];
   isPreview?: boolean;
   isLocked?: boolean;
+  quizPassingScore?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -103,6 +104,7 @@ export interface CreateLessonInput {
   type: LessonType;
   isPreview?: boolean;
   isLocked?: boolean;
+  quizPassingScore?: number;
 }
 
 export interface UpdateLessonInput extends Partial<CreateLessonInput> {

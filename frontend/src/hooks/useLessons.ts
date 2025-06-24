@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/services/api';
+import { api } from '@/lib/api';
 import { Lesson, CreateLessonData, Question, CreateQuestionData, LessonProgress, QuizAttempt } from '@/types/lesson';
 
 // Lesson CRUD hooks

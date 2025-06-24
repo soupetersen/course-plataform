@@ -4,7 +4,7 @@ import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/DashboardPage";
 import { LandingPage } from "../pages/LandingPage";
-import { LessonPage } from "../pages/LessonPage";
+import { LearnPage } from "../pages/LearnPage";
 import { MyLearningPage } from "../pages/MyLearningPage";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { CoursesPage } from "@/pages/CoursesPage";
@@ -60,14 +60,17 @@ export const router = createBrowserRouter([
             <MyLearningPage />
           </ProtectedRoute>
         ),
-      },
-      {
+      },      {
         path: "courses/:id",
         element: <CourseDetailPage />,
       },
       {
-        path: "courses/:courseId/lessons/:lessonId",
-        element: <LessonPage />,
+        path: "learn/:courseId",
+        element: (
+          <ProtectedRoute>
+            <LearnPage />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "profile",
@@ -104,7 +107,8 @@ export const router = createBrowserRouter([
             <CheckoutPage />
           </ProtectedRoute>
         ),
-      },      {
+      },
+      {
         path: "admin",
         element: (
           <ProtectedRoute requiredRole="ADMIN">

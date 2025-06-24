@@ -141,23 +141,27 @@ export function MyLearningPage() {
             </div>
 
             {enrollment.progress > 0 ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-1 h-7 px-3 text-xs"
-              >
-                <PlayCircle className="h-3 w-3" />
-                Continuar
-              </Button>
+              <Link to={`/learn/${enrollment.courseId}`}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-1 h-7 px-3 text-xs"
+                >
+                  <PlayCircle className="h-3 w-3" />
+                  Continuar
+                </Button>
+              </Link>
             ) : (
-              <Button
-                size="sm"
-                variant="default"
-                className="gap-1 h-7 px-3 text-xs"
-              >
-                <PlayCircle className="h-3 w-3" />
-                Começar
-              </Button>
+              <Link to={`/learn/${enrollment.courseId}`}>
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="gap-1 h-7 px-3 text-xs"
+                >
+                  <PlayCircle className="h-3 w-3" />
+                  Começar
+                </Button>
+              </Link>
             )}
           </div>
 

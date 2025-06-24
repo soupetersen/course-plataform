@@ -1,7 +1,7 @@
 ﻿import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
-import { ShoppingCart, Users, Star, TrendingUp, Lock } from "lucide-react";
+import { ShoppingCart, Users, Star, TrendingUp, Lock, Play } from "lucide-react";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import type { Course } from "../../../types/api";
@@ -20,8 +20,12 @@ export const EnrollmentCard = ({
   isEnrolling,
 }: EnrollmentCardProps) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const handleEnrollClick = () => {
+  const navigate = useNavigate();  const handleEnrollClick = () => {
+    if (isEnrolled) {
+      navigate(`/learn/${course.id}`);
+      return;
+    }
+    
     if (!user) {
       navigate(`/login?redirect=/courses/${course.id}`);
       return;
@@ -42,16 +46,18 @@ export const EnrollmentCard = ({
             {course.price === 0 ? "Gratuito" : `R$ ${course.price.toFixed(2)}`}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Button
+        <CardContent className="space-y-4">          <Button
             onClick={handleEnrollClick}
-            disabled={isEnrolled || isEnrolling}
+            disabled={isEnrolling}
             className="w-full bg-[#FF204E] hover:bg-[#A0153E] text-white h-12 text-lg font-semibold"
           >
             {isEnrolling ? (
               "Processando..."
             ) : isEnrolled ? (
-              "Já matriculado"
+              <>
+                <Play className="mr-2 h-5 w-5" />
+                Ir para o curso
+              </>
             ) : !user ? (
               <>
                 <Lock className="mr-2 h-5 w-5" />

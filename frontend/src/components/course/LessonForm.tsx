@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Loader2, Upload } from "lucide-react";
+  LessonBasicInfo,
+  VideoSection,
+  QuizConfiguration,
+  ContentSection,
+  LessonSettings,
+  FormActions,
+} from "./lesson-form";
 import type {
   Lesson,
   CreateLessonInput,
@@ -21,6 +16,7 @@ import type {
   LessonType,
 } from "@/types/api";
 import { useCreateLesson, useUpdateLesson } from "@/hooks/useModulesAndLessons";
+import { useUploadVideo } from "@/hooks/useLessons";
 
 interface LessonFormProps {
   courseId: string;
@@ -40,6 +36,7 @@ interface LessonFormData {
   duration: number;
   isPreview: boolean;
   isLocked: boolean;
+  quizPassingScore: number;
 }
 
 export const LessonForm: React.FC<LessonFormProps> = ({
@@ -51,15 +48,10 @@ export const LessonForm: React.FC<LessonFormProps> = ({
 }) => {
   const createLesson = useCreateLesson();
   const updateLesson = useUpdateLesson();
+  const uploadVideo = useUploadVideo();
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors, isSubmitting },
-  } = useForm<LessonFormData>({
+  const form = useForm<LessonFormData>({
     defaultValues: {
       title: lesson?.title || "",
       description: lesson?.description || "",
@@ -70,11 +62,12 @@ export const LessonForm: React.FC<LessonFormProps> = ({
       duration: lesson?.duration || 0,
       isPreview: lesson?.isPreview || false,
       isLocked: lesson?.isLocked || false,
+      quizPassingScore: lesson?.quizPassingScore || 70,
     },
   });
 
+  const { handleSubmit, register, watch, setValue, formState: { errors, isSubmitting } } = form;
   const selectedType = watch("type");
-  const videoUrl = watch("videoUrl");
 
   const onSubmit = async (data: LessonFormData) => {
     try {
@@ -89,6 +82,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           type: data.type,
           isPreview: data.isPreview,
           isLocked: data.isLocked,
+          quizPassingScore: data.type === "QUIZ" ? data.quizPassingScore : undefined,
         };
 
         await updateLesson.mutateAsync({
@@ -108,6 +102,7 @@ export const LessonForm: React.FC<LessonFormProps> = ({
           type: data.type,
           isPreview: data.isPreview,
           isLocked: data.isLocked,
+          quizPassingScore: data.type === "QUIZ" ? data.quizPassingScore : undefined,
         };
 
         await createLesson.mutateAsync(createData);
@@ -124,41 +119,43 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('video/')) {
+      alert('Por favor, selecione um arquivo de vídeo válido.');
+      return;
+    }
+
+    // Validar tamanho (500MB máximo)
+    const maxSize = 500 * 1024 * 1024; // 500MB
+    if (file.size > maxSize) {
+      alert('O arquivo de vídeo deve ter no máximo 500MB.');
+      return;
+    }
+
     setIsUploadingVideo(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      const mockUrl = `https://storage.example.com/videos/${file.name}`;
-      setValue("videoUrl", mockUrl);
-
-      const video = document.createElement("video");
-      video.preload = "metadata";
-      video.onloadedmetadata = () => {
-        setValue("duration", Math.round(video.duration));
-        URL.revokeObjectURL(video.src);
-      };
-      video.src = URL.createObjectURL(file);
+      // Upload real para S3 via backend
+      const response = await uploadVideo.mutateAsync(file);
+      
+      if (response && response.data && response.data.url) {
+        setValue("videoUrl", response.data.url);
+        
+        // Obter duração do vídeo
+        const video = document.createElement("video");
+        video.preload = "metadata";
+        video.onloadedmetadata = () => {
+          setValue("duration", Math.round(video.duration));
+          URL.revokeObjectURL(video.src);
+        };
+        video.src = URL.createObjectURL(file);
+      }
     } catch (error) {
       console.error("Video upload error:", error);
+      alert('Erro ao fazer upload do vídeo. Tente novamente.');
     } finally {
       setIsUploadingVideo(false);
     }
   };
-
-  const lessonTypeOptions = [
-    {
-      value: "TEXT",
-      label: "Texto",
-      description: "Aula baseada em texto e imagens",
-    },
-    { value: "VIDEO", label: "Vídeo", description: "Aula em formato de vídeo" },
-    { value: "QUIZ", label: "Quiz", description: "Questionário interativo" },
-    {
-      value: "ASSIGNMENT",
-      label: "Tarefa",
-      description: "Exercício prático para o aluno",
-    },
-  ];
 
   return (
     <div className="space-y-6">
@@ -173,248 +170,47 @@ export const LessonForm: React.FC<LessonFormProps> = ({
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="md:col-span-2">
-            <Label htmlFor="title">Título da Aula*</Label>
-            <Input
-              id="title"
-              {...register("title", {
-                required: "Título é obrigatório",
-                minLength: {
-                  value: 3,
-                  message: "Título deve ter pelo menos 3 caracteres",
-                },
-              })}
-              placeholder="Ex: Introdução ao JavaScript"
-              className={errors.title ? "border-red-500" : ""}
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.title.message}
-              </p>
-            )}
-          </div>
+        <LessonBasicInfo
+          register={register}
+          errors={errors}
+          selectedType={selectedType}
+          onTypeChange={(type) => setValue("type", type)}
+        />
 
-          <div>
-            <Label htmlFor="type">Tipo de Aula*</Label>
-            <Select
-              value={selectedType}
-              onValueChange={(value: LessonType) => setValue("type", value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                {lessonTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div>
-                      <div className="font-medium">{option.label}</div>
-                      <div className="text-sm text-gray-500">
-                        {option.description}
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.type && (
-              <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>
-            )}
-          </div>
+        <QuizConfiguration
+          register={register}
+          errors={errors}
+          selectedType={selectedType}
+        />
 
-          <div>
-            <Label htmlFor="order">Ordem</Label>
-            <Input
-              id="order"
-              type="number"
-              min="1"
-              {...register("order", {
-                required: "Ordem é obrigatória",
-                min: { value: 1, message: "Ordem deve ser maior que 0" },
-                valueAsNumber: true,
-              })}
-              className={errors.order ? "border-red-500" : ""}
-            />
-            {errors.order && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.order.message}
-              </p>
-            )}
-          </div>
-        </div>
+        <VideoSection
+          register={register}
+          errors={errors}
+          selectedType={selectedType}
+          watch={watch}
+          onVideoUpload={handleVideoFileUpload}
+          isUploadingVideo={isUploadingVideo}
+        />
 
-        <div>
-          <Label htmlFor="description">Descrição</Label>
-          <Textarea
-            id="description"
-            {...register("description")}
-            placeholder="Breve descrição da aula..."
-            rows={2}
-            className={errors.description ? "border-red-500" : ""}
-          />
-          {errors.description && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.description.message}
-            </p>
-          )}
-        </div>
+        <ContentSection
+          register={register}
+          errors={errors}
+          selectedType={selectedType}
+          watch={watch}
+          setValue={setValue}
+        />
 
-        {selectedType === "VIDEO" && (
-          <div className="space-y-4 p-4 border rounded-lg bg-blue-50">
-            <h3 className="text-lg font-medium text-blue-900">
-              Configurações de Vídeo
-            </h3>
+        <LessonSettings
+          watch={watch}
+          setValue={setValue}
+        />
 
-            <div>
-              <Label htmlFor="videoUrl">URL do Vídeo</Label>
-              <div className="flex space-x-2">
-                <Input
-                  id="videoUrl"
-                  {...register("videoUrl", {
-                    required:
-                      selectedType === "VIDEO"
-                        ? "URL do vídeo é obrigatória para aulas de vídeo"
-                        : false,
-                  })}
-                  placeholder="https://..."
-                  className={errors.videoUrl ? "border-red-500" : ""}
-                />
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept="video/*"
-                    onChange={handleVideoFileUpload}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    disabled={isUploadingVideo}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isUploadingVideo}
-                    className="whitespace-nowrap"
-                  >
-                    {isUploadingVideo ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-              {errors.videoUrl && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.videoUrl.message}
-                </p>
-              )}
-              {videoUrl && (
-                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-sm text-green-700">
-                  Vídeo configurado: {videoUrl}
-                </div>
-              )}
-            </div>
-
-            <div>
-              <Label htmlFor="duration">Duração (segundos)</Label>
-              <Input
-                id="duration"
-                type="number"
-                min="0"
-                {...register("duration", {
-                  min: { value: 0, message: "Duração não pode ser negativa" },
-                  valueAsNumber: true,
-                })}
-                placeholder="Ex: 300 (5 minutos)"
-                className={errors.duration ? "border-red-500" : ""}
-              />
-              {errors.duration && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.duration.message}
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div>
-          <Label htmlFor="content">Conteúdo da Aula*</Label>
-          <Textarea
-            id="content"
-            {...register("content", {
-              required: "Conteúdo é obrigatório",
-              minLength: {
-                value: 10,
-                message: "Conteúdo deve ter pelo menos 10 caracteres",
-              },
-            })}
-            placeholder={
-              selectedType === "VIDEO"
-                ? "Descrição do vídeo, pontos principais, recursos adicionais..."
-                : selectedType === "QUIZ"
-                ? "Instruções do quiz, perguntas, alternativas..."
-                : "Conteúdo da aula em formato markdown ou texto..."
-            }
-            rows={8}
-            className={errors.content ? "border-red-500" : ""}
-          />
-          {errors.content && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.content.message}
-            </p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-lg bg-gray-50">
-          <div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="isPreview">Aula Gratuita</Label>
-                <p className="text-sm text-gray-600">
-                  Permitir acesso sem inscrição
-                </p>
-              </div>
-              <Switch
-                id="isPreview"
-                checked={watch("isPreview")}
-                onCheckedChange={(checked) => setValue("isPreview", checked)}
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="isLocked">Aula Bloqueada</Label>
-                <p className="text-sm text-gray-600">
-                  Requer aulas anteriores completas
-                </p>
-              </div>
-              <Switch
-                id="isLocked"
-                checked={watch("isLocked")}
-                onCheckedChange={(checked) => setValue("isLocked", checked)}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end space-x-3 pt-4 border-t">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancelar
-          </Button>
-          <Button
-            type="submit"
-            disabled={isSubmitting || isUploadingVideo}
-            className="bg-[#FF204E] hover:bg-[#E01D4A]"
-          >
-            {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            {lesson ? "Atualizar" : "Criar"} Aula
-          </Button>
-        </div>
+        <FormActions
+          isSubmitting={isSubmitting}
+          isUploadingVideo={isUploadingVideo}
+          isEditing={!!lesson}
+          onCancel={onCancel}
+        />
       </form>
     </div>
   );
