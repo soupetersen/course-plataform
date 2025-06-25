@@ -8,6 +8,7 @@ import {
   VideoSection,
   LessonActions,
 } from "./lesson-viewer";
+import { LessonComments } from "./LessonComments";
 
 interface LessonViewerProps {
   lessonId: string;
@@ -265,6 +266,11 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
           }
           onComplete={handleCompleteLesson}
         />
+
+        {/* Seção de Comentários */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+          <LessonComments lessonId={lessonId} />
+        </div>
       </div>
     </div>
   );

@@ -149,7 +149,6 @@ export function LoginPage() {
               </Link>
             </div>
           </form>
-
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}

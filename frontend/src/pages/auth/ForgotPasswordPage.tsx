@@ -37,17 +37,20 @@ export function ForgotPasswordPage() {
       return;
     }
 
-    forgotPasswordMutation.mutate({ email }, {
-      onSuccess: () => {
-        handleSuccess("Código enviado para seu email!");
-        navigate(`/reset-password/verify?email=${encodeURIComponent(email)}`);
-      },
-      onError: (error: any) => {
-        handleError(error, {
-          title: "Erro ao enviar código",
-        });
-      },
-    });
+    forgotPasswordMutation.mutate(
+      { email },
+      {
+        onSuccess: () => {
+          handleSuccess("Código enviado para seu email!");
+          navigate(`/reset-password/verify?email=${encodeURIComponent(email)}`);
+        },
+        onError: (error: any) => {
+          handleError(error, {
+            title: "Erro ao enviar código",
+          });
+        },
+      }
+    );
   };
 
   return (
@@ -80,7 +83,7 @@ export function ForgotPasswordPage() {
                 />
               </div>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full bg-primary-500 hover:bg-primary-600 text-white fade-in-up"
@@ -107,7 +110,7 @@ export function ForgotPasswordPage() {
                 Voltar para o login
               </Link>
             </div>
-            
+
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Não tem uma conta?{" "}

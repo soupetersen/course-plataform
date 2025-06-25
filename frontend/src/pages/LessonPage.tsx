@@ -1,6 +1,6 @@
 ﻿import { useParams } from "react-router-dom";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
-import LessonViewer from "@/components/LessonViewer";
+import LessonViewer from "@/components/course/LessonViewer";
 
 export function LessonPage() {
   const { courseId, lessonId } = useParams<{

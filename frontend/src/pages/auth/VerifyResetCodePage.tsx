@@ -48,17 +48,24 @@ export function VerifyResetCodePage() {
       return;
     }
 
-    validateCodeMutation.mutate({ email, code }, {
-      onSuccess: () => {
-        handleSuccess("Código válido!");
-        navigate(`/reset-password/new?email=${encodeURIComponent(email)}&code=${code}`);
-      },
-      onError: (error: any) => {
-        handleError(error, {
-          title: "Código inválido",
-        });
-      },
-    });
+    validateCodeMutation.mutate(
+      { email, code },
+      {
+        onSuccess: () => {
+          handleSuccess("Código válido!");
+          navigate(
+            `/reset-password/new?email=${encodeURIComponent(
+              email
+            )}&code=${code}`
+          );
+        },
+        onError: (error: any) => {
+          handleError(error, {
+            title: "Código inválido",
+          });
+        },
+      }
+    );
   };
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,7 +107,7 @@ export function VerifyResetCodePage() {
                 Digite o código de 6 dígitos enviado para seu email
               </p>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full bg-primary-500 hover:bg-primary-600 text-white fade-in-up"
@@ -127,7 +134,7 @@ export function VerifyResetCodePage() {
                 Voltar
               </Link>
             </div>
-            
+
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Não recebeu o código?{" "}

@@ -12,7 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useResetPassword } from "@/hooks/useAuth";
 import { useErrorHandler } from "@/hooks/useErrorHandler";
-import { ArrowLeft, Lock, Eye, EyeOff, Loader2, CheckCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  CheckCircle,
+} from "lucide-react";
 
 export function NewPasswordPage() {
   const navigate = useNavigate();
@@ -31,7 +38,7 @@ export function NewPasswordPage() {
   useEffect(() => {
     const emailParam = searchParams.get("email");
     const codeParam = searchParams.get("code");
-    
+
     if (emailParam && codeParam) {
       setEmail(decodeURIComponent(emailParam));
       setCode(codeParam);
@@ -65,11 +72,11 @@ export function NewPasswordPage() {
     }
 
     resetPasswordMutation.mutate(
-      { 
-        email, 
-        code, 
-        newPassword: formData.newPassword 
-      }, 
+      {
+        email,
+        code,
+        newPassword: formData.newPassword,
+      },
       {
         onSuccess: () => {
           handleSuccess("Senha alterada com sucesso!");
@@ -136,9 +143,7 @@ export function NewPasswordPage() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-500">
-                Mínimo de 8 caracteres
-              </p>
+              <p className="text-xs text-gray-500">Mínimo de 8 caracteres</p>
             </div>
 
             <div className="space-y-2">
@@ -183,7 +188,7 @@ export function NewPasswordPage() {
                 </div>
               )}
             </div>
-            
+
             <Button
               type="submit"
               className="w-full bg-primary-500 hover:bg-primary-600 text-white fade-in-up"
