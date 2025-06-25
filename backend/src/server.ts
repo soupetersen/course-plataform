@@ -3,6 +3,7 @@ import cors from '@fastify/cors';
 import multipart from '@fastify/multipart';
 import websocket from '@fastify/websocket';
 import { setupDependencies } from './infrastructure/dependencies';
+import { passwordResetRoutes } from './routes/passwordResetRoutes';
 import { authRoutes } from './routes/authRoutes';
 import { courseRoutes } from './routes/courseRoutes';
 import { moduleRoutes } from './routes/moduleRoutes';
@@ -70,6 +71,7 @@ async function buildApp() {
   (fastify as any).decorate('diContainer', container);
 
   fastify.setErrorHandler(ErrorHandler.handle);
+  await fastify.register(passwordResetRoutes, { prefix: '/api/auth' });
   await fastify.register(authRoutes, { prefix: '/api/auth' });
   await fastify.register(courseRoutes, { prefix: '/api/courses' });
   await fastify.register(moduleRoutes, { prefix: '/api/modules' });

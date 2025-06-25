@@ -12,6 +12,7 @@ import { SubscriptionRepository } from '@/interfaces/SubscriptionRepository';
 import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
+import { PasswordResetRepository } from '@/interfaces/PasswordResetRepository';
 
 import { PrismaUserRepository } from '@/repositories/PrismaUserRepository';
 import { PrismaCourseRepository } from '@/repositories/PrismaCourseRepository';
@@ -24,6 +25,7 @@ import { PrismaSubscriptionRepository } from '@/repositories/PrismaSubscriptionR
 import { PrismaCategoryRepository } from '@/repositories/PrismaCategoryRepository';
 import { PrismaReviewRepository } from '@/repositories/PrismaReviewRepository';
 import { PrismaSavedCardRepository } from '@/repositories/PrismaSavedCardRepository';
+import { PrismaPasswordResetRepository } from '@/repositories/PrismaPasswordResetRepository';
 
 import { PrismaCouponRepository } from '@/repositories/PrismaCouponRepository';
 import { PrismaCouponUsageRepository } from '@/repositories/PrismaCouponUsageRepository';
@@ -40,6 +42,11 @@ import { EnrollInCourseUseCase } from '@/use-cases/EnrollInCourseUseCase';
 import { CreateOneTimePaymentUseCase } from '@/use-cases/CreateOneTimePaymentUseCase';
 import { CreateSubscriptionPaymentUseCase } from '@/use-cases/CreateSubscriptionPaymentUseCase';
 import { CreateReviewUseCase } from '@/use-cases/CreateReviewUseCase';
+import { NotifyCourseCompletionUseCase } from '@/use-cases/NotifyCourseCompletionUseCase';
+import { SendPasswordResetEmailUseCase } from '@/use-cases/SendPasswordResetEmailUseCase';
+import { ForgotPasswordUseCase } from '@/use-cases/ForgotPasswordUseCase';
+import { ValidateResetCodeUseCase } from '@/use-cases/ValidateResetCodeUseCase';
+import { ResetPasswordUseCase } from '@/use-cases/ResetPasswordUseCase';
 
 import { ValidateCouponUseCase } from '@/use-cases/ValidateCouponUseCase';
 import { ApplyCouponUseCase } from '@/use-cases/ApplyCouponUseCase';
@@ -53,6 +60,7 @@ import { JwtService } from '@/services/JwtService';
 import { PasswordService } from '@/services/PasswordService';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { S3Service } from '@/services/S3Service';
+import { EmailService } from '@/services/EmailService';
 
 export function setupDependencies(): DIContainer {
   const container = new DIContainer();
@@ -63,6 +71,12 @@ export function setupDependencies(): DIContainer {
   container.registerSingleton('PasswordService', () => new PasswordService());
   container.registerSingleton('PaymentGatewayFactory', () => PaymentGatewayFactory.getInstance());
   container.registerSingleton('S3Service', () => new S3Service());
+  container.registerSingleton('EmailService', () => new EmailService());
+
+  container.registerSingleton('PasswordResetRepository', () => {
+    const prisma = container.resolve<PrismaClient>('PrismaClient');
+    return new PrismaPasswordResetRepository(prisma);
+  });
 
   container.registerSingleton('UserRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
@@ -242,7 +256,8 @@ export function setupDependencies(): DIContainer {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
-    return new AutoEnrollStudentUseCase(enrollmentRepository, paymentRepository, courseRepository, userRepository);
+    const emailService = container.resolve<EmailService>('EmailService');
+    return new AutoEnrollStudentUseCase(enrollmentRepository, paymentRepository, courseRepository, userRepository, emailService);
   });
 
   container.register('ManageEnrollmentStatusUseCase', () => {
@@ -251,6 +266,38 @@ export function setupDependencies(): DIContainer {
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
     return new ManageEnrollmentStatusUseCase(enrollmentRepository, paymentRepository, courseRepository, userRepository);
+  });
+
+  container.register('NotifyCourseCompletionUseCase', () => {
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    const courseRepository = container.resolve<CourseRepository>('CourseRepository');
+    const emailService = container.resolve<EmailService>('EmailService');
+    return new NotifyCourseCompletionUseCase(userRepository, courseRepository, emailService);
+  });
+
+  container.register('SendPasswordResetEmailUseCase', () => {
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    const emailService = container.resolve<EmailService>('EmailService');
+    return new SendPasswordResetEmailUseCase(userRepository, emailService);
+  });
+
+  container.register('ForgotPasswordUseCase', () => {
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    const passwordResetRepository = container.resolve<PasswordResetRepository>('PasswordResetRepository');
+    const emailService = container.resolve<EmailService>('EmailService');
+    return new ForgotPasswordUseCase(userRepository, passwordResetRepository, emailService);
+  });
+
+  container.register('ValidateResetCodeUseCase', () => {
+    const passwordResetRepository = container.resolve<PasswordResetRepository>('PasswordResetRepository');
+    return new ValidateResetCodeUseCase(passwordResetRepository);
+  });
+
+  container.register('ResetPasswordUseCase', () => {
+    const userRepository = container.resolve<UserRepository>('UserRepository');
+    const passwordResetRepository = container.resolve<PasswordResetRepository>('PasswordResetRepository');
+    const passwordService = container.resolve<PasswordService>('PasswordService');
+    return new ResetPasswordUseCase(userRepository, passwordResetRepository, passwordService);
   });
 
   return container;

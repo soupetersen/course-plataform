@@ -16,7 +16,10 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "test:email": "tsx src/scripts/testEmail.ts",
+    "validate:templates": "tsx src/scripts/validateEmailTemplates.ts",
+    "preview:emails": "tsx src/scripts/generateEmailPreviews.ts"
   },
   "keywords": [
     "nodejs",
@@ -47,6 +50,7 @@
     "mercadopago": "^2.8.0",
     "multer": "^2.0.0",
     "react-player": "^2.16.0",
+    "resend": "^3.2.0",
     "sharp": "^0.34.2",
     "socket.io": "^4.8.1",
     "uuid": "^11.1.0",

@@ -10,6 +10,7 @@ import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
+import { EmailService } from '@/services/EmailService';
 import { Payment, PaymentStatus } from '@/models/Payment';
 import { PaymentGatewayStatus } from '@/interfaces/PaymentGateway';
 
@@ -25,7 +26,8 @@ export class PaymentController {
     private paymentRepository: PaymentRepository,
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
-    private paymentGatewayFactory: PaymentGatewayFactory
+    private paymentGatewayFactory: PaymentGatewayFactory,
+    private emailService: EmailService
   ) {}
 
   private mapGatewayStatusToDomain(gatewayStatus: PaymentGatewayStatus): PaymentStatus {
@@ -62,6 +64,29 @@ export class PaymentController {
         couponCode,
         cardData,
       });
+
+      // Buscar dados do usuário e curso para envio de email
+      const user = await this.userRepository.findById(userInfo.userId);
+      const course = await this.courseRepository.findById(courseId);
+
+      // Se o pagamento for PIX, enviar email com instruções
+      if (paymentMethod === 'PIX' && result.paymentData && user && course) {
+        try {
+          await this.emailService.sendPixPaymentInstructionsEmail(user.email, {
+            userName: user.name,
+            courseName: course.title,
+            amount: result.payment.amount,
+            currency: result.payment.currency,
+            pixCode: result.paymentData.pixCode || result.paymentData.qr_code || '',
+            qrCode: result.paymentData.qr_code_base64,
+            expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
+          });
+          console.log(`✅ Email PIX enviado para ${user.email}`);
+        } catch (emailError) {
+          console.error('❌ Erro ao enviar email PIX:', emailError);
+          // Não falha o pagamento por causa do email
+        }
+      }
 
       reply.status(201).send({
         success: true,
@@ -164,6 +189,25 @@ export class PaymentController {
 
               if (enrollResult.success) {
                 console.log(`✅ Aluno matriculado automaticamente via webhook no curso ${payment.courseId}`);
+                
+                // Enviar email de confirmação de pagamento aprovado
+                try {
+                  const user = await this.userRepository.findById(payment.userId);
+                  const course = await this.courseRepository.findById(payment.courseId);
+                  
+                  if (user && course) {
+                    await this.emailService.sendPaymentApprovedEmail(user.email, {
+                      userName: user.name,
+                      courseName: course.title,
+                      amount: payment.amount,
+                      currency: payment.currency,
+                      paymentDate: new Date(),
+                    });
+                    console.log(`✅ Email de pagamento aprovado enviado para ${user.email}`);
+                  }
+                } catch (emailError) {
+                  console.error('❌ Erro ao enviar email de pagamento aprovado:', emailError);
+                }
               } else {
                 console.error(`❌ Erro ao matricular aluno via webhook: ${enrollResult.error}`);
               }
