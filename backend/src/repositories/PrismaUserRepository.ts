@@ -13,6 +13,7 @@ export class PrismaUserRepository implements UserRepository {
       password: data.password!,
       role: data.role!,
       isActive: data.isActive ?? true,
+      avatar: data.avatar || null,
       createdAt: data.createdAt || new Date(),
       updatedAt: data.updatedAt || new Date(),
     };
@@ -24,7 +25,7 @@ export class PrismaUserRepository implements UserRepository {
       password: user.password,
       role: user.role,
       isActive: user.isActive,
-      avatar: undefined,
+      avatar: (user as any).avatar || undefined,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -40,7 +41,7 @@ export class PrismaUserRepository implements UserRepository {
       password: user.password,
       role: user.role,
       isActive: user.isActive,
-      avatar: undefined,
+      avatar: (user as any).avatar || undefined,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -56,7 +57,7 @@ export class PrismaUserRepository implements UserRepository {
       password: user.password,
       role: user.role,
       isActive: user.isActive,
-      avatar: undefined,
+      avatar: (user as any).avatar || undefined,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -69,6 +70,7 @@ export class PrismaUserRepository implements UserRepository {
       password: data.password,
       role: data.role,
       isActive: data.isActive,
+      avatar: data.avatar,
       updatedAt: new Date(),
     };
     const user = await this.prisma.user.update({ where: { id }, data: updateData });
@@ -79,7 +81,7 @@ export class PrismaUserRepository implements UserRepository {
       password: user.password,
       role: user.role,
       isActive: user.isActive,
-      avatar: undefined,
+      avatar: (user as any).avatar || undefined,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });

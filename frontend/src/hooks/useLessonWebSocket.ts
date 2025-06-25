@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { LessonComment } from '@/types/api';
 
 interface WebSocketMessage {
   type: string;
@@ -27,9 +28,11 @@ interface UseLessonWebSocketReturn {
   updateVideoProgress: (watchTime: number) => void;
   completeLesson: () => void;
   submitQuiz: (answers: Array<{ questionId: string; selectedOptionId?: string; timeSpent: number }>) => void;
+  sendComment: (content: string) => void;
   lastMessage: WebSocketMessage | null;
   lessonProgress: LessonProgress | null;
   quizResult: QuizResult | null;
+  newComment: LessonComment | null;
   error: string | null;
 }
 
@@ -39,6 +42,7 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
   const [lastMessage, setLastMessage] = useState<WebSocketMessage | null>(null);
   const [lessonProgress, setLessonProgress] = useState<LessonProgress | null>(null);
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
+  const [newComment, setNewComment] = useState<LessonComment | null>(null);
   const [error, setError] = useState<string | null>(null);
   
   const wsRef = useRef<WebSocket | null>(null);
@@ -114,6 +118,15 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
             case 'quiz_result':
               console.log('📝 Resultado do quiz:', message.data);
               setQuizResult(message.data as unknown as QuizResult);
+              break;
+              
+            case 'new_comment':
+              console.log('💬 Novo comentário:', message.data);
+              setNewComment(message.data as unknown as LessonComment);
+              break;
+              
+            case 'comment_sent':
+              console.log('✅ Comentário enviado:', message.data);
               break;
               
             case 'error':
@@ -219,6 +232,13 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     });
   }, [sendMessage]);
 
+  const sendComment = useCallback((content: string) => {
+    sendMessage({
+      type: 'send_comment',
+      data: { content }
+    });
+  }, [sendMessage]);
+
   // Ping para manter conexão viva
   useEffect(() => {
     if (!isConnected) return;
@@ -255,9 +275,11 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     updateVideoProgress,
     completeLesson,
     submitQuiz,
+    sendComment,
     lastMessage,
     lessonProgress,
     quizResult,
+    newComment,
     error
   };
 };

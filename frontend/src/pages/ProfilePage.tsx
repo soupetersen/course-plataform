@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+﻿import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEnrollmentStats } from "../hooks/useEnrollments";
@@ -19,19 +19,105 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-import { User, Calendar, BookOpen, Award, Loader2 } from "lucide-react";
+import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
+import {
+  User,
+  Calendar,
+  BookOpen,
+  Award,
+  Loader2,
+  Camera,
+  Upload,
+} from "lucide-react";
+import { api } from "../lib/api";
+import { useToast } from "../components/ui/use-toast";
 
 export const ProfilePage = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { stats, isLoading: statsLoading, enrollments } = useEnrollmentStats();
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     name: user?.name || "",
     email: user?.email || "",
   });
 
-  const handleSave = () => {
-    setIsEditing(false);
+  const handleSave = async () => {
+    try {
+      // Aqui você pode implementar a lógica para salvar os dados do perfil
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Erro ao salvar perfil:", error);
+    }
+  };
+
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Erro",
+        description: "Por favor, selecione apenas arquivos de imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      // 2MB
+      toast({
+        title: "Erro",
+        description: "A imagem deve ter no máximo 2MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+
+    try {
+      // Upload do avatar
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const uploadResponse = await api.post("/api/uploads/avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (uploadResponse.data.success) {
+        // Atualizar perfil com a nova URL do avatar
+        const avatarUrl = uploadResponse.data.data.url;
+
+        const profileResponse = await api.put("/api/auth/profile", {
+          avatar: avatarUrl,
+        });
+
+        if (profileResponse.data.success) {
+          toast({
+            title: "Sucesso!",
+            description: "Avatar atualizado com sucesso!",
+          });
+          // Atualizar o contexto do usuário ou recarregar os dados
+          window.location.reload(); // Temporário - melhor seria atualizar o contexto
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao fazer upload do avatar:", error);
+      toast({
+        title: "Erro",
+        description: "Erro ao fazer upload da imagem. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
   const handleCancel = () => {
@@ -80,9 +166,44 @@ export const ProfilePage = () => {
     <div className="space-y-6 animate-fade-in">
       <div className="bg-gradient-to-r from-primary to-secondary rounded-lg p-6 text-white">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
-            <User className="h-8 w-8" />
+          <div className="relative group">
+            <Avatar className="w-20 h-20 border-4 border-white/20">
+              {user.avatar ? (
+                <AvatarImage src={user.avatar} alt={user.name} />
+              ) : null}
+              <AvatarFallback className="bg-white/20 text-white text-xl font-bold">
+                {user.name
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+
+            {/* Botão de upload de avatar */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+            >
+              {isUploadingAvatar ? (
+                <Loader2 className="h-6 w-6 animate-spin text-white" />
+              ) : (
+                <Camera className="h-6 w-6 text-white" />
+              )}
+            </button>
+
+            {/* Input oculto para upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              className="hidden"
+            />
           </div>
+
           <div>
             <h1 className="text-3xl font-bold">{user.name}</h1>
             <p className="text-primary-foreground/80">{user.email}</p>
