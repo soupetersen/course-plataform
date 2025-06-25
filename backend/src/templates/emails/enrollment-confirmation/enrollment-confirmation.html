@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bem-vindo ao Curso</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.6;
+        color: #1a202c;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f7fafc;
+      }
+      .container {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+        border: 1px solid #e2e8f0;
+      }
+      .header {
+        background: linear-gradient(135deg, #2d3748, #4a5568);
+        color: white;
+        padding: 40px 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: 600;
+        letter-spacing: -0.025em;
+      }
+      .content {
+        background: #ffffff;
+        padding: 40px 30px;
+      }
+      .welcome-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        display: block;
+        text-align: center;
+      }
+      .course-info {
+        background: #f7fafc;
+        padding: 24px;
+        border-radius: 8px;
+        margin: 24px 0;
+        border-left: 4px solid #38a169;
+      }
+      .course-info h3 {
+        color: #2d3748;
+        margin: 0 0 16px 0;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .course-info p {
+        margin: 8px 0;
+        color: #4a5568;
+      }
+      .button {
+        display: inline-block;
+        background: linear-gradient(135deg, #38a169, #2f855a);
+        color: white;
+        padding: 16px 32px;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 24px 0;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(56, 161, 105, 0.15);
+        transition: all 0.2s;
+      }
+      .button:hover {
+        background: linear-gradient(135deg, #2f855a, #276749);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 12px rgba(56, 161, 105, 0.25);
+      }
+      .tips {
+        background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+        padding: 20px;
+        border-left: 4px solid #4299e1;
+        margin: 24px 0;
+        border-radius: 8px;
+      }
+      .tips h4 {
+        color: #2d3748;
+        margin: 0 0 12px 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      .tips ul {
+        margin: 0;
+        padding-left: 20px;
+        color: #4a5568;
+      }
+      .tips li {
+        margin-bottom: 8px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 24px;
+        border-top: 1px solid #e2e8f0;
+        color: #718096;
+        font-size: 14px;
+      }
+      .footer p {
+        margin: 8px 0;
+      }
+      .highlight {
+        color: #2d3748;
+        font-weight: 600;
+      }
+      .greeting {
+        font-size: 18px;
+        color: #2d3748;
+        margin-bottom: 24px;
+      }
+      .message {
+        color: #4a5568;
+        margin-bottom: 20px;
+        font-size: 16px;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .header,
+        .content {
+          padding: 20px;
+        }
+        .header h1 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="welcome-icon">🎉</span>
+        <h1>Bem-vindo ao seu novo curso!</h1>
+      </div>
+      <div class="content">
+        <p class="greeting">
+          Olá, <span class="highlight">{{userName}}</span>!
+        </p>
+
+        <p class="message">
+          Parabéns! Você foi matriculado com sucesso no curso e sua jornada de
+          aprendizado começa agora.
+        </p>
+
+        <div class="course-info">
+          <h3>📚 Informações do Curso</h3>
+          <p><strong>Curso:</strong> {{courseName}}</p>
+          {{#if courseDescription}}
+          <p><strong>Descrição:</strong> {{courseDescription}}</p>
+          {{/if}} {{#if instructorName}}
+          <p><strong>Instrutor:</strong> {{instructorName}}</p>
+          {{/if}}
+          <p><strong>Data de Matrícula:</strong> {{enrollmentDate}}</p>
+        </div>
+
+        <div class="tips">
+          <h4>💡 Dicas para aproveitar ao máximo seu curso:</h4>
+          <ul>
+            <li>Dedique um tempo regular para estudar</li>
+            <li>Faça anotações durante as aulas</li>
+            <li>Participe das atividades práticas</li>
+            <li>Tire suas dúvidas quando necessário</li>
+          </ul>
+        </div>
+
+        <div style="text-align: center">
+          <a href="{{courseUrl}}" class="button">🚀 Começar Curso</a>
+        </div>
+
+        <p class="message">Estamos ansiosos para ver seu progresso!</p>
+      </div>
+      <div class="footer">
+        <p>Este é um email automático, por favor não responda.</p>
+        <p>
+          &copy; {{currentYear}} Course Platform. Todos os direitos reservados.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

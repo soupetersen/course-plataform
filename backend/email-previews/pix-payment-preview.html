@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instruções PIX</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background-color: white;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background: linear-gradient(135deg, #00224d, #ff204e);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+      .header h1 {
+        margin: 0;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .content {
+        background: #ffffff;
+        padding: 30px;
+      }
+      .pix-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+        display: block;
+      }
+      .pix-info {
+        background: #f9f9f9;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border-left: 4px solid #00224d;
+      }
+      .pix-info h3 {
+        color: #00224d;
+        margin-top: 0;
+      }
+      .pix-code {
+        background: #f0f0f0;
+        padding: 15px;
+        border-radius: 5px;
+        word-break: break-all;
+        font-family: "Courier New", monospace;
+        font-size: 12px;
+        margin: 15px 0;
+        border: 2px dashed #00224d;
+        position: relative;
+      }
+      .copy-button {
+        background: #00224d;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      .amount {
+        font-size: 24px;
+        font-weight: bold;
+        color: #ff204e;
+        margin: 20px 0;
+        text-align: center;
+        padding: 15px;
+        background: linear-gradient(135deg, #fff0f3, #ffe6ea);
+        border-radius: 8px;
+        border: 2px solid #ff204e;
+      }
+      .qr-code {
+        text-align: center;
+        margin: 20px 0;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .qr-code img {
+        max-width: 200px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .warning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        border: 1px solid #ffc107;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+        border-left: 4px solid #ff9f00;
+      }
+      .warning h4 {
+        color: #856404;
+        margin-top: 0;
+      }
+      .warning ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .warning li {
+        margin: 8px 0;
+        color: #856404;
+      }
+      .countdown {
+        background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 20px 0;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 30px;
+        color: #666;
+        font-size: 14px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-top: 1px solid #eee;
+      }
+      .footer p {
+        margin: 5px 0;
+      }
+      .highlight {
+        color: #ff204e;
+        font-weight: bold;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+      }
+      .step-number {
+        background: #00224d;
+        color: white;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-weight: bold;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 10px;
+        }
+        .header,
+        .content {
+          padding: 20px;
+        }
+        .header h1 {
+          font-size: 24px;
+        }
+        .pix-code {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <span class="pix-icon">💳</span>
+        <h1>Finalize seu Pagamento PIX</h1>
+      </div>
+      <div class="content">
+        <p>Olá, <strong class="highlight">Sofia Rhythm</strong>!</p>
+
+        <p>
+          🎯 Seu pedido foi processado com sucesso! Para finalizar a compra do
+          curso, realize o pagamento PIX seguindo as instruções abaixo:
+        </p>
+
+        <div class="pix-info">
+          <h3>📚 Detalhes da Compra</h3>
+          <p><strong>Curso:</strong> Curso de Piano Popular e Jazz</p>
+          <div class="amount">R$ 349.90</div>
+          <div class="countdown">⏰ Vencimento: 26/06/2025</div>
+        </div>
+
+        <div class="pix-info">
+          <h3>🔐 Como Pagar com PIX</h3>
+
+          <div class="step">
+            <div class="step-number">1</div>
+            <div>Abra o aplicativo do seu banco</div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div>Escolha a opção PIX</div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div>Escaneie o QR Code OU copie e cole o código</div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">4</div>
+            <div>Confirme o pagamento</div>
+          </div>
+        </div>
+
+        
+        <div class="pix-info">
+          <h4>📱 QR Code PIX</h4>
+          <p>Escaneie com o aplicativo do seu banco:</p>
+          <div class="qr-code">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" alt="QR Code PIX" />
+          </div>
+        </div>
+        
+
+        <div class="pix-info">
+          <h4>📋 Código PIX Copia e Cola</h4>
+          <p>Ou copie o código abaixo e cole no seu aplicativo bancário:</p>
+          <div class="pix-code">00020126330014BR.GOV.BCB.PIX013662345678901234567890125204000053039865802BR5925MUSIC ACADEMY ONLINE6009Sao Paulo610805049-9506304B91A</div>
+        </div>
+
+        <div class="warning">
+          <h4>⚠️ Informações Importantes:</h4>
+          <ul>
+            <li>
+              🕐 O pagamento deve ser realizado até
+              <strong>26/06/2025</strong>
+            </li>
+            <li>
+              ✅ Após o pagamento, você receberá uma confirmação por email
+            </li>
+            <li>🚀 O acesso ao curso será liberado automaticamente</li>
+            <li>⏱️ A confirmação pode levar alguns minutos</li>
+            <li>❓ Em caso de dúvidas, entre em contato conosco</li>
+          </ul>
+        </div>
+
+        <p style="text-align: center; font-weight: bold; color: #00224d">
+          🎉 Assim que o pagamento for confirmado, você receberá um email e
+          poderá acessar seu curso imediatamente!
+        </p>
+      </div>
+      <div class="footer">
+        <p>Este é um email automático, por favor não responda.</p>
+        <p>
+          &copy; 2025 Course Platform. Todos os direitos reservados.
+        </p>
+        <p style="margin-top: 10px; font-size: 12px">
+          🔒 Transação segura protegida pelo Banco Central do Brasil
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

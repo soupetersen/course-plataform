@@ -2,6 +2,7 @@ import { EnrollmentRepository } from '@/interfaces/EnrollmentRepository';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
+import { EmailService } from '@/services/EmailService';
 import { Enrollment } from '@/models/Enrollment';
 import { PaymentStatus } from '@/models/Payment';
 
@@ -20,7 +21,8 @@ export class AutoEnrollStudentUseCase {
     private enrollmentRepository: EnrollmentRepository,
     private paymentRepository: PaymentRepository,
     private courseRepository: CourseRepository,
-    private userRepository: UserRepository
+    private userRepository: UserRepository,
+    private emailService: EmailService
   ) {}
 
   async execute(request: AutoEnrollRequest): Promise<AutoEnrollResponse> {
@@ -81,6 +83,25 @@ export class AutoEnrollStudentUseCase {
       });
 
       const createdEnrollment = await this.enrollmentRepository.create(enrollment);
+
+      // 7. Enviar email de confirmação de matrícula
+      try {
+        const instructor = await this.userRepository.findById(course.instructorId);
+        
+        await this.emailService.sendEnrollmentConfirmationEmail(user.email, {
+          userName: user.name,
+          courseName: course.title,
+          courseDescription: course.description,
+          instructorName: instructor?.name,
+          enrollmentDate: new Date(),
+          courseUrl: `${process.env.FRONTEND_URL}/learn/${course.id}`,
+        });
+        
+        console.log(`✅ Email de confirmação de matrícula enviado para ${user.email}`);
+      } catch (emailError) {
+        console.error('❌ Erro ao enviar email de confirmação de matrícula:', emailError);
+        // Não falha a matrícula por causa do email
+      }
 
       return {
         success: true,
