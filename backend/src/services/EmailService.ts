@@ -44,7 +44,7 @@ export interface CourseCompletionEmailData {
 
 export interface PasswordResetEmailData {
   userName: string;
-  resetUrl: string;
+  resetCode: string;
   expirationTime: Date;
 }
 
@@ -155,14 +155,14 @@ export class EmailService {
   async sendPasswordResetEmail(email: string, data: PasswordResetEmailData): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const html = EmailTemplateLoader.loadTemplate('password-reset', {
       userName: data.userName,
-      resetUrl: data.resetUrl,
+      resetCode: data.resetCode,
       expirationDate: data.expirationTime.toLocaleDateString('pt-BR'),
       expirationTime: data.expirationTime.toLocaleTimeString('pt-BR')
     });
     
     return this.sendEmail({
       to: email,
-      subject: `🔒 Redefinição de senha - Course Platform`,
+      subject: `🔒 Código de redefinição de senha - Course Platform`,
       html,
     });
   }
