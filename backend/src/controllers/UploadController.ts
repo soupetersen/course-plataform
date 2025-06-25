@@ -147,6 +147,75 @@ export class UploadController {
     }
   };
 
+  public uploadAvatar = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
+    try {
+      const data = await request.file();
+      
+      if (!data) {
+        reply.status(400).send({ 
+          success: false,
+          error: 'No avatar image provided' 
+        });
+        return;
+      }
+
+      const buffer = await data.toBuffer();
+      const { filename, mimetype } = data;
+      
+      if (!mimetype.startsWith('image/')) {
+        reply.status(400).send({ 
+          success: false,
+          error: 'Avatar must be an image (jpeg, png, webp, etc.)' 
+        });
+        return;
+      }
+
+      // Validar tamanho (max 2MB para avatar)
+      const maxAvatarSize = 2 * 1024 * 1024; // 2MB
+      if (buffer.length > maxAvatarSize) {
+        reply.status(400).send({ 
+          success: false,
+          error: 'Avatar image too large. Maximum size allowed: 2MB' 
+        });
+        return;
+      }
+
+      // Comprimir e redimensionar avatar para 300x300
+      let finalBuffer = buffer;
+      finalBuffer = await this.compressionService.compressImage(buffer, {
+        maxSizeMB: 0.5, // Máximo 500KB para avatar
+        quality: 90,
+        maxWidth: 300,
+        maxHeight: 300
+      });
+
+      const result = await this.s3Service.uploadFile(
+        finalBuffer,
+        `avatar-${Date.now()}-${filename}`,
+        mimetype,
+        'avatars'
+      );
+
+      reply.status(200).send({
+        success: true,
+        data: {
+          ...result,
+          originalSize: buffer.length,
+          compressedSize: finalBuffer.length,
+          compressionRatio: ((buffer.length - finalBuffer.length) / buffer.length * 100).toFixed(2) + '%'
+        },
+        message: 'Avatar uploaded successfully'
+      });
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      reply.status(500).send({ 
+        success: false,
+        error: 'Failed to upload avatar',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  };
+
   public uploadVideo = async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
     try {
       const data = await request.file();

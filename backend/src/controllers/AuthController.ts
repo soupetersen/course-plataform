@@ -82,10 +82,70 @@ export class AuthController {
           email: user.email,
           role: user.role,
           isActive: user.isActive,
+          avatar: user.avatar,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt
         }
       });    } catch (error) {
+      reply.status(500).send({
+        success: false,
+        message: error instanceof Error ? error.message : 'Erro interno do servidor. Tente novamente mais tarde.'
+      });
+    }
+  }
+
+  async updateProfile(request: FastifyRequest, reply: FastifyReply) {
+    try {
+      const userInfo = (request as any).userInfo;
+      if (!userInfo) {
+        return reply.status(401).send({
+          success: false,
+          message: 'Acesso não autorizado. Faça login novamente.'
+        });
+      }
+
+      const { name, avatar } = request.body as { name?: string; avatar?: string };
+      
+      if (!name && !avatar) {
+        return reply.status(400).send({
+          success: false,
+          message: 'Pelo menos um campo deve ser fornecido para atualização.'
+        });
+      }
+
+      const userRepository = this.container.resolve<UserRepository>('UserRepository');
+      
+      // Verificar se o usuário existe
+      const existingUser = await userRepository.findById(userInfo.userId);
+      if (!existingUser) {
+        return reply.status(404).send({
+          success: false,
+          message: 'Usuário não encontrado.'
+        });
+      }
+
+      // Atualizar o usuário
+      const updateData: any = {};
+      if (name) updateData.name = name;
+      if (avatar) updateData.avatar = avatar;
+
+      const updatedUser = await userRepository.update(userInfo.userId, updateData);
+
+      reply.send({
+        success: true,
+        data: {
+          id: updatedUser.id,
+          name: updatedUser.name,
+          email: updatedUser.email,
+          role: updatedUser.role,
+          isActive: updatedUser.isActive,
+          avatar: updatedUser.avatar,
+          createdAt: updatedUser.createdAt,
+          updatedAt: updatedUser.updatedAt
+        },
+        message: 'Perfil atualizado com sucesso!'
+      });
+    } catch (error) {
       reply.status(500).send({
         success: false,
         message: error instanceof Error ? error.message : 'Erro interno do servidor. Tente novamente mais tarde.'

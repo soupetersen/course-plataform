@@ -25,6 +25,14 @@ export const createUploadRoutes = (uploadController: UploadController): FastifyP
     });
 
     
+    fastify.post('/avatar', {
+      preHandler: [
+        authMiddleware.authenticate.bind(authMiddleware)
+      ],
+      handler: uploadController.uploadAvatar,
+    });
+
+    
     fastify.post('/video', {
       preHandler: [
         authMiddleware.authenticate.bind(authMiddleware),

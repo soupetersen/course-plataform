@@ -3,12 +3,14 @@
   email: string;
   password: string;
   role?: string;
+  avatar?: string;
 }
 
 export interface UpdateUserDto {
   name?: string;
   email?: string;
   password?: string;
+  avatar?: string;
 }
 
 export interface LoginDto {
@@ -22,6 +24,7 @@ export interface UserResponseDto {
   email: string;
   role: string;
   isActive: boolean;
+  avatar?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }

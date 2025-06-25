@@ -39,4 +39,17 @@ export async function authRoutes(fastify: FastifyInstance) {
   fastify.get('/me', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
   }, authController.me.bind(authController));
+
+  fastify.put('/profile', {
+    preHandler: authMiddleware.authenticate.bind(authMiddleware),
+    schema: {
+      body: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          avatar: { type: 'string', format: 'uri' }
+        }
+      }
+    }
+  }, authController.updateProfile.bind(authController));
 }

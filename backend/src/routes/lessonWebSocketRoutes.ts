@@ -170,6 +170,10 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         await handleQuizSubmit(connection, message.data, prisma);
         break;
 
+      case 'send_comment':
+        await handleSendComment(connection, message.data, prisma);
+        break;
+
       case 'ping':
         socket.send(JSON.stringify({ type: 'pong', data: { timestamp: Date.now() } }));
         break;
@@ -432,6 +436,116 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       socket.send(JSON.stringify({
         type: 'error',
         data: { message: 'Erro ao processar quiz' }
+      }));
+    }
+  }
+
+  async function handleSendComment(
+    connection: UserConnection,
+    data: { content: string },
+    prisma: PrismaClient
+  ) {
+    const { userId, socket, currentLessonId, currentCourseId } = connection;
+
+    if (!currentLessonId || !currentCourseId) {
+      socket.send(JSON.stringify({
+        type: 'error',
+        data: { message: 'Você precisa entrar em uma lição primeiro' }
+      }));
+      return;
+    }
+
+    if (!data.content || !data.content.trim()) {
+      socket.send(JSON.stringify({
+        type: 'error',
+        data: { message: 'Conteúdo do comentário é obrigatório' }
+      }));
+      return;
+    }
+
+    try {
+      // Verificar se o usuário está matriculado no curso
+      const enrollment = await prisma.enrollment.findFirst({
+        where: { userId, courseId: currentCourseId, isActive: true }
+      });
+
+      if (!enrollment) {
+        socket.send(JSON.stringify({
+          type: 'error',
+          data: { message: 'Você não está matriculado neste curso' }
+        }));
+        return;
+      }
+
+      // Buscar dados do usuário
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, email: true }
+      });
+
+      if (!user) {
+        socket.send(JSON.stringify({
+          type: 'error',
+          data: { message: 'Usuário não encontrado' }
+        }));
+        return;
+      }
+
+      // Criar o comentário
+      const comment = await prisma.lessonComment.create({
+        data: {
+          id: randomUUID(),
+          content: data.content.trim(),
+          userId,
+          lessonId: currentLessonId,
+        },
+        include: {
+          user: {
+            select: { id: true, name: true, email: true }
+          }
+        }
+      });
+
+      // Enviar confirmação para o autor
+      socket.send(JSON.stringify({
+        type: 'comment_sent',
+        data: { commentId: comment.id, message: 'Comentário enviado com sucesso!' }
+      }));
+
+      // Broadcast do comentário para todos na sala da lição
+      const room = lessonRooms.get(currentLessonId);
+      if (room) {
+        const commentData = {
+          type: 'new_comment',
+          data: {
+            id: comment.id,
+            content: comment.content,
+            userId: comment.userId,
+            user: comment.user,
+            lessonId: comment.lessonId,
+            createdAt: comment.createdAt.toISOString(),
+            updatedAt: comment.updatedAt.toISOString(),
+          }
+        };
+
+        // Enviar para todos os usuários conectados na sala
+        for (const [connId, roomConnection] of room.connections) {
+          try {
+            roomConnection.socket.send(JSON.stringify(commentData));
+          } catch (error) {
+            console.error(`Error sending comment to connection ${connId}:`, error);
+            // Remover conexão inválida
+            room.connections.delete(connId);
+            activeConnections.delete(connId);
+          }
+        }
+      }
+
+    } catch (error) {
+      console.error('Error sending comment:', error);
+      socket.send(JSON.stringify({
+        type: 'error',
+        data: { message: 'Erro ao enviar comentário' }
       }));
     }
   }
