@@ -56,11 +56,16 @@ export class PrismaModuleRepository implements ModuleRepository {
       updatedAt: module.updatedAt,
     }));
   }
-  async findByCourseId(courseId: string): Promise<Module[]> {
+  async findByCourseId(courseId: string, userId?: string): Promise<Module[]> {
     const modules = await this.prisma.module.findMany({ 
       where: { courseId }, 
       include: {
         lessons: {
+          include: {
+            lessonProgress: userId ? {
+              where: { userId }
+            } : false
+          },
           orderBy: { order: 'asc' }
         }
       },
@@ -89,6 +94,13 @@ export class PrismaModuleRepository implements ModuleRepository {
         quizPassingScore: lesson.quizPassingScore || undefined,
         createdAt: lesson.createdAt.toISOString(),
         updatedAt: lesson.updatedAt.toISOString(),
+        completions: (lesson as any).lessonProgress?.map((progress: any) => ({
+          id: progress.id,
+          userId: progress.userId,
+          lessonId: progress.lessonId,
+          completedAt: progress.completedAt?.toISOString()
+        })) || [],
+        comments: []
       })),
       createdAt: module.createdAt,
       updatedAt: module.updatedAt,

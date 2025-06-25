@@ -34,6 +34,15 @@ export const createUploadRoutes = (uploadController: UploadController): FastifyP
     });
 
     
+    fastify.post('/video/metadata', {
+      preHandler: [
+        authMiddleware.authenticate.bind(authMiddleware),
+        authMiddleware.requireRole(['INSTRUCTOR', 'ADMIN'])
+      ],
+      handler: uploadController.getVideoMetadata,
+    });
+
+    
     fastify.get('/files/:filename', {
       handler: uploadController.serveFile,
     });

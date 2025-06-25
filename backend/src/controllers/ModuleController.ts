@@ -117,7 +117,7 @@ export class ModuleController {
       const { courseId } = request.params;
       
       const moduleRepository = this.container.resolve<ModuleRepository>('ModuleRepository');
-      const modules = await moduleRepository.findByCourseId(courseId);
+      const modules = await moduleRepository.findByCourseId(courseId, userInfo.userId);
 
       reply.send({
         success: true,
