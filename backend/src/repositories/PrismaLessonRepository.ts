@@ -1,10 +1,10 @@
 ﻿import { Lesson, LessonType } from '@/models/Lesson';
 import { LessonRepository } from '@/interfaces/LessonRepository';
-import { PrismaService } from '@/infrastructure/database/prisma';
+import { prisma } from '@/infrastructure/database/prisma';
 import { LessonProgress } from '@/models/LessonProgress';
 
 export class PrismaLessonRepository implements LessonRepository {
-  constructor(private prisma: PrismaService) {}
+  private prisma = prisma;
 
   async create(lesson: Lesson): Promise<Lesson> {
     const createdLesson = await this.prisma.lesson.create({
@@ -15,13 +15,16 @@ export class PrismaLessonRepository implements LessonRepository {
         description: lesson.description || null,
         videoUrl: lesson.videoUrl || null,
         videoDuration: lesson.videoDuration || null,
-        orderIndex: lesson.order,
+        duration: lesson.duration || null,
+        order: lesson.order,
         moduleId: lesson.moduleId,
         courseId: lesson.courseId,
-        lessonType: lesson.type,
-        isFree: lesson.isPreview || false,
-        createdAt: lesson.createdAt || new Date(),
-        updatedAt: lesson.updatedAt || new Date(),
+        type: lesson.type,
+        isPreview: lesson.isPreview || false,
+        isLocked: lesson.isLocked || false,
+        quizPassingScore: lesson.quizPassingScore || null,
+        quizAttempts: lesson.quizAttempts || 0,
+        allowReview: lesson.allowReview !== undefined ? lesson.allowReview : true,
       },
       include: {
         module: true,
@@ -29,30 +32,25 @@ export class PrismaLessonRepository implements LessonRepository {
       },
     });
 
-    const lessonWithAllFields = await this.prisma.lesson.findUnique({
-      where: { id: createdLesson.id },
-      include: { module: true, course: true },
-    });
-
-    if (!lessonWithAllFields) {
-      throw new Error('Lesson not found after creation');
-    }
-    
     return new Lesson({
-      id: lesson.id,
-      title: lesson.title,
-      content: lesson.content || undefined,
-      description: lessonWithAllFields.description || undefined,
-      videoUrl: lesson.videoUrl || undefined,
-      duration: lesson.duration || undefined,
-      order: lesson.order,
-      moduleId: lesson.moduleId!,
-      courseId: lessonWithAllFields.courseId,
-      type: lesson.type,
-      isPreview: lesson.isPreview || false,
-      isLocked: lesson.isLocked || false,
-      createdAt: lesson.createdAt || new Date(),
-      updatedAt: lesson.updatedAt || new Date(),
+      id: createdLesson.id,
+      title: createdLesson.title,
+      content: createdLesson.content || undefined,
+      description: createdLesson.description || undefined,
+      videoUrl: createdLesson.videoUrl || undefined,
+      videoDuration: createdLesson.videoDuration || undefined,
+      duration: createdLesson.duration || undefined,
+      order: createdLesson.order,
+      moduleId: createdLesson.moduleId || '',
+      courseId: createdLesson.courseId,
+      type: createdLesson.type as LessonType,
+      isPreview: createdLesson.isPreview,
+      isLocked: createdLesson.isLocked,
+      quizPassingScore: createdLesson.quizPassingScore || undefined,
+      quizAttempts: createdLesson.quizAttempts,
+      allowReview: createdLesson.allowReview,
+      createdAt: createdLesson.createdAt,
+      updatedAt: createdLesson.updatedAt,
     });
   }
 
@@ -62,6 +60,11 @@ export class PrismaLessonRepository implements LessonRepository {
       include: {
         module: true,
         course: true,
+        questions: {
+          include: {
+            options: true,
+          },
+        },
       },
     });
 
@@ -74,13 +77,16 @@ export class PrismaLessonRepository implements LessonRepository {
       description: lesson.description || undefined,
       videoUrl: lesson.videoUrl || undefined,
       videoDuration: lesson.videoDuration || undefined,
-      duration: lesson.videoDuration || undefined,
-      order: lesson.orderIndex,
-      moduleId: lesson.moduleId,
+      duration: lesson.duration || undefined,
+      order: lesson.order,
+      moduleId: lesson.moduleId || '',
       courseId: lesson.courseId,
-      type: lesson.lessonType as LessonType,
-      isPreview: lesson.isFree,
-      isLocked: false,
+      type: lesson.type as LessonType,
+      isPreview: lesson.isPreview,
+      isLocked: lesson.isLocked,
+      quizPassingScore: lesson.quizPassingScore || undefined,
+      quizAttempts: lesson.quizAttempts,
+      allowReview: lesson.allowReview,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     });
@@ -89,28 +95,30 @@ export class PrismaLessonRepository implements LessonRepository {
   async findByModuleId(moduleId: string): Promise<Lesson[]> {
     const lessons = await this.prisma.lesson.findMany({
       where: { moduleId },
-      orderBy: { orderIndex: 'asc' },
+      orderBy: { order: 'asc' },
       include: {
         module: true,
         course: true,
-        lessonProgress: true,
       },
     });
 
-    return lessons.map(lesson => new Lesson({
+    return lessons.map((lesson: any) => new Lesson({
       id: lesson.id,
       title: lesson.title,
       content: lesson.content || undefined,
       description: lesson.description || undefined,
       videoUrl: lesson.videoUrl || undefined,
       videoDuration: lesson.videoDuration || undefined,
-      duration: lesson.videoDuration || undefined,
-      order: lesson.orderIndex,
-      moduleId: lesson.moduleId,
+      duration: lesson.duration || undefined,
+      order: lesson.order,
+      moduleId: lesson.moduleId || '',
       courseId: lesson.courseId,
-      type: lesson.lessonType as LessonType,
-      isPreview: lesson.isFree,
-      isLocked: false,
+      type: lesson.type as LessonType,
+      isPreview: lesson.isPreview,
+      isLocked: lesson.isLocked,
+      quizPassingScore: lesson.quizPassingScore || undefined,
+      quizAttempts: lesson.quizAttempts,
+      allowReview: lesson.allowReview,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     }));
@@ -120,48 +128,55 @@ export class PrismaLessonRepository implements LessonRepository {
     const lessons = await this.prisma.lesson.findMany({
       where: { courseId },
       orderBy: [
-        { module: { orderIndex: 'asc' } },
-        { orderIndex: 'asc' }
+        { module: { order: 'asc' } },
+        { order: 'asc' }
       ],
       include: {
         module: true,
         course: true,
-        lessonProgress: true,
       },
     });
 
-    return lessons.map(lesson => new Lesson({
+    return lessons.map((lesson: any) => new Lesson({
       id: lesson.id,
       title: lesson.title,
       content: lesson.content || undefined,
       description: lesson.description || undefined,
       videoUrl: lesson.videoUrl || undefined,
       videoDuration: lesson.videoDuration || undefined,
-      duration: lesson.videoDuration || undefined,
-      order: lesson.orderIndex,
-      moduleId: lesson.moduleId,
+      duration: lesson.duration || undefined,
+      order: lesson.order,
+      moduleId: lesson.moduleId || '',
       courseId: lesson.courseId,
-      type: lesson.lessonType as LessonType,
-      isPreview: lesson.isFree,
-      isLocked: false,
+      type: lesson.type as LessonType,
+      isPreview: lesson.isPreview,
+      isLocked: lesson.isLocked,
+      quizPassingScore: lesson.quizPassingScore || undefined,
+      quizAttempts: lesson.quizAttempts,
+      allowReview: lesson.allowReview,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
     }));
   }
 
-  async update(lesson: Lesson): Promise<Lesson> {
+  async update(id: string, data: Partial<Lesson>): Promise<Lesson> {
     const updatedLesson = await this.prisma.lesson.update({
-      where: { id: lesson.id },
+      where: { id },
       data: {
-        title: lesson.title,
-        content: lesson.content || undefined,
-        description: lesson.description,
-        videoUrl: lesson.videoUrl,
-        videoDuration: lesson.videoDuration,
-        orderIndex: lesson.order,
-        lessonType: lesson.type,
-        isFree: lesson.isPreview || false,
-        updatedAt: new Date(),
+        title: data.title,
+        content: data.content,
+        description: data.description,
+        videoUrl: data.videoUrl,
+        videoDuration: data.videoDuration,
+        duration: data.duration,
+        order: data.order,
+        moduleId: data.moduleId,
+        type: data.type,
+        isPreview: data.isPreview,
+        isLocked: data.isLocked,
+        quizPassingScore: data.quizPassingScore,
+        quizAttempts: data.quizAttempts,
+        allowReview: data.allowReview,
       },
       include: {
         module: true,
@@ -176,13 +191,16 @@ export class PrismaLessonRepository implements LessonRepository {
       description: updatedLesson.description || undefined,
       videoUrl: updatedLesson.videoUrl || undefined,
       videoDuration: updatedLesson.videoDuration || undefined,
-      duration: updatedLesson.videoDuration || undefined,
-      order: updatedLesson.orderIndex,
-      moduleId: updatedLesson.moduleId,
+      duration: updatedLesson.duration || undefined,
+      order: updatedLesson.order,
+      moduleId: updatedLesson.moduleId || '',
       courseId: updatedLesson.courseId,
-      type: updatedLesson.lessonType as LessonType,
-      isPreview: updatedLesson.isFree,
-      isLocked: false,
+      type: updatedLesson.type as LessonType,
+      isPreview: updatedLesson.isPreview,
+      isLocked: updatedLesson.isLocked,
+      quizPassingScore: updatedLesson.quizPassingScore || undefined,
+      quizAttempts: updatedLesson.quizAttempts,
+      allowReview: updatedLesson.allowReview,
       createdAt: updatedLesson.createdAt,
       updatedAt: updatedLesson.updatedAt,
     });
@@ -194,12 +212,7 @@ export class PrismaLessonRepository implements LessonRepository {
     });
   }
 
-  async getWithProgress(lessonId: string, userId: string): Promise<{ lesson: Lesson; progress: LessonProgress | null }> {
-    const lesson = await this.findById(lessonId);
-    if (!lesson) {
-      throw new Error('Lesson not found');
-    }
-
+  async findProgress(lessonId: string, userId: string): Promise<LessonProgress | null> {
     const progressData = await this.prisma.lessonProgress.findFirst({
       where: {
         lessonId,
@@ -207,18 +220,63 @@ export class PrismaLessonRepository implements LessonRepository {
       },
     });
 
-    const progress = progressData ? new LessonProgress(
+    if (!progressData) return null;
+
+    const progress = new LessonProgress(
       progressData.id,
       progressData.userId,
       progressData.lessonId,
       progressData.courseId,
       progressData.isCompleted,
-      progressData.completedAt || undefined,
-      progressData.watchTime || 0,
+      progressData.watchTime,
+      progressData.completedAt,
+      progressData.lastAccessed,
       progressData.createdAt,
       progressData.updatedAt
-    ) : null;
+    );
 
-    return { lesson, progress };
+    return progress;
+  }
+
+  async updateProgress(
+    userId: string,
+    lessonId: string,
+    currentTime: number,
+    isCompleted: boolean
+  ): Promise<void> {
+    // Buscar o courseId da lição
+    const lesson = await this.prisma.lesson.findUnique({
+      where: { id: lessonId },
+      select: { courseId: true }
+    });
+
+    if (!lesson) {
+      throw new Error('Lesson not found');
+    }
+
+    await this.prisma.lessonProgress.upsert({
+      where: {
+        userId_lessonId: {
+          userId,
+          lessonId,
+        },
+      },
+      update: {
+        watchTime: currentTime,
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null,
+        lastAccessed: new Date(),
+        updatedAt: new Date(),
+      },
+      create: {
+        userId,
+        lessonId,
+        courseId: lesson.courseId,
+        watchTime: currentTime,
+        isCompleted,
+        completedAt: isCompleted ? new Date() : null,
+        lastAccessed: new Date(),
+      },
+    });
   }
 }

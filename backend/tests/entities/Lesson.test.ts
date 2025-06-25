@@ -174,7 +174,7 @@ describe('Lesson', () => {
     });
 
     it('should create lesson with all lesson types', () => {
-      const types: LessonType[] = ['VIDEO', 'TEXT', 'QUIZ', 'ASSIGNMENT'];
+      const types: LessonType[] = ['VIDEO', 'TEXT', 'QUIZ'];
 
       types.forEach(type => {
         const lesson = Lesson.create({

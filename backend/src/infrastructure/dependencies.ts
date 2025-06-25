@@ -107,8 +107,7 @@ export function setupDependencies(): DIContainer {
   });
 
   container.registerSingleton('LessonRepository', () => {
-    const prisma = container.resolve<PrismaClient>('PrismaClient');
-    return new PrismaLessonRepository(prisma);
+    return new PrismaLessonRepository();
   });
 
   container.registerSingleton('LessonCommentRepository', () => {

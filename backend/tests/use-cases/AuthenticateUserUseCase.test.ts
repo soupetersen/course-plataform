@@ -16,6 +16,7 @@ describe('AuthenticateUserUseCase', () => {
       findById: jest.fn(),
       findByEmail: jest.fn(),
       update: jest.fn(),
+      updatePassword: jest.fn(),
       delete: jest.fn()
     } as jest.Mocked<UserRepository>;
 

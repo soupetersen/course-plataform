@@ -17,7 +17,7 @@ export class CreateLessonUseCase {
 
     const lesson = Lesson.create({
       title: data.title,
-      content: data.content,
+      content: data.content || '',
       description: data.description,
       videoUrl: data.videoUrl,
       duration: data.duration || 0,

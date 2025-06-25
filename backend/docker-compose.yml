@@ -65,6 +65,7 @@
       AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
       AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
       AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
+      RESEND_API_KEY : ${RESEND_API_KEY:-}
     ports:
       - "3000:3000"
     depends_on:
@@ -105,6 +106,7 @@
       AWS_S3_IMAGES_FOLDER: ${AWS_S3_IMAGES_FOLDER:-images}
       AWS_S3_VIDEOS_FOLDER: ${AWS_S3_VIDEOS_FOLDER:-videos}
       AWS_S3_DOCUMENTS_FOLDER: ${AWS_S3_DOCUMENTS_FOLDER:-documents}
+      RESEND_API_KEY : ${RESEND_API_KEY:-}
     ports:
       - "3000:3000"      
     depends_on:
