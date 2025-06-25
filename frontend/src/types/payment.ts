@@ -1,4 +1,3 @@
-// Payment related types
 export interface Payment {
   id: string;
   userId: string;
@@ -19,7 +18,6 @@ export interface Payment {
   };
 }
 
-// Coupon related types
 export interface Coupon {
   id: string;
   code: string;
@@ -28,10 +26,12 @@ export interface Coupon {
   discountValue: number;
   maxUses?: number;
   usedCount: number;
-  validUntil?: string;
   isActive: boolean;
+  validFrom: string;
+  validUntil?: string;
+  instructorId?: string;
   courseId?: string;
-  createdById: string;
+  courseIds?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -40,27 +40,24 @@ export interface CouponUsage {
   id: string;
   couponId: string;
   userId: string;
-  paymentId: string;
-  discountAmount: number;
   usedAt: string;
+  discountAmount: number;
+  payment?: Payment;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
-export interface CouponValidationRequest {
-  code: string;
-  courseId: string;
-}
-
-export interface CouponValidationResponse {
+export interface CouponApplication {
+  couponId: string;
+  discountAmount: number;
+  finalAmount: number;
   success: boolean;
-  valid: boolean;
-  coupon?: Coupon;
-  discountAmount?: number;
-  finalPrice?: number;
-  message?: string;
   error?: string;
 }
 
-// Instructor coupon management types
 export interface InstructorCoupon extends Coupon {
   courseName?: string;
   totalDiscountGiven: number;
@@ -70,236 +67,252 @@ export interface InstructorCoupon extends Coupon {
 export interface InstructorCourse {
   id: string;
   title: string;
-  price: number;
-  isPublished: boolean;
 }
 
-// Platform Settings types
 export interface PlatformSetting {
   id: string;
   key: string;
   value: string;
-  type: 'STRING' | 'NUMBER' | 'BOOLEAN';
-  description?: string;
-  updatedBy: string;
+  description: string;
+  dataType: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'JSON';
+  isEditable: boolean;
+  category: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface PlatformSettingsResponse {
   success: boolean;
-  settings: PlatformSetting[];
-  message?: string;
+  data: PlatformSetting[];
   error?: string;
 }
 
-// Refund related types
+export interface UpdatePlatformSettingRequest {
+  value: string;
+}
+
 export interface RefundRequest {
   id: string;
   paymentId: string;
   userId: string;
-  reason?: string;
   amount: number;
-  status: 'PENDING' | 'PROCESSED' | 'APPROVED' | 'REJECTED' | 'FAILED' | 'CANCELLED';
-  gatewayRefundId?: string;
+  reason: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PROCESSED';
+  adminNotes?: string;
   processedAt?: string;
-  processedBy?: string;
-  notes?: string;
   createdAt: string;
   updatedAt: string;
   payment?: Payment;
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  };
 }
 
-export interface CreateRefundRequestData {
-  paymentId: string;
-  reason?: string;
-}
-
-export interface RefundRequestResponse {
+export interface RefundRequestsResponse {
   success: boolean;
-  refundRequest?: RefundRequest;
-  message?: string;
+  data: RefundRequest[];
+  total: number;
+  page: number;
+  totalPages: number;
   error?: string;
 }
 
-// Fee calculation types
-export interface FeeCalculationRequest {
-  courseId: string;
-  discountAmount?: number;
+export interface CreateRefundRequest {
+  paymentId: string;
+  reason: string;
+}
+
+export interface ProcessRefundRequest {
+  status: 'APPROVED' | 'REJECTED';
+  adminNotes?: string;
+}
+
+export interface FeeCalculation {
+  originalAmount: number;
+  platformFee: number;
+  gatewayFee: number;
+  instructorAmount: number;
+  finalAmount: number;
 }
 
 export interface FeeCalculationResponse {
   success: boolean;
-  calculation: {
-    subtotal: number;
-    discount: number;
-    platformFee: number;
-    processingFee: number;
-    total: number;
-    instructorAmount: number;
-  };
-  message?: string;
+  data: FeeCalculation;
   error?: string;
 }
 
-// Admin coupon management types
-export interface CreateCouponRequest {
+export interface FeeStructure {
+  platformFeePercentage: number;
+  gatewayFeePercentage: number;
+  gatewayFeeFixed: number;
+}
+
+export interface AdminCouponWithStats extends Coupon {
+  totalUsage: number;
+  totalDiscountGiven: number;
+  courses?: {
+    id: string;
+    title: string;
+  }[];
+  usages?: {
+    id: string;
+    userId: string;
+    usedAt: string;
+    discountAmount: number;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+    };
+    payment?: {
+      id: string;
+      amount: number;
+      course?: {
+        id: string;
+        title: string;
+      };
+    };
+  }[];
+}
+
+export interface AdminCouponsResponse {
+  success: boolean;
+  data: AdminCouponWithStats[];
+  total: number;
+  page: number;
+  totalPages: number;
+  error?: string;
+}
+
+export interface CreateAdminCouponRequest {
   code: string;
   description?: string;
   discountType: 'PERCENTAGE' | 'FLAT_RATE';
   discountValue: number;
   maxUses?: number;
+  validFrom: string;
   validUntil?: string;
-  isActive?: boolean;
-  courseId?: string;
-  createdById: string;
+  courseIds?: string[];
 }
 
-export interface CreateCouponFormData {
-  code: string;
+export interface UpdateAdminCouponRequest {
   description?: string;
-  discountType: 'PERCENTAGE' | 'FLAT_RATE';
-  discountValue: number;
-  maxUses?: number;
-  validUntil?: string;
-  isActive?: boolean;
-  courseId?: string;
-}
-
-export interface UpdateCouponRequest {
-  code?: string;
-  description?: string;
-  discountType?: 'PERCENTAGE' | 'FLAT_RATE';
   discountValue?: number;
   maxUses?: number;
   validUntil?: string;
+  courseIds?: string[];
   isActive?: boolean;
-  courseId?: string;
 }
 
-export interface CouponResponse {
+export interface PaymentInitiationRequest {
+  courseId: string;
+  couponCode?: string;
+}
+
+export interface PaymentInitiationResponse {
   success: boolean;
-  coupon?: Coupon;
-  message?: string;
+  data?: {
+    paymentId: string;
+    url?: string;
+  };
   error?: string;
 }
 
-export interface CouponListResponse {
+export interface ApiResponse<T> {
   success: boolean;
-  coupons: Coupon[];
-  total?: number;
-  page?: number;
-  limit?: number;
-  message?: string;
+  data?: T;
   error?: string;
 }
 
-// Payment processing types
-export interface CreatePaymentRequest {
+export interface UserPaymentHistory {
+  payments: Payment[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface RefundRequestList {
+  requests: RefundRequest[];
+  total: number;
+  page: number;
+  totalPages: number;
+}
+
+export interface InstructorCouponListResponse {
+  success: boolean;
+  data: InstructorCoupon[];
+  total: number;
+  page: number;
+  totalPages: number;
+  error?: string;
+}
+
+export interface CreateInstructorCouponRequest {
+  code: string;
+  description?: string;
+  discountType: 'PERCENTAGE' | 'FLAT_RATE';
+  discountValue: number;
+  maxUses?: number;
+  validFrom: string;
+  validUntil?: string;
+  courseIds?: string[];
+}
+
+export interface UpdateInstructorCouponRequest {
+  description?: string;
+  discountValue?: number;
+  maxUses?: number;
+  validUntil?: string;
+  courseIds?: string[];
+  isActive?: boolean;
+}
+
+export interface StudentCouponResponse {
+  success: boolean;
+  data: {
+    coupon: Coupon;
+    discountAmount: number;
+    finalAmount: number;
+  };
+  error?: string;
+}
+
+export interface ValidateCouponRequest {
+  code: string;
+  courseId: string;
+}
+
+export interface SavedCard {
+  id: string;
+  userId: string;
+  lastFourDigits: string;
+  cardNetwork: string;
+  expirationDate: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface SavedCardsResponse {
+  success: boolean;
+  data: SavedCard[];
+  error?: string;
+}
+
+export interface CreateSavedCardRequest {
+  cardToken: string;
+  lastFourDigits: string;
+  cardNetwork: string;
+  expirationDate: string;
+  isDefault?: boolean;
+}
+
+export interface PaymentProcessingData {
   courseId: string;
   amount: number;
   couponCode?: string;
-  successUrl?: string;
-  cancelUrl?: string;
-}
-
-export interface CreatePaymentResponse {
-  success: boolean;
-  paymentId?: string;
-  url?: string; // Mercado Pago Checkout URL
-  message?: string;
-  error?: string;
-}
-
-// API Response wrapper
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
-
-// User payment history
-export interface UserPaymentHistoryResponse {
-  success: boolean;
-  payments: Payment[];
-  total?: number;
-  message?: string;
-  error?: string;
-}
-
-// Refund request list
-export interface RefundRequestListResponse {
-  success: boolean;
-  refundRequests: RefundRequest[];
-  total?: number;
-  message?: string;
-  error?: string;
-}
-
-// Instructor coupon management types
-export interface InstructorCoupon extends Coupon {
-  courseName?: string;
-  totalDiscountGiven: number;
-  usages: CouponUsage[];
-}
-
-export interface InstructorCourse {
-  id: string;
-  title: string;
-  price: number;
-  isPublished: boolean;
-}
-
-export interface InstructorCouponResponse {
-  success: boolean;
-  data: InstructorCoupon[];
-  message?: string;
-  error?: string;
-}
-
-export interface InstructorCoursesResponse {
-  success: boolean;
-  data: InstructorCourse[];
-  message?: string;
-  error?: string;
-}
-
-// Student coupon types
-export interface AvailableCoupon {
-  id: string;
-  code: string;
-  description: string;
-  discountType: "PERCENTAGE" | "FLAT_RATE";
-  discountValue: number;
-  minimumAmount?: number;
-  maxUsageCount?: number;
-  currentUsageCount: number;
-  validUntil: string;
-  isActive: boolean;
-  courseId?: string;
-  courseTitle?: string;
-  createdBy?: string;
-  isGlobal?: boolean;
-}
-
-export interface CouponUsageHistory {
-  id: string;
-  coupon: {
-    id: string;
-    code: string;
-    description: string;
-    discountType: string;
-    discountValue: number;
-    courseTitle?: string;
-  };
-  discountAmount: number;
-  usedAt: string;
-  payment?: {
-    id: string;
-    amount: number;
-    currency: string;
-    status: string;
-    createdAt: string;
-  };
+  paymentMethodId?: string;
+  cardToken?: string;
+  saveCard?: boolean;
 }

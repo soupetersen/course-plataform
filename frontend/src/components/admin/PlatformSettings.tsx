@@ -124,9 +124,6 @@ export function PlatformSettings() {
       case "PLATFORM_FEE_PERCENTAGE":
         if (numValue > 100) return "Taxa da plataforma deve ser no máximo 100%";
         break;
-      case "STRIPE_FEE_PERCENTAGE":
-        if (numValue > 10) return "Taxa do Stripe deve ser no máximo 10%";
-        break;
       case "REFUND_DAYS_LIMIT":
         if (numValue > 365)
           return "Prazo de reembolso deve ser no máximo 365 dias";
@@ -171,11 +168,10 @@ export function PlatformSettings() {
   const settingGroups: SettingGroup[] = [
     {
       title: "Taxas e Comissões",
-      description:
-        "Configure as taxas da plataforma e processamento de pagamentos",
+      description: "Configure as taxas da plataforma",
       icon: <DollarSign className="w-5 h-5" />,
       settings: settings.filter((s) =>
-        ["PLATFORM_FEE_PERCENTAGE", "STRIPE_FEE_PERCENTAGE"].includes(s.key)
+        ["PLATFORM_FEE_PERCENTAGE"].includes(s.key)
       ),
     },
     {
@@ -310,13 +306,12 @@ export function PlatformSettings() {
         </Card>
       ))}
 
-      {/* Summary Card */}
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Resumo das Configurações</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label className="text-sm font-medium">Taxa da Plataforma</Label>
               <div className="text-2xl font-bold text-green-600">
@@ -340,16 +335,6 @@ export function PlatformSettings() {
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Taxa do Stripe</Label>
-              <div className="text-2xl font-bold text-orange-600">
-                {getSettingValue("STRIPE_FEE_PERCENTAGE", "2.9")}%
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Taxa de processamento de pagamentos
-              </p>
-            </div>
-
-            <div className="space-y-2">
               <Label className="text-sm font-medium">Saque Mínimo</Label>
               <div className="text-2xl font-bold text-purple-600">
                 R${" "}
@@ -362,6 +347,22 @@ export function PlatformSettings() {
               </p>
             </div>
           </div>
+
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-4 h-4 text-orange-600" />
+              <Label className="text-sm font-medium text-orange-800">
+                Taxa do Gateway (Mercado Pago)
+              </Label>
+            </div>
+            <div className="text-lg font-bold text-orange-600 mb-1">
+              3.99% + R$ 0,40
+            </div>
+            <p className="text-xs text-orange-700">
+              Taxa fixa do Mercado Pago aplicada automaticamente em todas as
+              transações (não configurável)
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -371,9 +372,9 @@ export function PlatformSettings() {
 function getSettingLabel(key: string): string {
   const labels: Record<string, string> = {
     PLATFORM_FEE_PERCENTAGE: "Taxa da Plataforma (%)",
-    STRIPE_FEE_PERCENTAGE: "Taxa do Stripe (%)",
     REFUND_DAYS_LIMIT: "Prazo para Reembolso (dias)",
     MINIMUM_PAYOUT_AMOUNT: "Valor Mínimo para Saque (R$)",
+    BALANCE_HOLD_DAYS: "Dias de Retenção do Saldo",
   };
   return labels[key] || key;
 }
@@ -381,9 +382,9 @@ function getSettingLabel(key: string): string {
 function getSettingUnit(key: string): string {
   const units: Record<string, string> = {
     PLATFORM_FEE_PERCENTAGE: "%",
-    STRIPE_FEE_PERCENTAGE: "%",
     REFUND_DAYS_LIMIT: "dias",
     MINIMUM_PAYOUT_AMOUNT: "R$",
+    BALANCE_HOLD_DAYS: "dias",
   };
   return units[key] || "";
 }

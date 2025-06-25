@@ -7,14 +7,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { InstructorCouponManagement } from "@/components/instructor/InstructorCouponManagement";
 import { InstructorPaymentAnalytics } from "@/components/instructor/InstructorPaymentAnalytics";
 import { InstructorSection } from "@/components/dashboard/InstructorSection";
 import { useCoursesByInstructor } from "@/hooks/useCourses";
 import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { Wallet } from "lucide-react";
 
 export const InstructorDashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     data: coursesResponse,
     isLoading,
@@ -103,7 +107,47 @@ export const InstructorDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">
-          <InstructorPaymentAnalytics />
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Analytics Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Payment Analytics</CardTitle>
+                <CardDescription>
+                  View your revenue analytics and performance metrics
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <InstructorPaymentAnalytics />
+              </CardContent>
+            </Card>
+
+            {/* Payouts Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5" />
+                  Payouts & Withdrawals
+                </CardTitle>
+                <CardDescription>
+                  Manage your earnings and withdrawal requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-gray-600">
+                  Access your payout dashboard to view your balance, request
+                  withdrawals, and track payout history.
+                </p>
+                <Button
+                  onClick={() => navigate("/instructor/payout")}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  Open Payout Dashboard
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

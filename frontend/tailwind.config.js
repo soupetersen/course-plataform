@@ -39,7 +39,7 @@ export default {
           200: "#fecaca",
           300: "#fca5a5",
           400: "#f87171",
-          500: "#ff204e", // Main color from palette
+          500: "#ff204e",
           600: "#dc2626",
           700: "#b91c1c",
           800: "#991b1b",
@@ -53,7 +53,7 @@ export default {
           200: "#e2e8f0",
           300: "#cbd5e1",
           400: "#94a3b8",
-          500: "#a0153e", // Second color from palette
+          500: "#a0153e",
           600: "#475569",
           700: "#334155",
           800: "#1e293b",
@@ -65,7 +65,7 @@ export default {
           200: "#e2e8f0",
           300: "#cbd5e1",
           400: "#94a3b8",
-          500: "#5d0e41", // Third color from palette
+          500: "#5d0e41",
           600: "#475569",
           700: "#334155",
           800: "#1e293b",
@@ -77,7 +77,7 @@ export default {
           200: "#bae6fd",
           300: "#7dd3fc",
           400: "#38bdf8",
-          500: "#00224d", // Fourth color from palette
+          500: "#00224d",
           600: "#0284c7",
           700: "#0369a1",
           800: "#075985",

@@ -53,19 +53,16 @@ export function LearnPage() {
   const enrollments = enrollmentsData?.data || [];
   const myReviews = reviewsData?.data || [];
 
-  // Verificar se o usuário está matriculado
   const currentEnrollment = enrollments.find(
     (enrollment) => enrollment.courseId === courseId
   );
   const isEnrolled = !!currentEnrollment;
 
-  // Verificar se o usuário já avaliou este curso
   const existingReview = myReviews.find(
     (review) => review.courseId === courseId
   );
   const hasReviewed = !!existingReview;
 
-  // Calcular progresso baseado nas aulas concluídas
   const totalLessons = useMemo(() => {
     return modules.reduce(
       (total, module) => total + (module.lessons?.length || 0),
@@ -77,16 +74,13 @@ export function LearnPage() {
   const calculatedProgress =
     totalLessons > 0 ? (completedLessonsCount / totalLessons) * 100 : 0;
 
-  // Usar progresso calculado baseado nas aulas concluídas ou o progresso base
   const progress = Math.max(
     calculatedProgress,
     currentEnrollment?.progress || 0
   );
 
-  // Verificar se o usuário atingiu 20% de progresso
   const canReview = progress >= 20 && !hasReviewed;
 
-  // Verificar se a review foi dispensada para este curso
   useEffect(() => {
     if (courseId) {
       const dismissed = localStorage.getItem(`review_dismissed_${courseId}`);

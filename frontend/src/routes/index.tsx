@@ -21,6 +21,7 @@ import { AdminPayments } from "@/pages/AdminPayments";
 import { UserDashboard } from "@/pages/UserDashboard";
 import { CheckoutPage } from "@/pages/CheckoutPage";
 import { InstructorDashboard } from "@/pages/InstructorDashboard";
+import InstructorPayoutDashboard from "@/pages/InstructorPayoutDashboard";
 import { SettingsPage } from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
@@ -54,7 +55,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "explore",
-        element: <CoursesPage />, // Redireciona explore para a mesma página de cursos
+        element: <CoursesPage />,
       },
       {
         path: "my-learning",
@@ -141,6 +142,14 @@ export const router = createBrowserRouter([
         element: (
           <ProtectedRoute requiredRole="INSTRUCTOR">
             <InstructorDashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "instructor/payout",
+        element: (
+          <ProtectedRoute requiredRole="INSTRUCTOR">
+            <InstructorPayoutDashboard />
           </ProtectedRoute>
         ),
       },

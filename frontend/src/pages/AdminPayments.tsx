@@ -118,7 +118,6 @@ export function AdminPayments() {
       } else {
         console.warn("⚠️ Estrutura de dados inválida ou vazia");
         console.log("response:", response);
-        // Se não houver resposta válida, definir array vazio
         setPayments([]);
         setStats({
           total: 0,
@@ -131,7 +130,6 @@ export function AdminPayments() {
     } catch (error) {
       console.error("❌ Erro ao buscar pagamentos:", error);
 
-      // Em caso de erro, definir array vazio
       setPayments([]);
       setStats({
         total: 0,
@@ -166,7 +164,6 @@ export function AdminPayments() {
           description: "Pagamento aprovado com sucesso!",
         });
 
-        // Recarregar lista
         await fetchPayments();
       } else {
         toast({
@@ -203,7 +200,6 @@ export function AdminPayments() {
           description: "Pagamento rejeitado com sucesso!",
         });
 
-        // Recarregar lista
         await fetchPayments();
       } else {
         toast({
@@ -227,14 +223,6 @@ export function AdminPayments() {
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
-
-  // Log para debug na renderização
-  console.log("🎨 Renderizando AdminPayments:", {
-    loading,
-    paymentsCount: payments?.length,
-    payments: payments,
-    stats,
-  });
 
   const formatCurrency = (amount: number, currency: string = "BRL") => {
     return new Intl.NumberFormat("pt-BR", {

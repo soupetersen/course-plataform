@@ -1,4 +1,5 @@
-﻿// Password Reset types
+﻿import { Payment } from './payment';
+
 export interface ForgotPasswordRequest {
   email: string;
 }
@@ -19,7 +20,6 @@ export interface PasswordResetResponse {
   message: string;
 }
 
-// User types
 export interface User {
   id: string;
   email: string;
@@ -28,294 +28,388 @@ export interface User {
   avatar?: string;
   createdAt: string;
   updatedAt: string;
+  bio?: string;
+  website?: string;
+  socialLinks?: string;
 }
 
-export interface AuthUser extends User {
-  token: string;
+export interface UserResponse {
+  success: boolean;
+  data: User;
+  error?: string;
 }
 
-// Course types
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
-  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-  instructorId: string;
-  instructor: User;
-  categoryId: string;
-  category: Category;  modules: Module[];
-  enrollments: Enrollment[];
-  duration?: number;
-  enrollments_count?: number; 
-  averageRating: number;
-  reviewCount: number;
-  objectives?: string[]; 
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateCourseInput {
-  title: string;
-  description: string;
-  price: number;
-  imageUrl?: string;
-  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  categoryId: string;
-}
-
-export interface UpdateCourseInput extends Partial<CreateCourseInput> {
-  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-}
-
-
-export interface Module {
-  id: string;
-  title: string;
-  description: string;
-  order: number;
-  courseId: string;
-  course?: Course;
-  lessons: Lesson[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateModuleInput {
-  title: string;
-  description: string;
-  order: number;
-  courseId: string;
-}
-
-// Lesson types
-export type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
-
-export interface Lesson {
-  id: string;
-  title: string;
-  content: string;
-  description?: string;
-  videoUrl?: string;
-  duration: number;
-  order: number;
-  type?: LessonType;
-  moduleId: string;
-  module?: Module;
-  comments: LessonComment[];
-  completions: LessonCompletion[];
-  isPreview?: boolean;
-  isLocked?: boolean;
-  quizPassingScore?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateLessonInput {
-  title: string;
-  content: string;
-  description?: string;
-  videoUrl?: string;
-  duration: number;
-  order: number;
-  moduleId: string;
-  courseId: string;
-  type: LessonType;
-  isPreview?: boolean;
-  isLocked?: boolean;
-  quizPassingScore?: number;
-}
-
-export interface UpdateLessonInput extends Partial<CreateLessonInput> {
-  id?: string;
-}
-
-export interface LessonComment {
-  id: string;
-  content: string;
-  userId: string;
-  user: User;
-  lessonId: string;
-  lesson?: Lesson;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LessonCompletion {
-  id: string;
-  userId: string;
-  user: User;
-  lessonId: string;
-  lesson?: Lesson;
-  completedAt: string;
+export interface UpdateUserRequest {
+  name?: string;
+  bio?: string;
+  website?: string;
+  socialLinks?: string;
 }
 
 export interface Category {
   id: string;
   name: string;
   description?: string;
-  courses: Course[];
+  slug: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  shortDescription?: string;
+  thumbnailUrl?: string;
+  price: number;
+  originalPrice?: number;
+  discount?: number;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  duration?: number;
+  language: string;
+  requirements?: string[];
+  whatYoullLearn?: string[];
+  isPublished: boolean;
+  categoryId?: string;
+  instructorId: string;
+  createdAt: string;
+  updatedAt: string;
+  instructor?: User;
+  category?: Category;
+  modules?: Module[];
+  _count?: {
+    enrollments: number;
+    modules: number;
+    reviews: number;
+  };
+  rating?: number;
+  totalLessons?: number;
+  totalDuration?: number;
+  enrollmentCount?: number;
+  reviewCount?: number;
+}
+
+export interface CreateCourseRequest {
+  title: string;
+  description: string;
+  shortDescription?: string;
+  price: number;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  categoryId?: string;
+  language?: string;
+  requirements?: string[];
+  whatYoullLearn?: string[];
+}
+
+export interface UpdateCourseRequest {
+  title?: string;
+  description?: string;
+  shortDescription?: string;
+  price?: number;
+  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  categoryId?: string;
+  language?: string;
+  requirements?: string[];
+  whatYoullLearn?: string[];
+  isPublished?: boolean;
+}
+
+export interface Module {
+  id: string;
+  title: string;
+  description?: string;
+  orderIndex: number;
+  courseId: string;
+  createdAt: string;
+  updatedAt: string;
+  lessons?: Lesson[];
+  _count?: {
+    lessons: number;
+  };
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  videoDuration?: number;
+  orderIndex: number;
+  moduleId: string;
+  courseId: string;
+  lessonType: 'VIDEO' | 'TEXT' | 'QUIZ';
+  isFree: boolean;
+  createdAt: string;
+  updatedAt: string;
+  module?: Module;
+  course?: Course;
+  questions?: Question[];
+  _count?: {
+    questions: number;
+  };
+}
+
+export interface Question {
+  id: string;
+  lessonId: string;
+  question: string;
+  type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK';
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+  orderIndex: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateQuestionRequest {
+  lessonId: string;
+  question: string;
+  type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK';
+  options?: string[];
+  correctAnswer: string;
+  explanation?: string;
+  orderIndex?: number;
+}
+
+export interface UpdateQuestionRequest {
+  question?: string;
+  type?: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'FILL_BLANK';
+  options?: string[];
+  correctAnswer?: string;
+  explanation?: string;
+  orderIndex?: number;
+}
+
+export interface LessonProgress {
+  id: string;
+  userId: string;
+  lessonId: string;
+  courseId: string;
+  isCompleted: boolean;
+  completedAt?: string;
+  watchTime?: number;
+  quizScore?: number;
+  quizAttempts?: number;
+  createdAt: string;
+  updatedAt: string;
+  lesson?: Lesson;
+}
+
+export interface CreateLessonRequest {
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  videoDuration?: number;
+  moduleId: string;
+  lessonType: 'VIDEO' | 'TEXT' | 'QUIZ';
+  isFree?: boolean;
+  orderIndex?: number;
+}
+
+export interface UpdateLessonRequest {
+  title?: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  videoDuration?: number;
+  lessonType?: 'VIDEO' | 'TEXT' | 'QUIZ';
+  isFree?: boolean;
+  orderIndex?: number;
 }
 
 export interface Enrollment {
   id: string;
   userId: string;
-  user: User;
   courseId: string;
-  course: Course;
   enrolledAt: string;
   completedAt?: string;
   progress: number;
-}
-
-export interface Payment {
-  id: string;
-  amount: number;
-  currency: string;
-  status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
-  paymentMethod: 'CREDIT_CARD' | 'DEBIT_CARD' | 'PIX' | 'BOLETO';
-  gatewayPaymentId?: string;
-  gateway: 'MERCADOPAGO';
-  userId: string;
-  user: User;
-  courseId?: string;
+  lastAccessedAt?: string;
+  user?: User;
   course?: Course;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface LoginInput {
-  email: string;
-  password: string;
-}
-
-export interface RegisterInput {
-  name: string;
-  email: string;
-  password: string;
-  role?: 'STUDENT' | 'INSTRUCTOR';
-}
-
-export interface AuthResponse {
-  success: boolean;
-  data: {
-    user: User;
-    token: string;
-  };
-  message: string;
-}
-
-export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data: T;
-  message: string;
-}
-
-export interface PaginatedResponse<T = unknown> {
-  data: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
 }
 
 export interface Review {
   id: string;
-  courseId: string;
   userId: string;
-  user?: User;
+  courseId: string;
   rating: number;
   comment?: string;
   createdAt: string;
   updatedAt: string;
+  user?: User;
+  course?: Course;
 }
 
-export interface CreateReviewInput {
+export interface CreateReviewRequest {
   courseId: string;
   rating: number;
-  comment: string;
+  comment?: string;
 }
 
-export interface UpdateReviewInput {
+export interface UpdateReviewRequest {
   rating?: number;
   comment?: string;
 }
 
-export interface CourseRatingStats {
-  averageRating: number;
-  totalReviews: number;
-  ratingDistribution: {
-    1: number;
-    2: number;
-    3: number;
-    4: number;
-    5: number;
+export interface CreateModuleRequest {
+  title: string;
+  description?: string;
+  courseId: string;
+  orderIndex?: number;
+}
+
+export interface UpdateModuleRequest {
+  title?: string;
+  description?: string;
+  orderIndex?: number;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  description?: string;
+  slug?: string;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  description?: string;
+  slug?: string;
+  isActive?: boolean;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  data: T[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  error?: string;
+}
+
+export interface InstructorBalance {
+  id: string;
+  instructorId: string;
+  availableBalance: number;
+  pendingBalance: number;
+  totalEarnings: number;
+  totalWithdrawn: number;
+  lastPayoutAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PayoutRequest {
+  id: string;
+  instructorId: string;
+  amount: number;
+  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+  payoutMethod: 'PIX' | 'BANK_TRANSFER';
+  pixKey?: string;
+  bankAccount?: {
+    bank: string;
+    agency: string;
+    account: string;
+    accountType: string;
+  };
+  requestMonth: number;
+  requestYear: number;
+  processedAt?: string;
+  failureReason?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePayoutRequestData {
+  amount: number;
+  payoutMethod: 'PIX' | 'BANK_TRANSFER';
+  pixKey?: string;
+  bankAccount?: {
+    bank: string;
+    agency: string;
+    account: string;
+    accountType: string;
   };
 }
 
-export interface PaginationParams {
-  page?: number;
-  limit?: number;
+export interface InstructorPayoutResponse {
+  success: boolean;
+  data: {
+    balance: InstructorBalance;
+    payoutRequests: PayoutRequest[];
+    canRequestPayout: boolean;
+    nextPayoutDate?: string;
+  };
+  error?: string;
 }
 
-export interface CourseFilters extends PaginationParams {
-  categoryId?: string;
-  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
-  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
-  search?: string;
-  instructorId?: string;
+export interface InstructorEarnings {
+  totalEarnings: number;
+  pendingEarnings: number;
+  availableForPayout: number;
+  totalPayouts: number;
+  monthlyEarnings: {
+    month: string;
+    earnings: number;
+  }[];
 }
 
-export interface ApiError {
-  success: false;
-  message: string;
-  code?: string;
-  errors?: unknown[];
+export interface InstructorAnalytics {
+  totalStudents: number;
+  totalCourses: number;
+  totalRevenue: number;
+  monthlyRevenue: {
+    month: string;
+    revenue: number;
+  }[];
+  topCourses: {
+    id: string;
+    title: string;
+    students: number;
+    revenue: number;
+  }[];
 }
 
-export const queryKeys = {
-  auth: ['auth'] as const,
-  user: (id: string) => ['user', id] as const,
-  
-  // Courses
-  courses: ['courses'] as const,
-  course: (id: string) => ['course', id] as const,
-  coursesByInstructor: (instructorId: string) => ['courses', 'instructor', instructorId] as const,
-  
-  // Modules
-  modules: ['modules'] as const,
-  module: (id: string) => ['module', id] as const,
-  modulesByCourse: (courseId: string) => ['modules', 'course', courseId] as const,
-  
-  // Lessons
-  lessons: ['lessons'] as const,
-  lesson: (id: string) => ['lesson', id] as const,
-  lessonsByModule: (moduleId: string) => ['lessons', 'module', moduleId] as const,
-  
-  // Categories
-  categories: ['categories'] as const,
-  category: (id: string) => ['category', id] as const,
-  
-  // Enrollments
-  enrollments: ['enrollments'] as const,
-  enrollment: (id: string) => ['enrollment', id] as const,
-  enrollmentsByUser: (userId: string) => ['enrollments', 'user', userId] as const,
-  enrollmentsByCourse: (courseId: string) => ['enrollments', 'course', courseId] as const,
-    // Payments
-  payments: ['payments'] as const,
-  payment: (id: string) => ['payment', id] as const,
-  paymentsByUser: (userId: string) => ['payments', 'user', userId] as const,
-  
-  // Reviews
-  reviews: ['reviews'] as const,
-  review: (id: string) => ['review', id] as const,
-  reviewsByCourse: (courseId: string) => ['reviews', 'course', courseId] as const,
-  reviewsByUser: (userId: string) => ['reviews', 'user', userId] as const,
-  courseRatingStats: (courseId: string) => ['course', courseId, 'rating-stats'] as const,
-} as const;
+export type ApiEndpoints = {
+  getCoursesById: (id: string) => Course;
+  createCourse: (data: CreateCourseRequest) => Course;
+  updateCourse: (id: string, data: UpdateCourseRequest) => Course;
+  deleteCourse: (id: string) => { success: boolean };
+  getCoursesByInstructor: (instructorId: string) => Course[];
+  publishCourse: (id: string) => Course;
+  unpublishCourse: (id: string) => Course;
+  getModulesByCourse: (courseId: string) => Module[];
+  createModule: (data: CreateModuleRequest) => Module;
+  updateModule: (id: string, data: UpdateModuleRequest) => Module;
+  deleteModule: (id: string) => { success: boolean };
+  getLessonsByModule: (moduleId: string) => Lesson[];
+  createLesson: (data: CreateLessonRequest) => Lesson;
+  updateLesson: (id: string, data: UpdateLessonRequest) => Lesson;
+  deleteLesson: (id: string) => { success: boolean };
+  getCategories: () => Category[];
+  createCategory: (data: CreateCategoryRequest) => Category;
+  updateCategory: (id: string, data: UpdateCategoryRequest) => Category;
+  deleteCategory: (id: string) => { success: boolean };
+  getEnrollmentsByUser: (userId: string) => Enrollment[];
+  getEnrollmentsByCourse: (courseId: string) => Enrollment[];
+  createEnrollment: (courseId: string) => Enrollment;
+  deleteEnrollment: (id: string) => { success: boolean };
+  getPaymentsByUser: (userId: string) => Payment[];
+  getReviewsByCourse: (courseId: string) => Review[];
+  createReview: (data: CreateReviewRequest) => Review;
+  updateReview: (id: string, data: UpdateReviewRequest) => Review;
+  deleteReview: (id: string) => { success: boolean };
+};
