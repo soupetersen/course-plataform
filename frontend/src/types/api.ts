@@ -1,4 +1,25 @@
-﻿// User types
+﻿// Password Reset types
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ValidateResetCodeRequest {
+  email: string;
+  code: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface PasswordResetResponse {
+  success: boolean;
+  message: string;
+}
+
+// User types
 export interface User {
   id: string;
   email: string;

@@ -139,7 +139,17 @@ export function LoginPage() {
                 "Entrar"
               )}
             </Button>
-          </form>{" "}
+
+            <div className="text-center">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary-500 hover:text-primary-600 font-medium"
+              >
+                Esqueceu sua senha?
+              </Link>
+            </div>
+          </form>
+
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{" "}

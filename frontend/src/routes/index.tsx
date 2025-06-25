@@ -1,5 +1,8 @@
 ﻿import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
+import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
+import { VerifyResetCodePage } from "../pages/auth/VerifyResetCodePage";
+import { NewPasswordPage } from "../pages/auth/NewPasswordPage";
 import { LoginPage } from "../pages/auth/LoginPage";
 import { RegisterPage } from "../pages/auth/RegisterPage";
 import { DashboardPage } from "../pages/DashboardPage";
@@ -148,6 +151,18 @@ export const router = createBrowserRouter([
             <SettingsPage />
           </ProtectedRoute>
         ),
+      },
+      {
+        path: "forgot-password",
+        element: <ForgotPasswordPage />,
+      },
+      {
+        path: "reset-password/verify",
+        element: <VerifyResetCodePage />,
+      },
+      {
+        path: "reset-password/new",
+        element: <NewPasswordPage />,
       },
     ],
   },

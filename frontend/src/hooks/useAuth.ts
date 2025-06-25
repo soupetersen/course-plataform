@@ -77,6 +77,51 @@ export const useRegister = () => {
 };
 
 
+export const useForgotPassword = () => {
+  return useMutation({
+    mutationFn: async (data: { email: string }) => {
+      return apiRequest({
+        method: 'POST',
+        url: '/api/auth/forgot-password',
+        data,
+      });
+    },
+  });
+};
+
+export const useValidateResetCode = () => {
+  return useMutation({
+    mutationFn: async (data: { email: string; code: string }) => {
+      return apiRequest({
+        method: 'POST',
+        url: '/api/auth/validate-reset-code',
+        data,
+      });
+    },
+  });
+};
+
+export const useResetPassword = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (data: { email: string; code: string; newPassword: string }) => {
+      return apiRequest({
+        method: 'POST',
+        url: '/api/auth/reset-password',
+        data,
+      });
+    },
+    onSuccess: () => {
+      // Limpar cache de autenticação para forçar novo login
+      queryClient.removeQueries({ queryKey: queryKeys.auth });
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('user');
+    },
+  });
+};
+
+
 export const useLogout = () => {
   const queryClient = useQueryClient();
   
