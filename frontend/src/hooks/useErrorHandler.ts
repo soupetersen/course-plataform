@@ -25,11 +25,9 @@ export function useErrorHandler() {
     (error: Error | ApiError | string | unknown, options?: ErrorOptions) => {
       console.error("Error occurred:", error);
 
-      // Extrair mensagem de erro
       let errorMessage = "Ocorreu um erro inesperado";
       let errorTitle = options?.title || "❌ Erro";
 
-      // Type guards para diferentes tipos de erro
       const apiError = error as ApiError;
       const standardError = error as Error;
 
@@ -41,7 +39,6 @@ export function useErrorHandler() {
         errorMessage = error;
       }
 
-      // Personalizar mensagens para códigos de erro específicos
       if (apiError?.response?.status) {
         switch (apiError.response.status) {
           case 400:
@@ -84,7 +81,6 @@ export function useErrorHandler() {
         }
       }
 
-      // Verificar se é erro de rede
       if (apiError?.code === "NETWORK_ERROR" || standardError?.message?.includes("Network Error")) {
         errorTitle = "🌐 Erro de conexão";
         errorMessage = "Verifique sua conexão com a internet e tente novamente";

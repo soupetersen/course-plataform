@@ -11,31 +11,24 @@ export class ForgotPasswordUseCase {
 
   async execute(email: string): Promise<{ success: boolean; message: string }> {
     try {
-      // Verificar se o usuário existe
       const user = await this.userRepository.findByEmail(email);
       
       if (!user) {
-        // Por segurança, não revelamos se o email existe ou não
         return {
           success: true,
           message: 'Se o email existir em nossa base, você receberá um código de recuperação.'
         };
       }
 
-      // Limpar códigos anteriores para este email
       await this.passwordResetRepository.deleteByEmail(email);
 
-      // Gerar código de 6 dígitos
       const code = this.generateResetCode();
       
-      // Código expira em 15 minutos
       const expiresAt = new Date();
       expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
-      // Salvar código no banco
       await this.passwordResetRepository.create(email, code, expiresAt);
 
-      // Enviar email com o código
       await this.emailService.sendPasswordResetEmail(email, {
         userName: user.name,
         resetCode: code,

@@ -34,7 +34,6 @@ export class PaymentController {
     private emailService: EmailService,
     private instructorPayoutService: InstructorPayoutService
   ) {
-    // Criar instância do WebhookController com as dependências necessárias
     this.webhookController = new WebhookController(
       this.paymentGatewayFactory,
       this.paymentRepository,
@@ -71,7 +70,9 @@ export class PaymentController {
           error: 'Você precisa estar logado para realizar um pagamento.' 
         });
         return;
-      }      const result = await this.createOneTimePaymentUseCase.execute({
+      }
+
+      const result = await this.createOneTimePaymentUseCase.execute({
         userId: userInfo.userId,
         courseId,
         currency,

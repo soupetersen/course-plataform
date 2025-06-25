@@ -42,17 +42,14 @@ export class InstructorPayoutService {
    * Atualizar dados de pagamento do instrutor
    */
   async updatePayoutData(instructorId: string, data: UpdatePayoutDataRequest) {
-    // Validar dados do documento
     if (!this.validateDocument(data.documentType, data.documentNumber)) {
       throw new Error('Documento inválido');
     }
 
-    // Validar chave PIX se fornecida
     if (data.pixKey && !this.validatePixKey(data.pixKey)) {
       throw new Error('Chave PIX inválida');
     }
 
-    // Atualizar dados do usuário
     const updatedUser = await this.prisma.user.update({
       where: { id: instructorId },
       data: {
@@ -62,12 +59,11 @@ export class InstructorPayoutService {
         documentType: data.documentType,
         documentNumber: data.documentNumber,
         fullName: data.fullName,
-        isVerified: false, // Resetar verificação para nova análise
+        isVerified: false,
         verifiedAt: null
       }
     });
 
-    // Notificar admin para verificação
     console.log(`Solicitação de verificação enviada para instrutor: ${data.fullName} (${data.documentType}: ${data.documentNumber})`);
 
     return {

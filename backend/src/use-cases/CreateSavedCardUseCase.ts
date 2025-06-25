@@ -22,13 +22,11 @@ export class CreateSavedCardUseCase {
   async execute(request: CreateSavedCardUseCaseRequest): Promise<SavedCard> {
     const { userId, cardNumber, ...cardData } = request;
 
-    // Verificar se o usuário existe
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error('Usuário não encontrado');
     }
 
-    // Verificar se o cartão já está salvo (últimos 4 dígitos)
     const cardNumberLast4 = cardNumber.replace(/\D/g, '').slice(-4);
     const existingCards = await this.savedCardRepository.findByUserId(userId);
     
@@ -42,11 +40,9 @@ export class CreateSavedCardUseCase {
       throw new Error('Este cartão já está salvo');
     }
 
-    // Se é o primeiro cartão, marcar como padrão
     const isFirstCard = existingCards.length === 0;
     const isDefault = request.isDefault || isFirstCard;
 
-    // Criar dados do cartão
     const createCardData: CreateSavedCardRequest = {
       cardHolderName: cardData.cardHolderName,
       cardNumber: cardNumber,

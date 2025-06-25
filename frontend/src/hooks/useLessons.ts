@@ -8,7 +8,7 @@ export const useLessons = (courseId: string) => {
     queryKey: ['lessons', courseId],
     queryFn: async () => {
       const response = await api.get(`/api/courses/${courseId}/lessons`);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     enabled: !!courseId,
   });
@@ -19,7 +19,7 @@ export const useLesson = (lessonId: string) => {
     queryKey: ['lesson', lessonId],
     queryFn: async () => {
       const response = await api.get(`/api/lessons/${lessonId}`);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     enabled: !!lessonId,
   });
@@ -31,7 +31,7 @@ export const useCreateLesson = () => {
   return useMutation({
     mutationFn: async ({ courseId, data }: { courseId: string; data: CreateLessonData }) => {
       const response = await api.post(`/api/courses/${courseId}/lessons`, { ...data, courseId });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['lessons', variables.courseId] });
@@ -45,7 +45,7 @@ export const useUpdateLesson = () => {
   return useMutation({
     mutationFn: async ({ lessonId, data }: { lessonId: string; data: Partial<CreateLessonData> }) => {
       const response = await api.put(`/api/lessons/${lessonId}`, data);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['lesson', variables.lessonId] });
@@ -60,7 +60,7 @@ export const useDeleteLesson = () => {
   return useMutation({
     mutationFn: async (lessonId: string) => {
       const response = await api.delete(`/api/lessons/${lessonId}`);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lessons'] });
@@ -74,7 +74,7 @@ export const useQuestions = (lessonId: string) => {
     queryKey: ['questions', lessonId],
     queryFn: async () => {
       const response = await api.get(`/api/questions/lesson/${lessonId}`);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     enabled: !!lessonId,
   });
@@ -86,7 +86,7 @@ export const useCreateQuestion = () => {
   return useMutation({
     mutationFn: async ({ lessonId, data }: { lessonId: string; data: CreateQuestionData }) => {
       const response = await api.post(`/api/questions`, { ...data, lessonId });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['questions', variables.lessonId] });
@@ -100,7 +100,7 @@ export const useUpdateQuestion = () => {
   return useMutation({
     mutationFn: async ({ questionId, data }: { questionId: string; data: Partial<CreateQuestionData> }) => {
       const response = await api.put(`/api/questions/${questionId}`, data);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });
@@ -114,7 +114,7 @@ export const useDeleteQuestion = () => {
   return useMutation({
     mutationFn: async (questionId: string) => {
       const response = await api.delete(`/api/questions/${questionId}`);
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['questions'] });
@@ -137,7 +137,7 @@ export const useUpdateVideoProgress = () => {
         courseId,
         watchTime,
       });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
   });
 };
@@ -156,7 +156,7 @@ export const useCompleteLesson = () => {
         lessonId,
         courseId,
       });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['progress'] });
@@ -184,7 +184,7 @@ export const useSubmitQuiz = () => {
         courseId,
         answers,
       });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['progress'] });

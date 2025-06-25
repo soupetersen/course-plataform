@@ -6,7 +6,6 @@ export interface CreateCommentData {
   content: string;
 }
 
-// Hook para buscar comentários de uma lição
 export const useLessonComments = (lessonId: string) => {
   return useQuery({
     queryKey: ['lesson-comments', lessonId],
@@ -18,7 +17,6 @@ export const useLessonComments = (lessonId: string) => {
   });
 };
 
-// Hook para adicionar um comentário a uma lição
 export const useAddLessonComment = () => {
   const queryClient = useQueryClient();
 
@@ -28,7 +26,6 @@ export const useAddLessonComment = () => {
       return response.data.data;
     },
     onSuccess: (_data: LessonComment, variables: { lessonId: string; data: CreateCommentData }) => {
-      // Invalida a query de comentários para recarregar a lista
       queryClient.invalidateQueries({ queryKey: ['lesson-comments', variables.lessonId] });
     },
   });

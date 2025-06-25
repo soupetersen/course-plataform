@@ -27,7 +27,6 @@ export class ManageEnrollmentStatusUseCase {
 
   async execute(request: ManageEnrollmentStatusRequest): Promise<ManageEnrollmentStatusResponse> {
     try {
-      // 1. Buscar o pagamento
       const payment = await this.paymentRepository.findById(request.paymentId);
       if (!payment) {
         return {
@@ -36,16 +35,13 @@ export class ManageEnrollmentStatusUseCase {
         };
       }
 
-      // 2. Verificar se é um pagamento recorrente (subscription)
       const isSubscription = payment.paymentType === PaymentType.SUBSCRIPTION;
 
-      // 3. Buscar matrícula existente
       const existingEnrollment = await this.enrollmentRepository.findByUserAndCourse(
         payment.userId,
         payment.courseId
       );
 
-      // 4. Lógica baseada no status do pagamento
       switch (request.newStatus) {
         case PaymentStatus.COMPLETED:
           return await this.handleApprovedPayment(payment, existingEnrollment, isSubscription);
@@ -80,7 +76,6 @@ export class ManageEnrollmentStatusUseCase {
   ): Promise<ManageEnrollmentStatusResponse> {
     
     if (!existingEnrollment) {
-      // Criar nova matrícula
       const enrollment = Enrollment.create({
         userId: payment.userId,
         courseId: payment.courseId
@@ -94,7 +89,6 @@ export class ManageEnrollmentStatusUseCase {
         action: 'enrolled'
       };
     } else {
-      // Se matrícula existe mas está pausada, reativar
       if (!existingEnrollment.isActive) {
         existingEnrollment.reactivate();
         const updatedEnrollment = await this.enrollmentRepository.update(
@@ -130,7 +124,6 @@ export class ManageEnrollmentStatusUseCase {
       };
     }
 
-    // Para assinaturas, pausar a matrícula em vez de remover
     if (isSubscription && existingEnrollment.isActive) {
       existingEnrollment.deactivate();
       const updatedEnrollment = await this.enrollmentRepository.update(
@@ -165,7 +158,6 @@ export class ManageEnrollmentStatusUseCase {
       };
     }
 
-    // Para reembolsos, sempre pausar/desativar a matrícula
     if (existingEnrollment.isActive) {
       existingEnrollment.deactivate();
       const updatedEnrollment = await this.enrollmentRepository.update(

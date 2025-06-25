@@ -12,7 +12,7 @@ import { LessonCommentRepository } from '@/interfaces/LessonCommentRepository';
 import { EnrollmentRepository } from '@/interfaces/EnrollmentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { LessonType } from '@/models/Lesson';
-import { UserInfo } from '@/shared/types';
+import { UserInfo } from '@/middlewares/AuthMiddleware';
 
 export class LessonController {
   constructor(

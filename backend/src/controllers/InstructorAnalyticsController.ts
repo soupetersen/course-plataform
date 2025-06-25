@@ -1,6 +1,6 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { DIContainer } from '@/shared/utils/DIContainer';
-import { UserInfo } from '@/shared/types';
+import { UserInfo } from '@/middlewares/AuthMiddleware';
 import { prisma } from '@/infrastructure/database/prisma';
 
 interface AnalyticsQuery {
