@@ -17,9 +17,17 @@ model User {
   isActive                Boolean            @default(true)
   paymentCustomerId       String? // ID do cliente no gateway (genérico)
   paymentAccountId        String? // ID da conta de recebimento (genérico)
-  pixKey                  String? // Chave PIX do instrutor para receber pagamentos
-  bankAccount             String? // Dados bancários para saque (JSON)
-  payoutPreference        String?            @default("PIX") // PIX, BANK_TRANSFER
+  // Dados para recebimento de pagamentos (modelo simplificado)
+  pixKey                  String? // Chave PIX para receber pagamentos
+  bankData                Json? // Dados bancários completos (banco, agência, conta, tipo)
+  payoutPreference        PayoutMethod?      @default(PIX) // PIX, BANK_TRANSFER
+  // Dados fiscais/pessoais
+  documentType            String? // CPF ou CNPJ
+  documentNumber          String? // Número do documento
+  fullName                String? // Nome completo (pode ser diferente do nome de usuário)
+  // Status de verificação
+  isVerified              Boolean            @default(false) // Se os dados foram verificados
+  verifiedAt              DateTime?
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
   courses                 Course[]           @relation("InstructorCourses")
@@ -78,7 +86,7 @@ model Course {
   title           String
   description     String?
   imageUrl        String?
-  price           Float            @default(0)
+  price           Float            @default(0) // Pode ser 0 para cursos gratuitos
   isPublished     Boolean          @default(false)
   instructorId    String
   categoryId      String?
@@ -165,7 +173,7 @@ model Question {
   order       Int              @default(0)
   points      Int              @default(1) // Pontos que vale a questão
   createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  updatedAt   DateTime         @default(now())
   lesson      Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   options     QuestionOption[]
   answers     QuizAnswer[]
@@ -429,7 +437,7 @@ model RefundRequest {
   processedBy    String?
   notes          String?
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  updatedAt      DateTime     @default(now())
   payment        Payment      @relation(fields: [paymentId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   processor      User?        @relation("RefundProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
@@ -536,12 +544,15 @@ model PayoutRequest {
   processedBy       String?
   notes             String?
   rejectionReason   String?
+  requestMonth      Int // Mês do saque (1-12)
+  requestYear       Int // Ano do saque
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   instructorBalance InstructorBalance   @relation(fields: [instructorId], references: [instructorId], onDelete: Cascade)
   processor         User?               @relation("PayoutProcessor", fields: [processedBy], references: [id], onDelete: SetNull)
   transaction       BalanceTransaction?
 
+  @@unique([instructorId, requestMonth, requestYear], name: "unique_monthly_payout")
   @@index([instructorId])
   @@index([status])
   @@map("payout_requests")
@@ -580,4 +591,10 @@ enum BalanceTransactionType {
   DEBIT // Saque processado
   REFUND // Estorno
   FEE // Taxa da plataforma
+}
+
+enum PayoutMethod {
+  PIX
+  BANK_TRANSFER
+  PAYPAL // Para futuro
 }

@@ -11,10 +11,14 @@ import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { EmailService } from '@/services/EmailService';
+import { WebhookController } from '@/controllers/WebhookController';
+import { InstructorPayoutService } from '@/services/InstructorPayoutService';
 import { Payment, PaymentStatus } from '@/models/Payment';
 import { PaymentGatewayStatus } from '@/interfaces/PaymentGateway';
 
 export class PaymentController {
+  private webhookController: WebhookController;
+
   constructor(
     private createOneTimePaymentUseCase: CreateOneTimePaymentUseCase,
     private createSubscriptionPaymentUseCase: CreateSubscriptionPaymentUseCase,
@@ -27,8 +31,20 @@ export class PaymentController {
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
     private paymentGatewayFactory: PaymentGatewayFactory,
-    private emailService: EmailService
-  ) {}
+    private emailService: EmailService,
+    private instructorPayoutService: InstructorPayoutService
+  ) {
+    // Criar instância do WebhookController com as dependências necessárias
+    this.webhookController = new WebhookController(
+      this.paymentGatewayFactory,
+      this.paymentRepository,
+      this.userRepository,
+      this.courseRepository,
+      this.autoEnrollStudentUseCase,
+      this.manageEnrollmentStatusUseCase,
+      this.instructorPayoutService
+    );
+  }
 
   private mapGatewayStatusToDomain(gatewayStatus: PaymentGatewayStatus): PaymentStatus {
     const statusMap: Record<PaymentGatewayStatus, PaymentStatus> = {
@@ -148,80 +164,22 @@ export class PaymentController {
   
   async handleWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      console.log('🔔 Webhook recebido:', {
-        method: req.method,
-        headers: req.headers,
-        body: req.body,
-        query: req.query,
-        url: req.url
-      });
-
-      const gatewayType = req.headers['x-gateway-type'] as string || 'MERCADOPAGO';
-      const gateway = this.paymentGatewayFactory.getGateway(gatewayType as any);
+      console.log('🔔 Webhook recebido via PaymentController, delegando para WebhookController');
       
-      if (gateway.processWebhook) {
-        const result = await gateway.processWebhook(req.body);        if (result.success && result.paymentId) {
-          const payment = await this.paymentRepository.findByExternalPaymentId(result.paymentId);
-          if (payment && result.status) {
-            let internalStatus;
-            switch (result.status) {
-              case 'APPROVED':
-                internalStatus = 'COMPLETED';
-                break;
-              case 'REJECTED':
-                internalStatus = 'FAILED';
-                break;
-              case 'CANCELLED':
-                internalStatus = 'CANCELLED';
-                break;
-              default:
-                internalStatus = 'PENDING';
-            }
-            
-            const updatedPayment = payment.updateStatus(internalStatus as any);
-            await this.paymentRepository.update(updatedPayment);
-
-            // Se pagamento foi aprovado, matricular aluno automaticamente
-            if (internalStatus === 'COMPLETED') {
-              const enrollResult = await this.autoEnrollStudentUseCase.execute({
-                paymentId: payment.id
-              });
-
-              if (enrollResult.success) {
-                console.log(`✅ Aluno matriculado automaticamente via webhook no curso ${payment.courseId}`);
-                
-                // Enviar email de confirmação de pagamento aprovado
-                try {
-                  const user = await this.userRepository.findById(payment.userId);
-                  const course = await this.courseRepository.findById(payment.courseId);
-                  
-                  if (user && course) {
-                    await this.emailService.sendPaymentApprovedEmail(user.email, {
-                      userName: user.name,
-                      courseName: course.title,
-                      amount: payment.amount,
-                      currency: payment.currency,
-                      paymentDate: new Date(),
-                    });
-                    console.log(`✅ Email de pagamento aprovado enviado para ${user.email}`);
-                  }
-                } catch (emailError) {
-                  console.error('❌ Erro ao enviar email de pagamento aprovado:', emailError);
-                }
-              } else {
-                console.error(`❌ Erro ao matricular aluno via webhook: ${enrollResult.error}`);
-              }
-            }
-          }
-        }
+      // Detectar o tipo de gateway baseado no cabeçalho ou corpo da requisição
+      const userAgent = req.headers['user-agent'] || '';
+      const body = req.body as any;
+      
+      if (body.type && body.data?.id || userAgent.includes('MercadoPago')) {
+        await this.webhookController.handleMercadoPagoWebhook(req, reply);
+      } else {
+        await this.webhookController.handleGenericWebhook(req, reply);
       }
-
-      reply.status(200).send({ received: true });
     } catch (error) {
-      req.log.error('Error processing webhook:', error);
-      reply.status(400).send({
+      req.log.error('Error in PaymentController webhook delegation:', error);
+      reply.status(500).send({
         success: false,
-        error: 'Erro ao processar notificação de pagamento.',
+        error: 'Erro interno do servidor ao processar webhook.',
       });
     }
   }  async getPaymentHistory(req: FastifyRequest, reply: FastifyReply): Promise<void> {

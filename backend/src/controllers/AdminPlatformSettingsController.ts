@@ -107,14 +107,6 @@ export class AdminPlatformSettingsController {
           return;
         }
 
-        if (key === 'STRIPE_FEE_PERCENTAGE' && (numValue < 0 || numValue > 10)) {
-          reply.status(400).send({
-            success: false,
-            error: 'Porcentagem da taxa do Stripe deve estar entre 0 e 10'
-          });
-          return;
-        }
-
         if (key === 'REFUND_DAYS_LIMIT' && (numValue < 0 || numValue > 365)) {
           reply.status(400).send({
             success: false,

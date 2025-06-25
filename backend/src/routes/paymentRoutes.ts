@@ -14,6 +14,7 @@ import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { EmailService } from '@/services/EmailService';
+import { InstructorPayoutService } from '@/services/InstructorPayoutService';
 
 export async function paymentRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;
@@ -29,7 +30,9 @@ export async function paymentRoutes(fastify: FastifyInstance) {
   const userRepository = container.resolve<UserRepository>('UserRepository');
   const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
   const emailService = container.resolve<EmailService>('EmailService');
-    const paymentController = new PaymentController(
+  const instructorPayoutService = container.resolve<InstructorPayoutService>('InstructorPayoutService');
+
+  const paymentController = new PaymentController(
     createOneTimePaymentUseCase,
     createSubscriptionPaymentUseCase,
     validateCouponUseCase,
@@ -41,7 +44,8 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     courseRepository,
     userRepository,
     paymentGatewayFactory,
-    emailService
+    emailService,
+    instructorPayoutService
   );
 
   

@@ -61,6 +61,8 @@ import { PasswordService } from '@/services/PasswordService';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { S3Service } from '@/services/S3Service';
 import { EmailService } from '@/services/EmailService';
+import { InstructorPayoutService } from '@/services/InstructorPayoutService';
+import { MercadoPagoService } from '@/services/MercadoPagoService';
 
 export function setupDependencies(): DIContainer {
   const container = new DIContainer();
@@ -72,6 +74,17 @@ export function setupDependencies(): DIContainer {
   container.registerSingleton('PaymentGatewayFactory', () => PaymentGatewayFactory.getInstance());
   container.registerSingleton('S3Service', () => new S3Service());
   container.registerSingleton('EmailService', () => new EmailService());
+
+  // Registrar MercadoPagoService primeiro
+  container.registerSingleton('MercadoPagoService', () => new MercadoPagoService());
+
+  // Registrar InstructorPayoutService com suas dependências
+  container.registerSingleton('InstructorPayoutService', () => {
+    const prisma = container.resolve<PrismaClient>('PrismaClient');
+    const mercadoPagoService = container.resolve<MercadoPagoService>('MercadoPagoService');
+    const emailService = container.resolve<EmailService>('EmailService');
+    return new InstructorPayoutService(prisma, mercadoPagoService, emailService);
+  });
 
   container.registerSingleton('PasswordResetRepository', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');

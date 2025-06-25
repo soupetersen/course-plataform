@@ -21,7 +21,6 @@ export class SendPasswordResetEmailUseCase {
     try {
       const { email, resetToken } = request;
 
-      // Buscar usuário pelo email
       const user = await this.userRepository.findByEmail(email);
       if (!user) {
         return {
@@ -30,14 +29,10 @@ export class SendPasswordResetEmailUseCase {
         };
       }
 
-      // Construir URL de redefinição
-      const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-      
-      // Enviar email de redefinição
       await this.emailService.sendPasswordResetEmail(user.email, {
         userName: user.name,
-        resetUrl,
-        expirationTime: new Date(Date.now() + 60 * 60 * 1000), // 1 hora
+        resetCode: resetToken,
+        expirationTime: new Date(Date.now() + 60 * 60 * 1000),
       });
 
       console.log(`✅ Email de redefinição de senha enviado para ${user.email}`);

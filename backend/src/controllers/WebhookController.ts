@@ -2,17 +2,21 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
+import { CourseRepository } from '@/interfaces/CourseRepository';
 import { PaymentStatus } from '@/models/Payment';
 import { AutoEnrollStudentUseCase } from '@/use-cases/AutoEnrollStudentUseCase';
 import { ManageEnrollmentStatusUseCase } from '@/use-cases/ManageEnrollmentStatusUseCase';
+import { InstructorPayoutService } from '@/services/InstructorPayoutService';
 
 export class WebhookController {
   constructor(
     private paymentGatewayFactory: PaymentGatewayFactory,
     private paymentRepository: PaymentRepository,
     private userRepository: UserRepository,
+    private courseRepository: CourseRepository,
     private autoEnrollStudentUseCase: AutoEnrollStudentUseCase,
-    private manageEnrollmentStatusUseCase: ManageEnrollmentStatusUseCase
+    private manageEnrollmentStatusUseCase: ManageEnrollmentStatusUseCase,
+    private instructorPayoutService: InstructorPayoutService
   ) {}
 
   async handleMercadoPagoWebhook(req: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -118,7 +122,7 @@ export class WebhookController {
 
         // Creditar saldo do instrutor se pagamento foi aprovado
         if (newStatus === PaymentStatus.COMPLETED && payment.instructorAmount) {
-          await this.creditInstructorBalance(payment.courseId, payment.instructorAmount);
+          await this.creditInstructorBalance(payment.courseId, payment.instructorAmount, payment.id);
         }
       }
 
@@ -127,17 +131,33 @@ export class WebhookController {
     }
   }
 
-  private async creditInstructorBalance(courseId: string, amount: number): Promise<void> {
+  private async creditInstructorBalance(courseId: string, amount: number, paymentId: string): Promise<void> {
     try {
       // Buscar curso para pegar o instructorId
-      // Implementar lógica de crédito de saldo
-      console.log(`Creditando R$ ${amount} para instrutor do curso ${courseId}`);
+      const course = await this.courseRepository.findById(courseId);
       
-      // TODO: Implementar sistema de saldo do instrutor
-      // await this.balanceService.creditInstructor(instructorId, amount);
+      if (!course) {
+        console.error(`Curso não encontrado: ${courseId}`);
+        return;
+      }
+
+      if (!course.instructorId) {
+        console.error(`Curso ${courseId} não possui instrutor associado`);
+        return;
+      }
+
+      // Creditar saldo do instrutor usando o service
+      await this.instructorPayoutService.creditInstructorBalance(
+        course.instructorId,
+        amount,
+        paymentId
+      );
+
+      console.log(`✅ Saldo creditado com sucesso para instrutor ${course.instructorId}: R$ ${amount}`);
       
     } catch (error) {
       console.error('Erro ao creditar saldo do instrutor:', error);
+      // Não relançar o erro para não quebrar o webhook
     }
   }
 }
