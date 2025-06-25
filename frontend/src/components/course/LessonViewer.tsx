@@ -256,7 +256,13 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
         {/* Ações da Lição */}
         <LessonActions
           isCompleted={lessonProgress?.isCompleted || false}
-          completedAt={lessonProgress?.completedAt?.toISOString()}
+          completedAt={
+            lessonProgress?.completedAt
+              ? typeof lessonProgress.completedAt === "string"
+                ? lessonProgress.completedAt
+                : lessonProgress.completedAt.toISOString()
+              : undefined
+          }
           onComplete={handleCompleteLesson}
         />
       </div>

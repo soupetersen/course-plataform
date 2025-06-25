@@ -195,16 +195,40 @@ export const useSubmitQuiz = () => {
 
 export const useUploadVideo = () => {
   return useMutation({
-    mutationFn: async (file: File) => {
+    mutationFn: async ({file, onProgress}: {file: File, onProgress?: (progress: number) => void}) => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await api.post('/api/upload/video', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        if (onProgress) {
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const progress = (e.loaded / e.total) * 100;
+              onProgress(progress);
+            }
+          });
+        }
+
+        xhr.addEventListener('load', () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            const result = JSON.parse(xhr.responseText);
+            resolve(result.data);
+          } else {
+            const errorData = JSON.parse(xhr.responseText);
+            reject(new Error(errorData.error || 'Failed to upload video'));
+          }
+        });
+
+        xhr.addEventListener('error', () => {
+          reject(new Error('Network error during video upload'));
+        });
+
+        xhr.open('POST', '/api/uploads/video');
+        xhr.setRequestHeader('Authorization', `Bearer ${localStorage.getItem('authToken')}`);
+        xhr.send(formData);
       });
-      return response.data.data; // Acessar response.data.data para obter os dados reais
     },
   });
 };

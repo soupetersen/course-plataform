@@ -4,6 +4,7 @@
 @import './base/globals.css';
 @import './components/ui.css';
 @import './utilities/animations.css';
+@import './video-player.css';
 
 @tailwind base;
 @tailwind components;

@@ -10,6 +10,7 @@ import {
   Play,
   Lock,
   Eye,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,9 +21,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Tooltip } from "@/components/ui/tooltip";
 import { ModuleForm } from "./ModuleForm";
 import { LessonForm } from "./LessonForm";
 import type { Module, Lesson } from "@/types/api";
+import { useDeleteLesson } from "@/hooks/useModulesAndLessons";
+import { useErrorHandler } from "@/hooks/useErrorHandler";
 
 interface ModuleLessonManagerProps {
   courseId: string;
@@ -53,6 +67,11 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const [isModuleDialogOpen, setIsModuleDialogOpen] = useState(false);
   const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
+  const [lessonToDelete, setLessonToDelete] = useState<Lesson | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const deleteLesson = useDeleteLesson();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   const handleCreateModule = () => {
     setSelectedModule(null);
@@ -87,6 +106,33 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
     setSelectedLesson(null);
     setSelectedModule(null);
     onRefresh();
+  };
+
+  const handleDeleteLesson = (lesson: Lesson) => {
+    setLessonToDelete(lesson);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteLesson = async () => {
+    if (!lessonToDelete) return;
+
+    try {
+      await deleteLesson.mutateAsync(lessonToDelete.id);
+      handleSuccess("Aula removida com sucesso!");
+      setIsDeleteDialogOpen(false);
+      setLessonToDelete(null);
+      onRefresh();
+    } catch (error) {
+      handleError(error, {
+        title: "Erro ao remover aula",
+        description: "Tente novamente mais tarde",
+      });
+    }
+  };
+
+  const cancelDeleteLesson = () => {
+    setIsDeleteDialogOpen(false);
+    setLessonToDelete(null);
   };
 
   const formatDuration = (seconds?: number) => {
@@ -143,9 +189,11 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="cursor-move" draggable>
-                      <GripVertical className="w-4 h-4 text-gray-400" />
-                    </div>
+                    <Tooltip content="Arrastar para reordenar">
+                      <div className="cursor-move" draggable>
+                        <GripVertical className="w-4 h-4 text-gray-400" />
+                      </div>
+                    </Tooltip>
                     <div>
                       <CardTitle className="text-lg text-[#00224D]">
                         {module.title}
@@ -162,13 +210,15 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                     <Badge variant="secondary">
                       {module.lessons?.length || 0} aulas
                     </Badge>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditModule(module)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    <Tooltip content="Editar módulo">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditModule(module)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </Tooltip>
                     <Button
                       variant="outline"
                       size="sm"
@@ -196,40 +246,56 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                           className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
                         >
                           <div className="flex items-center space-x-3">
-                            <div className="cursor-move" draggable>
-                              <GripVertical className="w-4 h-4 text-gray-400" />
-                            </div>
-                            <IconComponent className="w-4 h-4 text-gray-600" />
+                            <Tooltip content="Arrastar para reordenar aula">
+                              <div className="cursor-move" draggable>
+                                <GripVertical className="w-4 h-4 text-gray-400" />
+                              </div>
+                            </Tooltip>
+                            <Tooltip
+                              content={`Tipo: ${lesson.type || "VIDEO"}`}
+                            >
+                              <IconComponent className="w-4 h-4 text-gray-600" />
+                            </Tooltip>
                             <div className="flex-1">
                               <div className="flex items-center space-x-2">
                                 <h4 className="font-medium text-gray-900">
                                   {lesson.title}
                                 </h4>{" "}
-                                <Badge
-                                  className={
-                                    lessonTypeColors[lesson.type || "VIDEO"]
-                                  }
-                                  variant="secondary"
+                                <Tooltip
+                                  content={`Tipo de aula: ${
+                                    lesson.type || "VIDEO"
+                                  }`}
                                 >
-                                  {lesson.type || "VIDEO"}
-                                </Badge>
-                                {lesson.isPreview && (
                                   <Badge
-                                    variant="outline"
-                                    className="text-green-600 border-green-600"
+                                    className={
+                                      lessonTypeColors[lesson.type || "VIDEO"]
+                                    }
+                                    variant="secondary"
                                   >
-                                    <Eye className="w-3 h-3 mr-1" />
-                                    Preview
+                                    {lesson.type || "VIDEO"}
                                   </Badge>
+                                </Tooltip>
+                                {lesson.isPreview && (
+                                  <Tooltip content="Esta aula pode ser visualizada sem inscrição">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-green-600 border-green-600"
+                                    >
+                                      <Eye className="w-3 h-3 mr-1" />
+                                      Preview
+                                    </Badge>
+                                  </Tooltip>
                                 )}
                                 {lesson.isLocked && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-orange-600 border-orange-600"
-                                  >
-                                    <Lock className="w-3 h-3 mr-1" />
-                                    Bloqueada
-                                  </Badge>
+                                  <Tooltip content="Esta aula está bloqueada e requer pré-requisitos">
+                                    <Badge
+                                      variant="outline"
+                                      className="text-orange-600 border-orange-600"
+                                    >
+                                      <Lock className="w-3 h-3 mr-1" />
+                                      Bloqueada
+                                    </Badge>
+                                  </Tooltip>
                                 )}
                               </div>
                               <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -249,15 +315,28 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleEditLesson(lesson, module.id)
-                              }
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
+                            <Tooltip content="Editar aula">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleEditLesson(lesson, module.id)
+                                }
+                                className="text-gray-600 hover:text-blue-600"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            </Tooltip>
+                            <Tooltip content="Remover aula">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteLesson(lesson)}
+                                className="text-gray-600 hover:text-red-600"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </Tooltip>
                           </div>
                         </div>
                       );
@@ -329,6 +408,38 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Lesson Confirmation Dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja remover a aula "{lessonToDelete?.title}"?
+              <br />
+              <br />
+              <strong>Esta ação não pode ser desfeita.</strong> A aula será
+              permanentemente removida do curso e todos os dados associados
+              serão perdidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDeleteLesson}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteLesson}
+              variant="destructive"
+              disabled={deleteLesson.isPending}
+            >
+              {deleteLesson.isPending ? "Removendo..." : "Remover Aula"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

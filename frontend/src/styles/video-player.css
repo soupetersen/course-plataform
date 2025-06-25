@@ -1,0 +1,278 @@
+/* Video Player Styles - Optimized for 1080p */
+
+.video-player-container {
+  position: relative;
+  width: 100%;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.video-player-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  border-radius: 0;
+}
+
+/* Ensure 1080p aspect ratio */
+.video-player-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  min-height: 400px; /* Minimum height for 1080p viewing */
+}
+
+.video-player-wrapper.fullscreen {
+  aspect-ratio: auto;
+  height: 100vh;
+  min-height: auto;
+}
+
+/* Progress slider styles */
+.progress-slider {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.progress-slider:hover {
+  height: 10px;
+}
+
+.progress-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+.progress-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6);
+}
+
+.progress-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 12px rgba(59, 130, 246, 0.4);
+  transition: all 0.2s ease;
+}
+
+/* Volume slider styles */
+.volume-slider {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 8px rgba(16, 185, 129, 0.4);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #10b981;
+  cursor: pointer;
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Control buttons */
+.video-control-button {
+  padding: 8px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-control-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.video-control-button:active {
+  transform: scale(0.95);
+}
+
+/* Settings menu */
+.video-settings-menu {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 8px;
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  min-width: 180px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.video-settings-section {
+  margin-bottom: 16px;
+}
+
+.video-settings-section:last-child {
+  margin-bottom: 0;
+}
+
+.video-settings-title {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.video-settings-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 2px;
+}
+
+.video-settings-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.video-settings-option.active {
+  background: rgba(59, 130, 246, 0.3);
+  color: #60a5fa;
+}
+
+/* Quality badge */
+.quality-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: #3b82f6;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.quality-badge.hd {
+  background: #10b981;
+}
+
+.quality-badge.uhd {
+  background: #8b5cf6;
+}
+
+/* Time display */
+.time-display {
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  font-size: 0.875rem;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 4px 8px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+  .video-player-wrapper {
+    min-height: 200px;
+  }
+  
+  .volume-slider {
+    width: 60px;
+  }
+  
+  .video-settings-menu {
+    min-width: 140px;
+    right: -20px;
+  }
+  
+  .time-display {
+    font-size: 0.75rem;
+    padding: 2px 6px;
+  }
+}
+
+/* Animation for controls */
+@keyframes fadeInControls {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.video-controls-enter {
+  animation: fadeInControls 0.3s ease-out;
+}
+
+/* Loading state */
+.video-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 1.125rem;
+}
+
+/* Error state */
+.video-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #ef4444;
+  text-align: center;
+  padding: 20px;
+}
+
+/* Ensure high quality rendering */
+.react-player-wrapper video {
+  object-fit: contain;
+  width: 100%;
+  height: 100%;
+}

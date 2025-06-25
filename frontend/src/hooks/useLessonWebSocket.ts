@@ -9,7 +9,7 @@ interface WebSocketMessage {
 interface LessonProgress {
   watchTime: number;
   isCompleted: boolean;
-  completedAt?: Date;
+  completedAt?: string | Date;
 }
 
 interface QuizResult {
@@ -84,7 +84,14 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
             case 'lesson_joined':
               console.log('🎓 Entrou na lição:', message.data);
               if (message.data.progress) {
-                setLessonProgress(message.data.progress as LessonProgress);
+                const progress = message.data.progress as Record<string, unknown>;
+                setLessonProgress({
+                  watchTime: (progress.watchTime as number) || 0,
+                  isCompleted: (progress.isCompleted as boolean) || false,
+                  completedAt: progress.completedAt ? 
+                    (typeof progress.completedAt === 'string' ? progress.completedAt : String(progress.completedAt)) 
+                    : undefined
+                });
               }
               break;
               
@@ -95,7 +102,13 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
               
             case 'lesson_completed':
               console.log('🎉 Lição concluída:', message.data);
-              setLessonProgress(prev => prev ? { ...prev, isCompleted: true, completedAt: message.data.completedAt as Date } : null);
+              setLessonProgress(prev => prev ? { 
+                ...prev, 
+                isCompleted: true, 
+                completedAt: message.data.completedAt ? 
+                  (typeof message.data.completedAt === 'string' ? message.data.completedAt : String(message.data.completedAt))
+                  : new Date().toISOString()
+              } : null);
               break;
               
             case 'quiz_result':

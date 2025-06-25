@@ -27,7 +27,8 @@ import {
 } from "../hooks/useCourses";
 import { useCategories } from "../hooks/useCategoriesAndEnrollments";
 import { useModulesByCourse } from "../hooks/useModulesAndLessons";
-import { uploadImage } from "../lib/upload";
+import { useErrorHandler } from "../hooks/useErrorHandler";
+import { uploadCourseImage } from "../lib/upload";
 import type { UpdateCourseInput } from "../types/api";
 import { ModuleLessonManager } from "../components/course/ModuleLessonManager";
 
@@ -46,10 +47,12 @@ export const EditCoursePage = () => {
   const updateCourse = useUpdateCourse();
   const publishCourse = usePublishCourse();
   const unpublishCourse = useUnpublishCourse();
+  const { handleError, handleSuccess } = useErrorHandler();
 
   const [imageUrl, setImageUrl] = useState<string>("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const course = courseData?.data;
   const categories = categoriesData?.data || [];
@@ -93,11 +96,20 @@ export const EditCoursePage = () => {
 
       if (imageFile) {
         setIsUploadingImage(true);
+        setUploadError(null);
         try {
-          const uploadResult = await uploadImage(imageFile);
+          const uploadResult = await uploadCourseImage(imageFile);
           finalImageUrl = uploadResult.url;
+          handleSuccess("Imagem enviada com sucesso!");
         } catch (error) {
           console.error("Error uploading image:", error);
+          const errorMsg = "Erro ao fazer upload da imagem. Tente novamente.";
+          setUploadError(errorMsg);
+          handleError(error, {
+            title: "Erro no upload da imagem",
+            description: "Verifique sua conexão e tente novamente",
+          });
+          return; // Parar aqui se o upload falhou
         } finally {
           setIsUploadingImage(false);
         }
@@ -117,9 +129,11 @@ export const EditCoursePage = () => {
       if (finalImageUrl !== imageUrl) {
         setImageUrl(finalImageUrl);
         setImageFile(null);
+        setUploadError(null);
       }
     } catch (error) {
       console.error("Error updating course:", error);
+      handleError(error, { title: "Erro ao atualizar curso" });
     }
   };
   const handlePublish = async () => {
@@ -141,6 +155,28 @@ export const EditCoursePage = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Limpar erro anterior
+      setUploadError(null);
+
+      // Validar tipo de arquivo
+      if (!file.type.startsWith("image/")) {
+        const errorMsg = "Por favor, selecione um arquivo de imagem válido.";
+        setUploadError(errorMsg);
+        handleError(errorMsg, { title: "Arquivo inválido" });
+        event.target.value = "";
+        return;
+      }
+
+      // Validar tamanho (10MB máximo)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        const errorMsg = "A imagem deve ter no máximo 10MB.";
+        setUploadError(errorMsg);
+        handleError(errorMsg, { title: "Arquivo muito grande" });
+        event.target.value = "";
+        return;
+      }
+
       setImageFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -375,6 +411,29 @@ export const EditCoursePage = () => {
                   className="hidden"
                   disabled={isUploadingImage}
                 />
+                {uploadError && (
+                  <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700 flex items-center justify-between">
+                    <span>{uploadError}</span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setUploadError(null);
+                        const fileInput = document.getElementById(
+                          "image-upload"
+                        ) as HTMLInputElement;
+                        if (fileInput) {
+                          fileInput.value = "";
+                          fileInput.click();
+                        }
+                      }}
+                      className="ml-2 h-6 text-xs"
+                    >
+                      Tentar novamente
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>
