@@ -1,4 +1,4 @@
-﻿import { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEnrollmentStats } from "../hooks/useEnrollments";
@@ -20,17 +20,9 @@ import {
   TabsTrigger,
 } from "../components/ui/tabs";
 import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
-import {
-  User,
-  Calendar,
-  BookOpen,
-  Award,
-  Loader2,
-  Camera,
-  Upload,
-} from "lucide-react";
+import { User, Calendar, BookOpen, Award, Loader2, Camera } from "lucide-react";
 import { api } from "../lib/api";
-import { useToast } from "../components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 export const ProfilePage = () => {
   const { user } = useAuth();

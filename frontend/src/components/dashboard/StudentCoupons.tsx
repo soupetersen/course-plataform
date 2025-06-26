@@ -5,10 +5,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { Badge } from "../ui/badge";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Gift,
   Search,
@@ -18,10 +18,10 @@ import {
   DollarSign,
   RefreshCw,
 } from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { useStudentCouponApi } from "../../hooks/usePaymentApi";
-import { AvailableCoupon } from "../../types/payment";
-import { useGlobalError } from "../../hooks/useGlobalError";
+import { useAuth } from "@/hooks/useAuth";
+import { useStudentCouponApi } from "@/hooks/usePaymentApi";
+import { AvailableCoupon } from "@/types/payment";
+import { useGlobalError } from "@/hooks/useGlobalError";
 
 export const StudentCoupons: React.FC = () => {
   const { user } = useAuth();

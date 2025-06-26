@@ -116,8 +116,8 @@ export function LearnPage() {
       const completed = new Set<string>();
       modules.forEach((module) => {
         module.lessons?.forEach((lesson) => {
-          // Verificar se a aula tem completions (assumindo que se tem completions, está concluída)
-          if (lesson.completions && lesson.completions.length > 0) {
+          // Verificar se a aula está concluída através do progresso
+          if (lesson.progress && lesson.progress.isCompleted) {
             completed.add(lesson.id);
           }
         });
@@ -512,11 +512,13 @@ export function LearnPage() {
                                       <div className="flex items-center text-xs text-gray-500 mt-0.5">
                                         <Clock className="w-3 h-3 mr-1" />
                                         <span>Aula {lessonIndex + 1}</span>
-                                        {lesson.duration && (
+                                        {lesson.videoDuration && (
                                           <>
                                             <span className="mx-1">•</span>
                                             <span>
-                                              {Math.floor(lesson.duration / 60)}
+                                              {Math.floor(
+                                                lesson.videoDuration / 60
+                                              )}
                                               min
                                             </span>
                                           </>

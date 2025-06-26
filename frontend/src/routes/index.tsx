@@ -1,4 +1,4 @@
-﻿import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import { ForgotPasswordPage } from "../pages/auth/ForgotPasswordPage";
 import { VerifyResetCodePage } from "../pages/auth/VerifyResetCodePage";

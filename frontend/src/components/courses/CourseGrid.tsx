@@ -1,4 +1,4 @@
-Ôªøimport {
+import {
   Card,
   CardContent,
   CardDescription,
@@ -42,9 +42,9 @@ export const CourseGrid = ({
       case "BEGINNER":
         return "Iniciante";
       case "INTERMEDIATE":
-        return "Intermedi√°rio";
+        return "Intermedi·rio";
       case "ADVANCED":
-        return "Avan√ßado";
+        return "AvanÁado";
       default:
         return level;
     }
@@ -186,7 +186,7 @@ export const CourseGrid = ({
 
             <div className="text-xs text-gray-600 mb-3">
               <span className="font-medium">por</span>{" "}
-              {course.instructor?.name || "Instrutor n√£o informado"}
+              {course.instructor?.name || "Instrutor n„o informado"}
             </div>
 
             {course.averageRating && course.averageRating > 0 && (
@@ -196,7 +196,7 @@ export const CourseGrid = ({
                   {course.averageRating.toFixed(1)}
                 </span>
                 <span className="text-gray-500">
-                  ({course.reviewCount || 0} avalia√ß√µes)
+                  ({course.reviewCount || 0} avaliaÁıes)
                 </span>
               </div>
             )}
@@ -210,7 +210,7 @@ export const CourseGrid = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course.modules?.length || 0} m√≥dulos</span>
+                    <span>{course.modules?.length || 0} mÛdulos</span>
                   </div>
                 </div>
 

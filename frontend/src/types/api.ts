@@ -1,7 +1,63 @@
-﻿import { Payment } from './payment';
+import { Payment } from './payment';
+
+// Query keys para React Query
+export const queryKeys = {
+  auth: ['auth'],
+  user: (id: string) => ['user', id],
+  users: ['users'],
+  courses: ['courses'],
+  course: (id: string) => ['course', id],
+  coursesByInstructor: (instructorId: string) => ['courses', 'instructor', instructorId],
+  coursesByCategoryAndInstructor: (categoryId?: string, instructorId?: string) => 
+    ['courses', 'filter', { categoryId, instructorId }],
+  categories: ['categories'],
+  category: (id: string) => ['category', id],
+  modules: ['modules'],
+  module: (id: string) => ['module', id],
+  modulesByCourse: (courseId: string) => ['modules', 'course', courseId],
+  lessons: ['lessons'],
+  lesson: (id: string) => ['lesson', id],
+  lessonsByModule: (moduleId: string) => ['lessons', 'module', moduleId],
+  enrollments: ['enrollments'],
+  enrollment: (id: string) => ['enrollment', id],
+  userEnrollments: (userId: string) => ['enrollments', 'user', userId],
+  enrollmentsByUser: (userId: string) => ['enrollments', 'user', userId],
+  enrollmentsByCourse: (courseId: string) => ['enrollments', 'course', courseId],
+  reviews: ['reviews'],
+  review: (id: string) => ['review', id],
+  reviewsByCourse: (courseId: string) => ['reviews', 'course', courseId],
+  reviewsByUser: (userId: string) => ['reviews', 'user', userId],
+  courseRatingStats: (courseId: string) => ['course-rating-stats', courseId],
+  progress: ['progress'],
+  userProgress: (userId: string, courseId: string) => ['progress', userId, courseId],
+  lessonProgress: (userId: string, lessonId: string) => ['progress', 'lesson', userId, lessonId],
+} as const;
 
 export interface ForgotPasswordRequest {
   email: string;
+}
+
+// Auth types
+export interface AuthResponse {
+  success: boolean;
+  data: {
+    user: User;
+    token: string;
+  };
+  error?: string;
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  role?: 'INSTRUCTOR' | 'STUDENT';
 }
 
 export interface ValidateResetCodeRequest {
@@ -62,6 +118,7 @@ export interface Course {
   description: string;
   shortDescription?: string;
   thumbnailUrl?: string;
+  imageUrl?: string;
   price: number;
   originalPrice?: number;
   discount?: number;
@@ -70,7 +127,9 @@ export interface Course {
   language: string;
   requirements?: string[];
   whatYoullLearn?: string[];
+  objectives?: string[];
   isPublished: boolean;
+  status?: 'DRAFT' | 'PUBLISHED';
   categoryId?: string;
   instructorId: string;
   createdAt: string;
@@ -78,6 +137,9 @@ export interface Course {
   instructor?: User;
   category?: Category;
   modules?: Module[];
+  enrollments?: Enrollment[];
+  enrollments_count?: number;
+  averageRating?: number;
   _count?: {
     enrollments: number;
     modules: number;
@@ -115,11 +177,44 @@ export interface UpdateCourseRequest {
   isPublished?: boolean;
 }
 
+// Course input types
+export interface CreateCourseInput {
+  title: string;
+  description: string;
+  price: number;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  categoryId: string;
+  imageUrl?: string;
+}
+
+export interface UpdateCourseInput {
+  title?: string;
+  description?: string;
+  price?: number;
+  level?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  categoryId?: string;
+  imageUrl?: string;
+}
+
+export interface CourseFilters {
+  category?: string;
+  categoryId?: string;
+  level?: string;
+  priceRange?: string;
+  instructor?: string;
+  instructorId?: string;
+  search?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
 export interface Module {
   id: string;
   title: string;
   description?: string;
   orderIndex: number;
+  order: number;
   courseId: string;
   createdAt: string;
   updatedAt: string;
@@ -136,16 +231,23 @@ export interface Lesson {
   content?: string;
   videoUrl?: string;
   videoDuration?: number;
+  duration?: number;
   orderIndex: number;
+  order: number;
   moduleId: string;
   courseId: string;
   lessonType: 'VIDEO' | 'TEXT' | 'QUIZ';
+  type?: 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
   isFree: boolean;
+  isPreview?: boolean;
+  isLocked?: boolean;
+  quizPassingScore?: number;
   createdAt: string;
   updatedAt: string;
   module?: Module;
   course?: Course;
   questions?: Question[];
+  progress?: LessonProgress;
   _count?: {
     questions: number;
   };
@@ -381,6 +483,82 @@ export interface InstructorAnalytics {
     students: number;
     revenue: number;
   }[];
+}
+
+// Module input types
+export interface CreateModuleInput {
+  title: string;
+  description?: string;
+  order: number;
+  courseId: string;
+}
+
+// Lesson types
+export type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
+
+export interface CreateLessonInput {
+  title: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  type: LessonType;
+  duration?: number;
+  order: number;
+  moduleId: string;
+  courseId: string;
+  isPreview?: boolean;
+  isLocked?: boolean;
+  quizPassingScore?: number;
+}
+
+export interface UpdateLessonInput {
+  title?: string;
+  description?: string;
+  content?: string;
+  videoUrl?: string;
+  type?: LessonType;
+  duration?: number;
+  order?: number;
+  isPreview?: boolean;
+  isLocked?: boolean;
+  quizPassingScore?: number;
+}
+
+// Review types
+export interface CreateReviewInput {
+  rating: number;
+  comment?: string;
+  courseId: string;
+}
+
+export interface UpdateReviewInput {
+  rating?: number;
+  comment?: string;
+}
+
+export interface CourseRatingStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}
+
+// Comment types
+export interface LessonComment {
+  id: string;
+  content: string;
+  userId: string;
+  lessonId: string;
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
+  user: User;
+  replies?: LessonComment[];
 }
 
 export type ApiEndpoints = {

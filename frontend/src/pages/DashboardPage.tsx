@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useCourses, useCoursesByInstructor } from "../hooks/useCourses";
 import { useEnrollmentsByUser } from "../hooks/useCategoriesAndEnrollments";

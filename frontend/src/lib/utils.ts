@@ -1,4 +1,4 @@
-Ôªøimport { clsx, type ClassValue } from "clsx"
+import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
@@ -10,9 +10,9 @@ export const getLevelText = (level?: string) => {
     case "BEGINNER":
       return "Iniciante";
     case "INTERMEDIATE":
-      return "Intermedi√°rio";
+      return "Intermedi·rio";
     case "ADVANCED":
-      return "Avan√ßado";
+      return "AvanÁado";
     default:
       return level;
   }

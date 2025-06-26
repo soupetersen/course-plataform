@@ -1,4 +1,4 @@
-ï»¿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,14 +32,14 @@ export function LoginPage() {
 
     if (!formData.email || !formData.password) {
       handleError("Por favor, preencha todos os campos", {
-        title: "Campos obrigatÃ³rios",
+        title: "Campos obrigatórios",
       });
       return;
     }
 
     if (!formData.email.includes("@")) {
-      handleError("Por favor, insira um email vÃ¡lido", {
-        title: "Email invÃ¡lido",
+      handleError("Por favor, insira um email válido", {
+        title: "Email inválido",
       });
       return;
     }
@@ -103,7 +103,7 @@ export function LoginPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                  placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -151,7 +151,7 @@ export function LoginPage() {
           </form>
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              NÃ£o tem uma conta?{" "}
+              Não tem uma conta?{" "}
               <Link
                 to="/register"
                 className="text-primary-500 hover:text-primary-600 font-medium"

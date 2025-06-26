@@ -1,4 +1,4 @@
-ï»¿import { Button } from "../ui/button";
+import { Button } from "../ui/button";
 
 interface CoursePaginationData {
   items: unknown[];
@@ -31,14 +31,14 @@ export const CoursePagination = ({
         Anterior
       </Button>{" "}
       <span className="flex items-center px-4 text-sm text-gray-600">
-        PÃ¡gina {pagination.page} de {pagination.totalPages}
+        Página {pagination.page} de {pagination.totalPages}
       </span>
       <Button
         variant="outline"
         disabled={pagination.page === pagination.totalPages}
         onClick={() => onPageChange(pagination.page + 1)}
       >
-        PrÃ³xima
+        Próxima
       </Button>
     </div>
   );

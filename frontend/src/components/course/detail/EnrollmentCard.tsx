@@ -97,7 +97,7 @@ export const EnrollmentCard = ({
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4 text-gray-500" />
               <span className="text-sm">
-                {course.enrollments_count || 0} alunos matriculados
+                {course.enrollmentCount || 0} alunos matriculados
               </span>
             </div>
 

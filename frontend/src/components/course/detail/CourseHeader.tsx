@@ -1,6 +1,6 @@
 ﻿import { Badge } from "../../ui/badge";
 import { BookOpen, Clock, Users, Star } from "lucide-react";
-import type { Course, CourseRatingStats } from "../../../types/api";
+import type { Course, CourseRatingStats } from "@/types/api";
 
 interface CourseHeaderProps {
   course: Course;

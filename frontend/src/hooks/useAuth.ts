@@ -1,4 +1,4 @@
-ï»¿import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '../lib/api';
 import type { AuthResponse, LoginInput, RegisterInput, User } from '../types/api';
 import { queryKeys } from '../types/api';
@@ -113,7 +113,7 @@ export const useResetPassword = () => {
       });
     },
     onSuccess: () => {
-      // Limpar cache de autenticaÃ§Ã£o para forÃ§ar novo login
+      // Limpar cache de autenticação para forçar novo login
       queryClient.removeQueries({ queryKey: queryKeys.auth });
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');

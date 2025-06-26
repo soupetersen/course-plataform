@@ -1,4 +1,4 @@
-﻿import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Play, Clock, Users, Star, BookOpen } from "lucide-react";
 import { Button } from "../components/ui/button";
 import {
@@ -26,7 +26,6 @@ export const CourseViewPage = () => {
   const ratingStats = ratingStatsData?.data;
   const enrollments = enrollmentsData?.data || [];
 
-  // Verificar se o usuário está matriculado
   const isEnrolled = enrollments.some(
     (enrollment) => enrollment.courseId === id
   );
@@ -96,13 +95,13 @@ export const CourseViewPage = () => {
                 <div className="flex items-center">
                   <Users className="w-4 h-4 mr-1" />
                   {(course.enrollments?.length || 0) > 0
-                    ? `${course.enrollments.length} alunos`
+                    ? `${course.enrollments?.length} alunos`
                     : "Sem alunos"}
                 </div>
                 <div className="flex items-center">
                   <BookOpen className="w-4 h-4 mr-1" />
                   {(course.modules?.length || 0) > 0
-                    ? `${course.modules.length} módulos`
+                    ? `${course.modules?.length} módulos`
                     : "Sem módulos"}
                 </div>
                 <div className="flex items-center">
@@ -135,7 +134,7 @@ export const CourseViewPage = () => {
                 <div className="text-right">
                   <div className="mb-4">
                     <Badge className="bg-green-100 text-green-700 border-green-200">
-                      ✓ Você já está matriculado
+                      Você já está matriculado
                     </Badge>
                   </div>
                   <Button
@@ -353,7 +352,7 @@ export const CourseViewPage = () => {
                   <span className="text-gray-600">Alunos inscritos</span>
                   <span className="font-medium">
                     {(course.enrollments?.length || 0) > 0
-                      ? course.enrollments.length
+                      ? course.enrollments?.length
                       : "Nenhum"}
                   </span>
                 </div>
@@ -361,7 +360,7 @@ export const CourseViewPage = () => {
                   <span className="text-gray-600">Módulos</span>
                   <span className="font-medium">
                     {(course.modules?.length || 0) > 0
-                      ? course.modules.length
+                      ? course.modules?.length
                       : "Nenhum"}
                   </span>
                 </div>

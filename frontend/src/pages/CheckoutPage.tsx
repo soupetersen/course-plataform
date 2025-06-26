@@ -2,7 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { PaymentCheckout } from "@/components/payment/PaymentCheckout";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useCourse } from "@/hooks/useCourses";

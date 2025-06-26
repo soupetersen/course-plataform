@@ -1,4 +1,4 @@
-ï»¿import { useParams, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useCourse } from "../hooks/useCourses";
 import { useModulesByCourse } from "../hooks/useModulesAndLessons";
 import { useAuth } from "../hooks/useAuth";
@@ -48,10 +48,10 @@ export const CourseDetailPage = () => {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Curso nÃ£o encontrado
+          Curso não encontrado
         </h2>
         <p className="text-gray-600">
-          O curso que vocÃª estÃ¡ procurando nÃ£o existe.
+          O curso que você está procurando não existe.
         </p>
       </div>
     );

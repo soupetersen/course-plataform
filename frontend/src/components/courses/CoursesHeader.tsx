@@ -1,4 +1,4 @@
-﻿import { Button } from "../ui/button";
+import { Button } from "../ui/button";
 import { Grid, List } from "lucide-react";
 
 interface CoursesHeaderProps {

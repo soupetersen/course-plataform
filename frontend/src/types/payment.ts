@@ -186,6 +186,24 @@ export interface AdminCouponsResponse {
   error?: string;
 }
 
+export interface AvailableCoupon {
+  id: string;
+  code: string;
+  description: string;
+  discountType: "PERCENTAGE" | "FLAT_RATE";
+  discountValue: number;
+  minimumAmount?: number;
+  maxUsageCount?: number;
+  currentUsageCount: number;
+  validUntil: string;
+  isActive: boolean;
+  courseId?: string;
+  courseTitle?: string;
+  createdBy?: string;
+  isGlobal?: boolean;
+}
+
+
 export interface CreateAdminCouponRequest {
   code: string;
   description?: string;

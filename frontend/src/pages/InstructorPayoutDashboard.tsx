@@ -21,7 +21,8 @@ import {
   XCircle,
   Loader,
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
 
 interface InstructorBalance {
   availableBalance: number;
@@ -63,23 +64,6 @@ export default function InstructorPayoutDashboard() {
   );
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
 
-  // Dados bancários
-  const [showPayoutDataForm, setShowPayoutDataForm] = useState(false);
-  const [payoutData, setPayoutData] = useState({
-    pixKey: "",
-    fullName: "",
-    documentType: "CPF" as "CPF" | "CNPJ",
-    documentNumber: "",
-    payoutPreference: "PIX" as "PIX" | "BANK_TRANSFER",
-    bankData: {
-      bank: "",
-      agency: "",
-      account: "",
-      accountType: "CORRENTE" as "CORRENTE" | "POUPANCA",
-      accountHolder: "",
-    },
-  });
-
   useEffect(() => {
     loadData();
   }, []);
@@ -88,63 +72,11 @@ export default function InstructorPayoutDashboard() {
     try {
       setLoading(true);
 
-      // Simular carregamento (substituir por chamadas reais à API)
+      // Chamadas reais à API
       const [balanceRes, historyRes, transactionsRes] = await Promise.all([
-        // api.get('/instructor/payout/balance'),
-        // api.get('/instructor/payout/history'),
-        // api.get('/instructor/payout/transactions?limit=10')
-        Promise.resolve({
-          data: {
-            availableBalance: 450.0,
-            pendingBalance: 120.0,
-            totalEarnings: 2340.0,
-            totalWithdrawn: 1770.0,
-            nextPayoutDate: new Date(
-              Date.now() + 7 * 24 * 60 * 60 * 1000
-            ).toISOString(),
-          },
-        }),
-        Promise.resolve({
-          data: [
-            {
-              id: "payout_001",
-              amount: 250.0,
-              method: "PIX",
-              status: "COMPLETED",
-              requestedAt: "2025-06-20T10:00:00Z",
-              processedAt: "2025-06-21T14:30:00Z",
-            },
-            {
-              id: "payout_002",
-              amount: 180.0,
-              method: "BANK_TRANSFER",
-              status: "PROCESSING",
-              requestedAt: "2025-06-24T16:20:00Z",
-              estimatedProcessingTime: "2-5 dias úteis",
-            },
-          ],
-        }),
-        Promise.resolve({
-          data: {
-            transactions: [
-              {
-                id: "tx_001",
-                type: "CREDIT",
-                amount: 90.0,
-                description: "Venda do curso: JavaScript Avançado",
-                createdAt: "2025-06-24T10:30:00Z",
-                course: { title: "JavaScript Avançado" },
-              },
-              {
-                id: "tx_002",
-                type: "DEBIT",
-                amount: -250.0,
-                description: "Saque processado via PIX",
-                createdAt: "2025-06-21T14:30:00Z",
-              },
-            ],
-          },
-        }),
+        api.get("/instructor/payout/balance"),
+        api.get("/instructor/payout/history"),
+        api.get("/instructor/payout/transactions?limit=10"),
       ]);
 
       setBalance(balanceRes.data);
@@ -152,7 +84,11 @@ export default function InstructorPayoutDashboard() {
       setTransactions(transactionsRes.data.transactions);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
-      toast.error("Erro ao carregar dados financeiros");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao carregar dados financeiros",
+      });
     } finally {
       setLoading(false);
     }
@@ -160,30 +96,46 @@ export default function InstructorPayoutDashboard() {
 
   const handleRequestPayout = async () => {
     if (!payoutAmount || parseFloat(payoutAmount) < 50) {
-      toast.error("Valor mínimo de saque é R$ 50,00");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Valor mínimo de saque é R$ 50,00",
+      });
       return;
     }
 
     if (!balance || parseFloat(payoutAmount) > balance.availableBalance) {
-      toast.error("Saldo insuficiente");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Saldo insuficiente",
+      });
       return;
     }
 
     try {
       setIsRequestingPayout(true);
 
-      // TODO: Chamada real à API
-      // await api.post('/instructor/payout/request', {
-      //   amount: parseFloat(payoutAmount),
-      //   method: payoutMethod
-      // });
+      // Chamada real à API
+      await api.post("/instructor/payout/request", {
+        amount: parseFloat(payoutAmount),
+        method: payoutMethod,
+      });
 
-      toast.success("Solicitação de saque enviada com sucesso!");
+      toast({
+        variant: "success",
+        title: "Sucesso",
+        description: "Solicitação de saque enviada com sucesso!",
+      });
       setPayoutAmount("");
       loadData(); // Recarregar dados
     } catch (error) {
       console.error("Erro ao solicitar saque:", error);
-      toast.error("Erro ao solicitar saque");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao solicitar saque",
+      });
     } finally {
       setIsRequestingPayout(false);
     }
@@ -249,9 +201,6 @@ export default function InstructorPayoutDashboard() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Pagamentos</h1>
-        <Button onClick={() => setShowPayoutDataForm(true)} variant="outline">
-          Configurar Dados de Pagamento
-        </Button>
       </div>
 
       {/* Cards de Resumo */}

@@ -1,4 +1,4 @@
-Ôªøimport { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Tabs, TabsList, TabsTrigger } from "../ui/tabs";
@@ -68,13 +68,13 @@ export const CourseFiltersSection = ({
               value="intermediate"
               onClick={() => onFiltersChange("level", "INTERMEDIATE")}
             >
-              Intermedi√°rio
+              Intermedi·rio
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
               onClick={() => onFiltersChange("level", "ADVANCED")}
             >
-              Avan√ßado
+              AvanÁado
             </TabsTrigger>
           </TabsList>
         </Tabs>
