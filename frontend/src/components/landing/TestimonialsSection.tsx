@@ -1,70 +1,69 @@
 import { Card, CardContent } from "../ui/card";
-import { Star } from "lucide-react";
+import { CheckCircle, Clock, Trophy, Users } from "lucide-react";
 
 export const TestimonialsSection = () => {
-  const testimonials = [
+  const benefits = [
     {
-      name: "Ana Carolina",
-      role: "Desenvolvedora Frontend",
+      icon: CheckCircle,
+      title: "Certificados Reconhecidos",
       content:
-        "Os cursos me ajudaram a conseguir minha primeira vaga como dev. Conteúdo excelente!",
-      rating: 5,
+        "Receba certificados de conclusão para valorizar seu currículo e LinkedIn.",
+      color: "text-green-500",
     },
     {
-      name: "Carlos Mendes",
-      role: "Freelancer",
+      icon: Clock,
+      title: "Flexibilidade Total",
       content:
-        "Aprendi muito e consegui aumentar minha renda com projetos freelance.",
-      rating: 5,
+        "Estude quando e onde quiser, no seu próprio ritmo, com acesso vitalício.",
+      color: "text-blue-500",
     },
     {
-      name: "Beatriz Oliveira",
-      role: "Product Manager",
+      icon: Trophy,
+      title: "Metodologia Prática",
       content:
-        "Cursos bem estruturados que me deram a base para mudar de carreira.",
-      rating: 5,
+        "Aprenda fazendo com projetos reais e exercícios hands-on.",
+      color: "text-yellow-500",
+    },
+    {
+      icon: Users,
+      title: "Suporte Dedicado",
+      content:
+        "Tire suas dúvidas diretamente com instrutores especializados.",
+      color: "text-purple-500",
     },
   ];
 
   return (
-    <section id="depoimentos" className="section-padding bg-card">
+    <section id="beneficios" className="section-padding bg-card">
       <div className="container">
         <div className="text-center mb-16 fade-in">
           <h2 className="text-4xl font-bold text-foreground mb-4">
-            O que nossos alunos dizem
+            Por que escolher nossa plataforma?
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Histórias reais de transformações e sucesso
+            Oferecemos tudo que você precisa para acelerar seu aprendizado
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {benefits.map((benefit, index) => (
             <Card
               key={index}
               className="border-none shadow-lg card-hover fade-in-up"
             >
               <CardContent className="p-6">
-                <div className="flex mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-5 w-5 text-yellow-400 fill-current"
-                    />
-                  ))}
-                </div>
-
-                <p className="text-muted-foreground mb-6 italic">
-                  "{testimonial.content}"
-                </p>
-
-                <div>
-                  <p className="font-semibold text-foreground">
-                    {testimonial.name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {testimonial.role}
-                  </p>
+                <div className="flex items-start gap-4">
+                  <div className={`flex-shrink-0 ${benefit.color}`}>
+                    <benefit.icon className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground text-lg mb-2">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {benefit.content}
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

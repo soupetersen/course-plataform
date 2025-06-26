@@ -8,7 +8,7 @@ export const HeroSection = () => {
     <section className="section-padding hero-gradient">
       <div className="container text-center">
         <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 animate-in fade-in duration-700">
-          ?? Mais de 10.000 alunos já transformaram suas carreiras
+          🚀 Plataforma em crescimento - Junte-se aos primeiros alunos
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-200">
           Transforme sua carreira com
@@ -41,22 +41,18 @@ export const HeroSection = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto animate-in slide-in-from-bottom-6 fade-in duration-800 delay-800">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto animate-in slide-in-from-bottom-6 fade-in duration-800 delay-800">
           <div className="text-center group hover:scale-110 transition-transform cursor-default">
-            <div className="text-3xl font-bold text-primary">10k+</div>
-            <div className="text-muted-foreground">Alunos</div>
+            <div className="text-3xl font-bold text-primary">100%</div>
+            <div className="text-muted-foreground">Online</div>
           </div>
           <div className="text-center group hover:scale-110 transition-transform cursor-default">
-            <div className="text-3xl font-bold text-primary">50+</div>
-            <div className="text-muted-foreground">Cursos</div>
+            <div className="text-3xl font-bold text-primary">24/7</div>
+            <div className="text-muted-foreground">Acesso</div>
           </div>
           <div className="text-center group hover:scale-110 transition-transform cursor-default">
-            <div className="text-3xl font-bold text-primary">4.8?</div>
-            <div className="text-muted-foreground">Avaliação</div>
-          </div>
-          <div className="text-center group hover:scale-110 transition-transform cursor-default">
-            <div className="text-3xl font-bold text-primary">95%</div>
-            <div className="text-muted-foreground">Satisfação</div>
+            <div className="text-3xl font-bold text-primary">∞</div>
+            <div className="text-muted-foreground">Revisões</div>
           </div>
         </div>
       </div>

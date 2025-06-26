@@ -19,10 +19,10 @@ export const FeaturedCoursesSection = () => {
       <div className="container">
         <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-800">
           <h2 className="text-4xl font-bold text-foreground mb-4">
-            Cursos em Destaque
+            Nossos Cursos
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Nossos cursos mais populares escolhidos por milhares de estudantes
+            Conteúdo de qualidade criado por especialistas da área
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">

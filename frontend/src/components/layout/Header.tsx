@@ -24,15 +24,11 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
     navigate("/");
   };
 
-  console.log("Header rendered with user:", user);
-
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full min-h-[64px]">
       <div className="max-w-full px-2 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16 min-h-[64px]">
-          
           <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
-            
             {user && (
               <Button
                 variant="ghost"
@@ -54,7 +50,6 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
             </Link>
           </div>
 
-          
           <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
             {user ? (
               <DropdownMenu>
@@ -95,7 +90,7 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    Configurações
+                    ConfiguraÃ§Ãµes
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
@@ -128,4 +123,3 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
     </header>
   );
 }
-

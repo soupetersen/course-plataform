@@ -5,24 +5,39 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { BookOpen, Users, Clock } from "lucide-react";
+import { BookOpen, Users, Clock, Award, Smartphone, HeadphonesIcon } from "lucide-react";
 
 export const FeaturesSection = () => {
   const features = [
     {
       icon: BookOpen,
-      title: "Cursos Completos",
-      description: "Aprenda com conteúdo estruturado e didático",
+      title: "Conteúdo Estruturado",
+      description: "Cursos organizados em módulos progressivos e práticos",
     },
     {
       icon: Users,
-      title: "Instrutores Experientes",
-      description: "Professores especializados em suas áreas",
+      title: "Instrutores Qualificados",
+      description: "Profissionais experientes e especialistas em suas áreas",
     },
     {
       icon: Clock,
       title: "Aprenda no Seu Ritmo",
-      description: "Acesso quando desejar",
+      description: "Acesso vitalício para estudar quando e onde quiser",
+    },
+    {
+      icon: Award,
+      title: "Certificados",
+      description: "Comprove suas habilidades com certificados reconhecidos",
+    },
+    {
+      icon: Smartphone,
+      title: "Multi-dispositivo",
+      description: "Acesse de qualquer lugar: computador, tablet ou celular",
+    },
+    {
+      icon: HeadphonesIcon,
+      title: "Suporte Dedicado",
+      description: "Tire suas dúvidas e receba ajuda quando precisar",
     },
   ];
   return (
@@ -30,15 +45,14 @@ export const FeaturesSection = () => {
       <div className="container">
         <div className="text-center mb-16 animate-in fade-in slide-in-from-top-6 duration-800">
           <h2 className="text-4xl font-bold text-foreground mb-4">
-            Por que escolher nossa plataforma?
+            Recursos da Plataforma
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Oferecemos a melhor experiência de aprendizado online com recursos
-            exclusivos
+            Tudo que você precisa para uma experiência de aprendizado completa
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <Card
               key={index}

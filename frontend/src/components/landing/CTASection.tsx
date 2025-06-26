@@ -7,11 +7,10 @@ export const CTASection = () => {
     <section className="section-padding bg-gradient-to-r from-primary to-secondary">
       <div className="container text-center">
         <h2 className="text-4xl font-bold text-white mb-4 fade-in">
-          Pronto para começar sua jornada?
+          Pronto para comeÃ§ar sua jornada?
         </h2>
         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto fade-in-up">
-          Junte-se a milhares de estudantes que já transformaram suas carreiras
-          conosco
+          Comece hoje mesmo e transforme sua carreira com nossos cursos especializados
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center fade-in-up">
@@ -21,7 +20,7 @@ export const CTASection = () => {
               className="bg-white text-primary hover:bg-gray-100 px-8 py-6 text-lg font-semibold"
             >
               <Trophy className="mr-2 h-5 w-5" />
-              Começar Agora
+              ComeÃ§ar Agora
             </Button>
           </Link>
 
