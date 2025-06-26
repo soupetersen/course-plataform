@@ -5,29 +5,24 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { BookOpen, Users, Award, Clock } from "lucide-react";
+import { BookOpen, Users, Clock } from "lucide-react";
 
 export const FeaturesSection = () => {
   const features = [
     {
       icon: BookOpen,
       title: "Cursos Completos",
-      description: "Aprenda com conteúdo estruturado e didático",
+      description: "Aprenda com conteÃºdo estruturado e didÃ¡tico",
     },
     {
       icon: Users,
       title: "Instrutores Experientes",
-      description: "Professores especializados em suas áreas",
-    },
-    {
-      icon: Award,
-      title: "Certificados",
-      description: "Receba certificados ao concluir os cursos",
+      description: "Professores especializados em suas Ã¡reas",
     },
     {
       icon: Clock,
       title: "Aprenda no Seu Ritmo",
-      description: "Acesso vitalício ao conteúdo",
+      description: "Acesso quando desejar",
     },
   ];
   return (
@@ -38,7 +33,7 @@ export const FeaturesSection = () => {
             Por que escolher nossa plataforma?
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Oferecemos a melhor experiência de aprendizado online com recursos
+            Oferecemos a melhor experiÃªncia de aprendizado online com recursos
             exclusivos
           </p>
         </div>
@@ -70,4 +65,3 @@ export const FeaturesSection = () => {
     </section>
   );
 };
-

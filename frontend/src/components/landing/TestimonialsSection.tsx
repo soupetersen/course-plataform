@@ -7,7 +7,7 @@ export const TestimonialsSection = () => {
       name: "Ana Carolina",
       role: "Desenvolvedora Frontend",
       content:
-        "Os cursos me ajudaram a conseguir minha primeira vaga como dev. Conteúdo excelente!",
+        "Os cursos me ajudaram a conseguir minha primeira vaga como dev. ConteÃºdo excelente!",
       rating: 5,
     },
     {
@@ -34,7 +34,7 @@ export const TestimonialsSection = () => {
             O que nossos alunos dizem
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Histórias reais de transformação e sucesso
+            HistÃ³rias reais de transformaÃ§Ãµes e sucesso
           </p>
         </div>
 
@@ -74,4 +74,3 @@ export const TestimonialsSection = () => {
     </section>
   );
 };
-

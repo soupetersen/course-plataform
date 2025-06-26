@@ -8,7 +8,7 @@ export const HeroSection = () => {
     <section className="section-padding hero-gradient">
       <div className="container text-center">
         <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 animate-in fade-in duration-700">
-          ?? Mais de 10.000 alunos j· transformaram suas carreiras
+          ?? Mais de 10.000 alunos j√° transformaram suas carreiras
         </Badge>
         <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 animate-in slide-in-from-bottom-8 fade-in duration-1000 delay-200">
           Transforme sua carreira com
@@ -16,7 +16,7 @@ export const HeroSection = () => {
         </h1>
         <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto animate-in slide-in-from-bottom-6 fade-in duration-800 delay-400">
           Aprenda as tecnologias mais demandadas do mercado com instrutores
-          especialistas. Do b·sico ao avanÁado, com certificados e suporte
+          especialistas. Do b√°sico ao avan√ßado, com certificados e suporte
           completo.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12 animate-in slide-in-from-bottom-4 fade-in duration-600 delay-600">
@@ -52,15 +52,14 @@ export const HeroSection = () => {
           </div>
           <div className="text-center group hover:scale-110 transition-transform cursor-default">
             <div className="text-3xl font-bold text-primary">4.8?</div>
-            <div className="text-muted-foreground">AvaliaÁ„o</div>
+            <div className="text-muted-foreground">Avalia√ß√£o</div>
           </div>
           <div className="text-center group hover:scale-110 transition-transform cursor-default">
             <div className="text-3xl font-bold text-primary">95%</div>
-            <div className="text-muted-foreground">SatisfaÁ„o</div>
+            <div className="text-muted-foreground">Satisfa√ß√£o</div>
           </div>
         </div>
       </div>
     </section>
   );
 };
-
