@@ -24,21 +24,6 @@
       - development
       - production
 
-  redis:
-    image: redis:7-alpine
-    container_name: course-platform-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - course-network
-    command: redis-server --appendonly yes
-    profiles:
-      - default
-      - development
-      - production
   api:
     build:
       context: .
@@ -51,7 +36,6 @@
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
-      REDIS_URL: redis://redis:6379
       MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
       MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
       DEFAULT_PAYMENT_GATEWAY: ${DEFAULT_PAYMENT_GATEWAY:-MERCADOPAGO}
@@ -71,8 +55,6 @@
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - course-network
     volumes:
@@ -91,14 +73,12 @@
       JWT_SECRET: ${JWT_SECRET:-dev-jwt-secret-key}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-24h}
       PORT: ${PORT:-3000}
-      REDIS_URL: redis://redis:6379
       MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
       MERCADOPAGO_PUBLIC_KEY: ${MERCADOPAGO_PUBLIC_KEY}
       DEFAULT_PAYMENT_GATEWAY: ${DEFAULT_PAYMENT_GATEWAY:-MERCADOPAGO}
       DEFAULT_PAYMENT_METHOD: ${DEFAULT_PAYMENT_METHOD:-PIX}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
       API_BASE_URL: ${API_BASE_URL:-http://localhost:3000}
-      NGROK_URL: ${NGROK_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
       AWS_REGION: ${AWS_REGION:-us-east-1}
@@ -112,8 +92,6 @@
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_started
     networks:
       - course-network
     volumes:
@@ -171,9 +149,7 @@
 
 volumes:
   postgres_data:
-    driver: local
-  redis_data:
-    driver: local
+    driver: loca
   api_dev_node_modules:
     driver: local
 
