@@ -34,23 +34,23 @@ export const RegisterPage = () => {
     const newErrors: string[] = [];
 
     if (!formData.name.trim()) {
-      newErrors.push("Nome È obrigatÛrio");
+      newErrors.push("Nome completo √© obrigat√≥rio");
     }
 
     if (!formData.email.trim()) {
-      newErrors.push("Email È obrigatÛrio");
+      newErrors.push("Email √© obrigat√≥rio");
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.push("Email inv·lido");
+      newErrors.push("Email invalido");
     }
 
     if (!formData.password) {
-      newErrors.push("Senha È obrigatÛria");
+      newErrors.push("Senha √© obrigat√≥ria");
     } else if (formData.password.length < 6) {
       newErrors.push("Senha deve ter pelo menos 6 caracteres");
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.push("Senhas n„o coincidem");
+      newErrors.push("Senhas n√£o coincidem");
     }
 
     setErrors(newErrors);
@@ -67,6 +67,7 @@ export const RegisterPage = () => {
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
         role: formData.role,
       },
       {
@@ -104,7 +105,7 @@ export const RegisterPage = () => {
               Criar Conta
             </CardTitle>
             <CardDescription>
-              Junte-se ‡ nossa plataforma de cursos
+              Junte-se √† nossa plataforma de cursos
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -118,7 +119,7 @@ export const RegisterPage = () => {
                         ? Conta criada com sucesso!
                       </div>
                       <div className="text-sm">
-                        Redirecionando para a p·gina de login...
+                        Redirecionando para a p√°gina de login...
                       </div>
                     </div>
                   </AlertDescription>
@@ -131,7 +132,7 @@ export const RegisterPage = () => {
                     {" "}
                     <ul className="space-y-1">
                       {errors.map((error, index) => (
-                        <li key={index}>ï {error}</li>
+                        <li key={index}> {error}</li>
                       ))}
                     </ul>
                   </AlertDescription>
@@ -208,7 +209,7 @@ export const RegisterPage = () => {
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="ïïïïïïïï"
+                    placeholder="********"
                     value={formData.password}
                     onChange={handleChange}
                     className="pr-10 transition-all duration-200 focus:scale-105"
@@ -236,7 +237,7 @@ export const RegisterPage = () => {
                     id="confirmPassword"
                     name="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="ïïïïïïïï"
+                    placeholder="********"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="pr-10 transition-all duration-200 focus:scale-105"
@@ -277,7 +278,7 @@ export const RegisterPage = () => {
               </Button>
 
               <div className="text-center text-sm text-gray-600">
-                J· tem uma conta?{" "}
+                J√° tem uma conta?{" "}
                 <Link
                   to="/login"
                   className="text-primary hover:underline font-medium transition-colors"

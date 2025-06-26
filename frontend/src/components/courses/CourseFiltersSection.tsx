@@ -68,13 +68,13 @@ export const CourseFiltersSection = ({
               value="intermediate"
               onClick={() => onFiltersChange("level", "INTERMEDIATE")}
             >
-              Intermedi·rio
+              Intermedi√°rio
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
               onClick={() => onFiltersChange("level", "ADVANCED")}
             >
-              AvanÁado
+              Avan√ßado
             </TabsTrigger>
           </TabsList>
         </Tabs>

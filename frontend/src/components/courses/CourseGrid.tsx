@@ -42,9 +42,9 @@ export const CourseGrid = ({
       case "BEGINNER":
         return "Iniciante";
       case "INTERMEDIATE":
-        return "Intermediário";
+        return "IntermediÃ¡rio";
       case "ADVANCED":
-        return "Avançado";
+        return "AvanÃ§ado";
       default:
         return level;
     }
@@ -186,7 +186,7 @@ export const CourseGrid = ({
 
             <div className="text-xs text-gray-600 mb-3">
               <span className="font-medium">por</span>{" "}
-              {course.instructor?.name || "Instrutor não informado"}
+              {course.instructor?.name || "Instrutor nï¿½o informado"}
             </div>
 
             {course.averageRating && course.averageRating > 0 && (
@@ -196,7 +196,7 @@ export const CourseGrid = ({
                   {course.averageRating.toFixed(1)}
                 </span>
                 <span className="text-gray-500">
-                  ({course.reviewCount || 0} avaliações)
+                  ({course.reviewCount || 0} avaliaÃ§Ãµes)
                 </span>
               </div>
             )}
@@ -210,7 +210,7 @@ export const CourseGrid = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course.modules?.length || 0} módulos</span>
+                    <span>{course.modules?.length || 0} mÃ³dulos</span>
                   </div>
                 </div>
 
