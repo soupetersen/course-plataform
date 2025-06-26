@@ -27,63 +27,41 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
   console.log("Header rendered with user:", user);
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl px-2 sm:px-4 lg:px-6">
-        <div className="flex justify-between items-center h-16">
-          {" "}
-          <div className="flex items-center space-x-4">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full min-h-[64px]">
+      <div className="max-w-full px-2 sm:px-4 lg:px-6">
+        <div className="flex justify-between items-center h-16 min-h-[64px]">
+          {/* Left side - Logo and Navigation */}
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
             {/* Mobile Menu Button (apenas quando autenticado) */}
             {user && (
               <Button
                 variant="ghost"
                 size="sm"
-                className="lg:hidden"
+                className="lg:hidden flex-shrink-0"
                 onClick={onMobileMenuClick}
               >
                 <Menu className="h-5 w-5" />
               </Button>
             )}
 
-            <Link to="/" className="flex items-center animate-fade-in">
-              <div className="text-xl md:text-2xl font-bold text-quaternary-500">
+            <Link
+              to="/"
+              className="flex items-center animate-fade-in flex-shrink-0"
+            >
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-quaternary-500 truncate">
                 Guitar Academy
               </div>
             </Link>
-
-            {user && (
-              <>
-                {/* Desktop Navigation */}
-                <nav className="hidden lg:flex space-x-6">
-                  <Link
-                    to="/dashboard"
-                    className="text-gray-600 hover:text-quaternary-500 transition-colors"
-                  >
-                    Dashboard
-                  </Link>{" "}
-                  <Link
-                    to="/courses"
-                    className="text-gray-600 hover:text-quaternary-500 transition-colors"
-                  >
-                    Cursos
-                  </Link>
-                  <Link
-                    to="/my-learning"
-                    className="text-gray-600 hover:text-quaternary-500 transition-colors"
-                  >
-                    Meu Aprendizado
-                  </Link>
-                </nav>
-              </>
-            )}
           </div>
-          {/* User Actions */}
-          <div className="flex items-center space-x-2 md:space-x-4">
+
+          {/* Right side - User Actions */}
+          <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-8 w-8 md:h-10 md:w-10 rounded-full"
+                    className="relative h-8 w-8 md:h-10 md:w-10 rounded-full flex-shrink-0"
                   >
                     <Avatar className="h-8 w-8 md:h-10 md:w-10">
                       <AvatarImage
@@ -109,6 +87,13 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
                     Perfil
                   </DropdownMenuItem>
+                  {(user.role === "INSTRUCTOR" || user.role === "ADMIN") && (
+                    <DropdownMenuItem
+                      onClick={() => navigate("/instructor/payout")}
+                    >
+                      Dashboard de Pagamentos
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
                     Configurações
                   </DropdownMenuItem>
@@ -124,14 +109,14 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate("/login")}
-                  className="text-gray-600 hover:text-quaternary-500 text-sm"
+                  className="text-gray-600 hover:text-quaternary-500 text-sm whitespace-nowrap"
                 >
                   Login
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => navigate("/register")}
-                  className="bg-primary-500 hover:bg-primary-600 text-white text-sm"
+                  className="bg-primary-500 hover:bg-primary-600 text-white text-sm whitespace-nowrap"
                 >
                   Sign Up
                 </Button>

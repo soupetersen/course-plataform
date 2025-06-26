@@ -8,16 +8,16 @@ export function LessonPage() {
     lessonId: string;
   }>();
 
-  // Por enquanto, usar localStorage. Em produÁ„o, isso viria do contexto de auth
+  // Por enquanto, usar localStorage. Em produ√ß√£o, isso viria do contexto de auth
   const token = localStorage.getItem("authToken") || "";
 
   if (!lessonId || !courseId) {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Par‚metros inv·lidos
+          Par√¢metros inv√°lidos
         </h2>
-        <p className="text-gray-600">LiÁ„o ou curso n„o encontrado.</p>
+        <p className="text-gray-600">Li√ß√£o ou curso n√£o encontrado.</p>
       </div>
     );
   }
@@ -26,10 +26,10 @@ export function LessonPage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          N„o autenticado
+          N√£o autenticado
         </h2>
         <p className="text-gray-600">
-          VocÍ precisa estar logado para acessar esta liÁ„o.
+          Voc√™ precisa estar logado para acessar esta li√ß√£o.
         </p>
       </div>
     );

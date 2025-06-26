@@ -733,6 +733,152 @@ export function useStudentCouponApi() {
   };
 }
 
+export function useInstructorPayoutApi() {
+  const getBalance = useCallback(
+    async () => {
+      try {
+        const response = await apiRequest<ApiResponse<{
+          availableBalance: number;
+          pendingBalance: number;
+          totalEarnings: number;
+          totalWithdrawn: number;
+          nextPayoutDate?: string;
+        }>>({
+          method: 'GET',
+          url: '/api/instructor/payout/balance',
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Get instructor balance error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const requestPayout = useCallback(
+    async (data: { amount: number; method: 'PIX' | 'BANK_TRANSFER' }) => {
+      try {
+        const response = await apiRequest<ApiResponse<{
+          id: string;
+          amount: number;
+          method: string;
+          status: string;
+          requestedAt: string;
+        }>>({
+          method: 'POST',
+          url: '/api/instructor/payout/request',
+          data,
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Request payout error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const getPayoutHistory = useCallback(
+    async () => {
+      try {
+        const response = await apiRequest<ApiResponse<Array<{
+          id: string;
+          amount: number;
+          method: string;
+          status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'REJECTED';
+          requestedAt: string;
+          processedAt?: string;
+          estimatedProcessingTime?: string;
+        }>>>({
+          method: 'GET',
+          url: '/api/instructor/payout/history',
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Get payout history error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const getTransactionHistory = useCallback(
+    async (params?: { page?: number; limit?: number }) => {
+      try {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.append('page', params.page.toString());
+        if (params?.limit) searchParams.append('limit', params.limit.toString());
+        
+        const response = await apiRequest<ApiResponse<{
+          transactions: Array<{
+            id: string;
+            type: 'CREDIT' | 'DEBIT';
+            amount: number;
+            description: string;
+            createdAt: string;
+            course?: { title: string };
+          }>;
+          pagination?: {
+            page: number;
+            limit: number;
+            total: number;
+          };
+        }>>({
+          method: 'GET',
+          url: `/api/instructor/payout/transactions${searchParams.toString() ? '?' + searchParams.toString() : ''}`,
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Get transaction history error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  const updatePayoutData = useCallback(
+    async (data: {
+      pixKey?: string;
+      bankData?: {
+        bank: string;
+        agency: string;
+        account: string;
+        accountType: 'CORRENTE' | 'POUPANCA';
+        accountHolder: string;
+      };
+      payoutPreference: 'PIX' | 'BANK_TRANSFER';
+      documentType: 'CPF' | 'CNPJ';
+      documentNumber: string;
+      fullName: string;
+    }) => {
+      try {
+        const response = await apiRequest<ApiResponse<{
+          success: boolean;
+          message?: string;
+        }>>({
+          method: 'PUT',
+          url: '/api/instructor/payout/data',
+          data,
+        });
+        return response.data;
+      } catch (error) {
+        console.error('Update payout data error:', error);
+        return null;
+      }
+    },
+    []
+  );
+
+  return {
+    getBalance,
+    requestPayout,
+    getPayoutHistory,
+    getTransactionHistory,
+    updatePayoutData,
+  };
+}
+
 export const paymentUtils = {
   formatCurrency: (amount: number, currency: string = 'BRL'): string => {
     return new Intl.NumberFormat('pt-BR', {

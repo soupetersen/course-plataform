@@ -18,6 +18,18 @@ export interface Payment {
   };
 }
 
+export interface RefundRequestResponse {
+  success: boolean;
+  refundRequest?: RefundRequest;
+  message?: string;
+  error?: string;
+}
+
+export interface FeeCalculationRequest {
+  courseId: string;
+  discountAmount?: number;
+}
+
 export interface Coupon {
   id: string;
   code: string;
@@ -34,6 +46,60 @@ export interface Coupon {
   courseIds?: string[];
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CreateCouponFormData {
+  code: string;
+  description?: string;
+  discountType: 'PERCENTAGE' | 'FLAT_RATE';
+  discountValue: number;
+  maxUses?: number;
+  validUntil?: string;
+  isActive?: boolean;
+  courseId?: string;
+}
+
+export interface CouponValidationRequest {
+  code: string;
+  courseId?: string;
+  amount: number;
+}
+
+export interface CouponValidationResponse {
+  success: boolean;
+  isValid: boolean;
+  coupon?: {
+    id: string;
+    code: string;
+    discountType: 'PERCENTAGE' | 'FLAT_RATE';
+    discountValue: number;
+    minimumAmount?: number;
+  };
+  discountAmount?: number;
+  finalAmount?: number;
+  message?: string;
+}
+
+export interface FeeCalculationRequest {
+  amount: number;
+  paymentMethod: string;
+  couponCode?: string;
+}
+
+export interface FeeCalculationResponse {
+  success: boolean;
+  fees: {
+    platformFee: number;
+    paymentFee: number;
+    totalFees: number;
+  };
+  finalAmount: number;
+  breakdown: {
+    originalAmount: number;
+    discount: number;
+    fees: number;
+    total: number;
+  };
 }
 
 export interface CouponUsage {
@@ -190,19 +256,19 @@ export interface AvailableCoupon {
   id: string;
   code: string;
   description: string;
-  discountType: "PERCENTAGE" | "FLAT_RATE";
+  discountType: 'PERCENTAGE' | 'FLAT_RATE';
   discountValue: number;
   minimumAmount?: number;
   maxUsageCount?: number;
   currentUsageCount: number;
   validUntil: string;
-  isActive: boolean;
-  courseId?: string;
   courseTitle?: string;
-  createdBy?: string;
-  isGlobal?: boolean;
+  courseId?: string;
+  instructorId?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
-
 
 export interface CreateAdminCouponRequest {
   code: string;
@@ -333,4 +399,92 @@ export interface PaymentProcessingData {
   paymentMethodId?: string;
   cardToken?: string;
   saveCard?: boolean;
+}
+
+export interface CreateRefundRequestData {
+  paymentId: string;
+  reason: string;
+  amount?: number;
+}
+
+export interface CreatePaymentRequest {
+  courseId: string;
+  paymentMethod: string;
+  couponCode?: string;
+  savedCardId?: string;
+}
+
+export interface CreatePaymentResponse {
+  success: boolean;
+  payment?: {
+    id: string;
+    status: string;
+    amount: number;
+    paymentUrl?: string;
+    qrCode?: string;
+    pixCode?: string;
+  };
+  message?: string;
+}
+
+export interface UserPaymentHistoryResponse {
+  success: boolean;
+  payments: Payment[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+export interface RefundRequestListResponse {
+  success: boolean;
+  refundRequests: RefundRequest[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+export interface CreateCouponRequest {
+  code: string;
+  description?: string;
+  discountType: 'PERCENTAGE' | 'FLAT_RATE';
+  discountValue: number;
+  maxUses?: number;
+  validUntil?: string;
+  isActive?: boolean;
+  courseId?: string;
+  courseIds?: string[];
+  minimumAmount?: number;
+}
+
+export interface UpdateCouponRequest {
+  code?: string;
+  description?: string;
+  discountType?: 'PERCENTAGE' | 'FLAT_RATE';
+  discountValue?: number;
+  maxUses?: number;
+  validUntil?: string;
+  isActive?: boolean;
+  courseId?: string;
+  courseIds?: string[];
+  minimumAmount?: number;
+}
+
+export interface CouponResponse {
+  success: boolean;
+  coupon?: Coupon;
+  message?: string;
+}
+
+export interface CouponListResponse {
+  success: boolean;
+  coupons: Coupon[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }

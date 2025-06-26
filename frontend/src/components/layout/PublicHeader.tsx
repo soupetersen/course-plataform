@@ -38,6 +38,12 @@ export function PublicHeader() {
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-8">
             <Link
+              to="/dashboard"
+              className="text-gray-600 hover:text-quaternary-500 transition-colors whitespace-nowrap"
+            >
+              Dashboard
+            </Link>
+            <Link
               to="/courses"
               className="text-gray-700 hover:text-[#FF204E] transition-colors"
             >

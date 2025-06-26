@@ -102,7 +102,7 @@ export const CourseTabs = ({
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">
-                    Instrutor: {course.instructor.name}
+                    Instrutor: {course.instructor?.name || "Não informado"}
                   </span>
                 </div>
               </CardContent>

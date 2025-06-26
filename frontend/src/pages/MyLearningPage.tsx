@@ -323,15 +323,16 @@ export function MyLearningPage() {
                   .filter((enrollment: Enrollment) => {
                     const course = enrollment.course;
                     return (
-                      course.title
-                        .toLowerCase()
+                      course &&
+                      (course.title
+                        ?.toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
-                      course.description
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                      course.instructor.name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        course.description
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                        course.instructor?.name
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()))
                     );
                   })
                   .map(renderCourseCard)}
@@ -356,15 +357,16 @@ export function MyLearningPage() {
                   .filter((enrollment: Enrollment) => {
                     const course = enrollment.course;
                     return (
-                      course.title
-                        .toLowerCase()
+                      course &&
+                      (course.title
+                        ?.toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
-                      course.description
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                      course.instructor.name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        course.description
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                        course.instructor?.name
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()))
                     );
                   })
                   .map(renderCourseCard)}
@@ -389,15 +391,16 @@ export function MyLearningPage() {
                   .filter((enrollment: Enrollment) => {
                     const course = enrollment.course;
                     return (
-                      course.title
-                        .toLowerCase()
+                      course &&
+                      (course.title
+                        ?.toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
-                      course.description
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                      course.instructor.name
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase())
+                        course.description
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()) ||
+                        course.instructor?.name
+                          ?.toLowerCase()
+                          .includes(searchTerm.toLowerCase()))
                     );
                   })
                   .map(renderCourseCard)}

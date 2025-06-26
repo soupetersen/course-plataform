@@ -176,7 +176,7 @@ export function LearnPage() {
       if (nextLesson) {
         setSelectedLessonId(nextLesson.id);
         setSelectedModuleId(nextLesson.moduleId);
-        setOpenModules((prev) => ({ ...prev, [nextLesson.moduleId]: true }));
+        setOpenModules((prev) => ({ ...prev, [nextLesson!.moduleId]: true }));
       }
     }
   }, [

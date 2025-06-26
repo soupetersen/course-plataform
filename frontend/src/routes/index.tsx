@@ -148,7 +148,7 @@ export const router = createBrowserRouter([
       {
         path: "instructor/payout",
         element: (
-          <ProtectedRoute requiredRole="INSTRUCTOR">
+          <ProtectedRoute requiredRole={["INSTRUCTOR", "ADMIN"]}>
             <InstructorPayoutDashboard />
           </ProtectedRoute>
         ),

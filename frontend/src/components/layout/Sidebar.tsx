@@ -9,6 +9,8 @@ import {
   GraduationCap,
   Shield,
   X,
+  BookOpen,
+  CreditCard,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
@@ -45,6 +47,20 @@ export const Sidebar = ({
       icon: GraduationCap,
       href: "/courses",
     },
+    {
+      title: "Meu Aprendizado",
+      icon: BookOpen,
+      href: "/my-learning",
+    },
+    ...(user?.role === "INSTRUCTOR" || user?.role === "ADMIN"
+      ? [
+          {
+            title: "Pagamentos",
+            icon: CreditCard,
+            href: "/instructor/payout",
+          },
+        ]
+      : []),
     {
       title: "Perfil",
       icon: User,

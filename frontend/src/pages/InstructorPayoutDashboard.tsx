@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
   Loader,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { api } from "@/lib/api";
+import { useInstructorPayoutApi } from "@/hooks/usePaymentApi";
 
 interface InstructorBalance {
   availableBalance: number;
@@ -52,6 +52,13 @@ interface Transaction {
 }
 
 export default function InstructorPayoutDashboard() {
+  const {
+    getBalance,
+    requestPayout: apiRequestPayout,
+    getPayoutHistory,
+    getTransactionHistory,
+  } = useInstructorPayoutApi();
+
   const [balance, setBalance] = useState<InstructorBalance | null>(null);
   const [payoutHistory, setPayoutHistory] = useState<PayoutRequest[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -64,24 +71,21 @@ export default function InstructorPayoutDashboard() {
   );
   const [isRequestingPayout, setIsRequestingPayout] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
 
-      // Chamadas reais à API
-      const [balanceRes, historyRes, transactionsRes] = await Promise.all([
-        api.get("/instructor/payout/balance"),
-        api.get("/instructor/payout/history"),
-        api.get("/instructor/payout/transactions?limit=10"),
+      // Chamadas reais à API usando os hooks
+      const [balanceData, historyData, transactionsData] = await Promise.all([
+        getBalance(),
+        getPayoutHistory(),
+        getTransactionHistory({ limit: 10 }),
       ]);
 
-      setBalance(balanceRes.data);
-      setPayoutHistory(historyRes.data);
-      setTransactions(transactionsRes.data.transactions);
+      if (balanceData) setBalance(balanceData);
+      if (historyData) setPayoutHistory(historyData);
+      if (transactionsData?.transactions)
+        setTransactions(transactionsData.transactions);
     } catch (error) {
       console.error("Erro ao carregar dados:", error);
       toast({
@@ -92,7 +96,11 @@ export default function InstructorPayoutDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [getBalance, getPayoutHistory, getTransactionHistory]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleRequestPayout = async () => {
     if (!payoutAmount || parseFloat(payoutAmount) < 50) {
@@ -116,19 +124,22 @@ export default function InstructorPayoutDashboard() {
     try {
       setIsRequestingPayout(true);
 
-      // Chamada real à API
-      await api.post("/instructor/payout/request", {
+      // Chamada real à API usando o hook
+      const result = await apiRequestPayout({
         amount: parseFloat(payoutAmount),
         method: payoutMethod,
       });
 
-      toast({
-        variant: "success",
-        title: "Sucesso",
-        description: "Solicitação de saque enviada com sucesso!",
-      });
-      setPayoutAmount("");
-      loadData(); // Recarregar dados
+      if (result) {
+        toast({
+          title: "Sucesso",
+          description: "Solicitação de saque enviada com sucesso!",
+        });
+        setPayoutAmount("");
+        loadData(); // Recarregar dados
+      } else {
+        throw new Error("Falha ao processar solicitação");
+      }
     } catch (error) {
       console.error("Erro ao solicitar saque:", error);
       toast({

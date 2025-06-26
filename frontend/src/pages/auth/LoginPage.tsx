@@ -32,14 +32,14 @@ export function LoginPage() {
 
     if (!formData.email || !formData.password) {
       handleError("Por favor, preencha todos os campos", {
-        title: "Campos obrigatórios",
+        title: "Campos obrigatÃ³rios",
       });
       return;
     }
 
     if (!formData.email.includes("@")) {
-      handleError("Por favor, insira um email válido", {
-        title: "Email inválido",
+      handleError("Por favor, insira um email vÃ¡lido", {
+        title: "Email invÃ¡lido",
       });
       return;
     }
@@ -103,7 +103,7 @@ export function LoginPage() {
                   id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="Digite sua senha"
                   value={formData.password}
                   onChange={handleChange}
                   required
@@ -151,7 +151,7 @@ export function LoginPage() {
           </form>
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Não tem uma conta?{" "}
+              NÃ£o tem uma conta?{" "}
               <Link
                 to="/register"
                 className="text-primary-500 hover:text-primary-600 font-medium"
