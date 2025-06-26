@@ -32,7 +32,6 @@ export class QuestionController {
     try {
       const { lessonId, question, explanation, order, points, options } = request.body;
 
-      // Criar a pergunta
       const newQuestion = await this.questionRepository.create({
         id: crypto.randomUUID(),
         lessonId,
@@ -44,7 +43,6 @@ export class QuestionController {
         updatedAt: new Date(),
       });
 
-      // Criar as opções
       const questionOptions = [];
       for (const optionData of options) {
         const option = await this.questionRepository.createOption({
@@ -84,7 +82,6 @@ export class QuestionController {
       
       const questions = await this.questionRepository.findByLessonId(lessonId);
       
-      // Buscar opções para cada pergunta
       const questionsWithOptions = await Promise.all(
         questions.map(async (question) => {
           const options = await this.questionRepository.findOptionsByQuestionId(question.id);
@@ -139,10 +136,8 @@ export class QuestionController {
     try {
       const { id } = request.params;
 
-      // Primeiro deletar as opções
       await this.questionRepository.deleteOptionsByQuestionId(id);
       
-      // Depois deletar a pergunta
       await this.questionRepository.delete(id);
 
       return reply.status(200).send({

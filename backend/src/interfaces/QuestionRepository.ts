@@ -7,7 +7,6 @@ export interface QuestionRepository {
   update(id: string, data: Partial<Question>): Promise<Question>;
   delete(id: string): Promise<void>;
   
-  // Question Options
   createOption(data: Partial<QuestionOption>): Promise<QuestionOption>;
   findOptionsByQuestionId(questionId: string): Promise<QuestionOption[]>;
   updateOption(id: string, data: Partial<QuestionOption>): Promise<QuestionOption>;

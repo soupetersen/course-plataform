@@ -45,7 +45,6 @@ export class CreateSubscriptionPaymentUseCase {
       throw new Error('Este curso não está disponível para assinatura no momento.');
     }
 
-    // Verificar se já existe uma assinatura ativa para este curso
     const existingPayments = await this.paymentRepository.findByUserAndCourse(
       request.userId,
       request.courseId
@@ -60,7 +59,6 @@ export class CreateSubscriptionPaymentUseCase {
       }
     }
 
-    // Obter o gateway de pagamento
     const gatewayType = request.gatewayType || 'MERCADOPAGO';
     const gateway = this.paymentGatewayFactory.getGateway(gatewayType);
     
@@ -68,7 +66,6 @@ export class CreateSubscriptionPaymentUseCase {
       throw new Error(`Gateway ${gatewayType} não suporta assinaturas recorrentes.`);
     }
 
-    // Criar assinatura no gateway
     const subscriptionResult = await gateway.createSubscription({
       customerEmail: user.email,
       customerName: user.name,
@@ -87,7 +84,7 @@ export class CreateSubscriptionPaymentUseCase {
 
     if (!subscriptionResult.success) {
       throw new Error(subscriptionResult.error || 'Não foi possível criar a assinatura.');
-    }    // Criar pagamento no banco
+    }    
     const payment = Payment.create(
       randomUUID(),
       request.userId,
@@ -105,12 +102,11 @@ export class CreateSubscriptionPaymentUseCase {
 
     const savedPayment = await this.paymentRepository.create(payment);
 
-    // Criar assinatura no banco
     const subscription = Subscription.create(
       randomUUID(),
       savedPayment.id,
       subscriptionResult.subscriptionId,
-      user.id, // Usar o ID do usuário como customerId genérico
+      user.id, 
       SubscriptionStatus.INCOMPLETE,
       new Date(),
       new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 ano por padrão

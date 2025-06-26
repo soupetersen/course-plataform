@@ -1,4 +1,3 @@
-// Interfaces genéricas para gateway de pagamento
 export interface PaymentGateway {
   name: string;
   createPayment(request: CreatePaymentRequest): Promise<CreatePaymentResponse>;
@@ -6,7 +5,6 @@ export interface PaymentGateway {
   createCustomer?(request: CreateCustomerRequest): Promise<CreateCustomerResponse>;
   processWebhook?(payload: any, signature?: string): Promise<WebhookResponse>;
   
-  // Métodos para assinaturas recorrentes
   createSubscription?(request: CreateSubscriptionRequest): Promise<CreateSubscriptionResponse>;
   getSubscriptionStatus?(subscriptionId: string): Promise<SubscriptionStatusResponse>;
   cancelSubscription?(subscriptionId: string): Promise<CancelSubscriptionResponse>;
@@ -33,10 +31,9 @@ export interface CreatePaymentRequest {
     installments?: number;
     identificationType?: string;
     identificationNumber?: string;
-    // Campos para Payment API direta
-    token?: string; // Token gerado pelo MercadoPago.js no frontend
-    paymentMethodId?: string; // visa, mastercard, etc
-    issuerId?: string; // ID do banco emissor
+    token?: string; 
+    paymentMethodId?: string; 
+    issuerId?: string;
   };
 }
 
@@ -68,7 +65,7 @@ export interface PaymentStatusResponse {
 export interface CreateCustomerRequest {
   email: string;
   name: string;
-  document?: string; // CPF/CNPJ
+  document?: string;
   phone?: string;
 }
 
@@ -78,7 +75,6 @@ export interface CreateCustomerResponse {
   error?: string;
 }
 
-// Interfaces para assinaturas recorrentes
 export interface CreateSubscriptionRequest {
   customerId?: string;
   customerEmail: string;
@@ -86,7 +82,7 @@ export interface CreateSubscriptionRequest {
   customerDocument?: string;
   amount: number;
   currency: string;
-  frequency: number; // 1 para mensal, 2 para bimestral, etc.
+  frequency: number;
   frequencyType: 'days' | 'weeks' | 'months' | 'years';
   startDate?: Date;
   endDate?: Date;
@@ -136,11 +132,9 @@ export interface WebhookResponse {
   error?: string;
 }
 
-// Tipos de status padronizados
 export type PaymentGatewayStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED' | 'REFUNDED';
 export type SubscriptionGatewayStatus = 'PENDING' | 'AUTHORIZED' | 'PAUSED' | 'CANCELLED' | 'FINISHED';
 
-// Mapeamento de status específicos do gateway para status padronizado
 export interface StatusMapper {
   mapToStandardStatus(gatewayStatus: string): PaymentGatewayStatus;
   mapFromStandardStatus(standardStatus: PaymentGatewayStatus): string;

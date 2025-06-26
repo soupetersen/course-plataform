@@ -3,7 +3,6 @@ import ffmpegPath from '@ffmpeg-installer/ffmpeg';
 import sharp from 'sharp';
 import { Readable } from 'stream';
 
-// Configurar o caminho do FFmpeg
 ffmpeg.setFfmpegPath(ffmpegPath.path);
 
 export interface CompressionOptions {
@@ -14,10 +13,6 @@ export interface CompressionOptions {
 }
 
 export class CompressionService {
-  
-  /**
-   * Comprime uma imagem usando Sharp
-   */
   async compressImage(
     buffer: Buffer, 
     options: CompressionOptions = {}
@@ -39,7 +34,6 @@ export class CompressionService {
 
       let compressed = await result.toBuffer();
       
-      // Se ainda estiver muito grande, reduzir qualidade gradualmente
       let currentQuality = quality;
       while (compressed.length > maxSizeMB * 1024 * 1024 && currentQuality > 20) {
         currentQuality -= 10;
@@ -69,8 +63,8 @@ export class CompressionService {
   ): Promise<Buffer> {
     const {
       maxSizeMB = 50,
-      maxWidth = 1920,  // 1080p width
-      maxHeight = 1080  // 1080p height
+      maxWidth = 1920, 
+      maxHeight = 1080  
     } = options;
 
     return new Promise((resolve, reject) => {
@@ -79,22 +73,21 @@ export class CompressionService {
       inputStream.push(buffer);
       inputStream.push(null);
 
-      // Configurações para manter qualidade 1080p
       const outputStream = ffmpeg(inputStream)
         .inputFormat('mp4')
         .videoCodec('libx264')
         .audioCodec('aac')
-        .videoBitrate('2500k') // Bitrate mais alto para 1080p
+        .videoBitrate('2500k')
         .audioBitrate('128k')  
         .size(`${maxWidth}x${maxHeight}`)
-        .fps(30) // 30 FPS para melhor qualidade
+        .fps(30) 
         .outputOptions([
-          '-preset medium', // Melhor qualidade vs velocidade
-          '-crf 23', // Melhor qualidade (lower CRF = higher quality)
-          '-profile:v high', // Perfil H.264 para melhor qualidade
-          '-level 4.0', // Level para suportar 1080p
-          '-movflags +faststart', // Otimizar para streaming
-          '-pix_fmt yuv420p' // Compatibilidade com players
+          '-preset medium',
+          '-crf 23', 
+          '-profile:v high',
+          '-level 4.0', 
+          '-movflags +faststart',
+          '-pix_fmt yuv420p' 
         ])
         .format('mp4')
         .on('error', (err) => {
@@ -106,7 +99,6 @@ export class CompressionService {
           
           console.log(`Video compression completed: ${(buffer.length / (1024 * 1024)).toFixed(2)}MB -> ${(result.length / (1024 * 1024)).toFixed(2)}MB`);
           
-          // Verificar se o tamanho está dentro do limite
           if (result.length > maxSizeMB * 1024 * 1024) {
             console.warn(`Compressed video is still large: ${(result.length / (1024 * 1024)).toFixed(2)}MB`);
           }
@@ -139,7 +131,6 @@ export class CompressionService {
     size: number;
   }> {
     return new Promise((resolve, reject) => {
-      // Criar um arquivo temporário para o ffprobe
       const fs = require('fs');
       const path = require('path');
       const os = require('os');
@@ -149,7 +140,6 @@ export class CompressionService {
       fs.writeFileSync(tempFile, buffer);
 
       ffmpeg.ffprobe(tempFile, (err, metadata) => {
-        // Limpar arquivo temporário
         fs.unlinkSync(tempFile);
         
         if (err) {

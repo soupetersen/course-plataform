@@ -4,7 +4,6 @@ import { LessonProgressController } from '@/controllers/LessonProgressController
 export const lessonProgressRoutes = async (fastify: FastifyInstance) => {
   const progressController = new LessonProgressController();
 
-  // Rotas para progresso de lições
   fastify.post('/lessons/progress/video', {
     handler: progressController.updateVideoProgress.bind(progressController),
   });
@@ -17,7 +16,6 @@ export const lessonProgressRoutes = async (fastify: FastifyInstance) => {
     handler: progressController.getProgressByUserAndCourse.bind(progressController),
   });
 
-  // Rotas para quiz
   fastify.post('/lessons/quiz/submit', {
     handler: progressController.submitQuiz.bind(progressController),
   });

@@ -335,7 +335,6 @@ describe('Lesson', () => {
 
       const originalUpdatedAt = lesson.updatedAt;
 
-      // Wait a small amount to ensure different timestamps
       await new Promise(resolve => setTimeout(resolve, 10));
       
       lesson.markAsCompleted();

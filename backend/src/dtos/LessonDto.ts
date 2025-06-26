@@ -14,7 +14,6 @@ export interface CreateLessonDto {
   type: LessonType;
   isPreview?: boolean;
   isLocked?: boolean;
-  // Campos específicos para quiz
   quizPassingScore?: number;
   quizAttempts?: number;
   allowReview?: boolean;
@@ -31,7 +30,6 @@ export interface UpdateLessonDto {
   type?: LessonType;
   isPreview?: boolean;
   isLocked?: boolean;
-  // Campos específicos para quiz
   quizPassingScore?: number;
   quizAttempts?: number;
   allowReview?: boolean;
@@ -52,12 +50,10 @@ export interface LessonResponseDto {
   isPreview: boolean;
   isLocked: boolean;
   isCompleted?: boolean;
-  // Campos específicos para quiz
   quizPassingScore?: number;
   quizAttempts?: number;
   allowReview?: boolean;
   questions?: QuestionResponseDto[];
-  // Dados de progresso
   progress?: any;
   createdAt?: Date;
   updatedAt?: Date;

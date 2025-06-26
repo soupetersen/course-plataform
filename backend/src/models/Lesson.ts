@@ -17,7 +17,6 @@ export class Lesson {
   isPreview: boolean;
   isLocked: boolean;
   isCompleted?: boolean;
-  // Campos específicos para quiz
   quizPassingScore?: number;
   quizAttempts?: number;
   allowReview?: boolean;

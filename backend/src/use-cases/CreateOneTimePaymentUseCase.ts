@@ -4,6 +4,7 @@ import { PaymentRepository } from '@/interfaces/PaymentRepository';
 import { CourseRepository } from '@/interfaces/CourseRepository';
 import { UserRepository } from '@/interfaces/UserRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
+import { PlatformSettingRepository } from '@/interfaces/PlatformSettingRepository';
 import { PaymentGatewayFactory } from '@/services/PaymentGatewayFactory';
 
 export interface CreateOneTimePaymentRequest {
@@ -23,7 +24,7 @@ export interface CreateOneTimePaymentRequest {
     identificationType?: string;
     identificationNumber?: string;
     saveCard?: boolean;
-    savedCardId?: string; // ID do cartão salvo
+    savedCardId?: string; 
   };
 }
 
@@ -44,19 +45,18 @@ export class CreateOneTimePaymentUseCase {
     private courseRepository: CourseRepository,
     private userRepository: UserRepository,
     private savedCardRepository: SavedCardRepository,
+    private platformSettingRepository: PlatformSettingRepository,
     private paymentGatewayFactory: PaymentGatewayFactory
   ) {}
 
   async execute(request: CreateOneTimePaymentRequest): Promise<CreateOneTimePaymentResponse> {
     const { userId, courseId, currency, couponCode, paymentMethod = 'PIX', gatewayType, cardData } = request;
 
-    // Validar usuário
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error('Usuário não encontrado. Verifique se você está logado corretamente.');
     }
 
-    // Validar curso
     const course = await this.courseRepository.findById(courseId);
     if (!course) {
       throw new Error('Curso não encontrado. O curso pode ter sido removido.');
@@ -66,7 +66,6 @@ export class CreateOneTimePaymentUseCase {
       throw new Error('Este curso não está disponível para compra no momento.');
     }
 
-    // Verificar se já tem pagamento bem-sucedido para este curso
     const existingPayments = await this.paymentRepository.findByUserAndCourse(userId, courseId);
     const hasCompletedPayment = existingPayments.some(payment => 
       payment.status === PaymentStatus.COMPLETED && payment.paymentType === PaymentType.ONE_TIME
@@ -76,15 +75,15 @@ export class CreateOneTimePaymentUseCase {
       throw new Error('Você já possui este curso.');
     }
 
-    // Buscar instrutor do curso
     const instructor = await this.userRepository.findById(course.instructorId);
     if (!instructor) {
       throw new Error('Instrutor do curso não encontrado.');
     }
 
-    // Obter gateway de pagamento - forçar MERCADOPAGO se não especificado
+    const platformFeeSetting = await this.platformSettingRepository.findByKey('PLATFORM_FEE_PERCENTAGE');
+    const platformFeePercentage = platformFeeSetting ? platformFeeSetting.getValueAsNumber() : 10;
+
     const finalGatewayType = gatewayType || 'MERCADOPAGO';
-    // Forçar currency para BRL
     const finalCurrency = 'BRL';
     console.log('Using gateway type:', finalGatewayType);
     console.log('Using currency:', finalCurrency);
@@ -92,22 +91,17 @@ export class CreateOneTimePaymentUseCase {
     
     const amount = course.price;
     
-    // Calcular taxas
-    const platformFeePercentage = 10; // 10% para a plataforma
     const platformFeeAmount = (amount * platformFeePercentage) / 100;
     const instructorAmount = amount - platformFeeAmount;
 
-    // Determinar URLs
     const returnUrl = `${process.env.FRONTEND_URL}/courses/${courseId}?payment=success`;
 
     console.log('Return URL para MercadoPago:', returnUrl);
 
-    // Processar dados do cartão (novo ou salvo)
     let finalCardData: any = undefined;
     
     if (cardData && paymentMethod === 'CREDIT_CARD') {
       if (cardData.savedCardId) {
-        // Usar cartão salvo
         const savedCard = await this.savedCardRepository.findById(cardData.savedCardId);
         if (!savedCard) {
           throw new Error('Cartão salvo não encontrado.');
@@ -118,7 +112,7 @@ export class CreateOneTimePaymentUseCase {
         }
         
         finalCardData = {
-          cardNumber: `****${savedCard.cardNumberLast4}`, // Placeholder para cartão salvo
+          cardNumber: `****${savedCard.cardNumberLast4}`, 
           cardHolderName: savedCard.cardHolderName,
           expirationMonth: savedCard.expirationMonth,
           expirationYear: savedCard.expirationYear,
@@ -128,7 +122,6 @@ export class CreateOneTimePaymentUseCase {
           identificationNumber: savedCard.identificationNumber,
         };
       } else if (cardData.cardNumber) {
-        // Usar novo cartão
         finalCardData = {
           cardNumber: cardData.cardNumber,
           cardHolderName: cardData.cardHolderName!,
@@ -144,7 +137,6 @@ export class CreateOneTimePaymentUseCase {
       }
     }
 
-    // Criar pagamento no gateway
     const gatewayRequest = {
       amount: amount,
       currency: finalCurrency,
@@ -176,7 +168,6 @@ export class CreateOneTimePaymentUseCase {
       orderId: gatewayResponse.orderId 
     });
 
-    // Verificar se já existe um pagamento com este externalPaymentId
     const existingPayment = await this.paymentRepository.findByExternalPaymentId(gatewayResponse.paymentId);
     if (existingPayment) {
       console.log('Payment already exists, returning existing payment:', existingPayment.id);
@@ -186,7 +177,6 @@ export class CreateOneTimePaymentUseCase {
       };
     }
 
-    // Criar pagamento no banco de dados
     const payment = Payment.create(
       randomUUID(),
       userId,
@@ -209,7 +199,6 @@ export class CreateOneTimePaymentUseCase {
     console.log('Creating new payment:', payment.id);
     const savedPayment = await this.paymentRepository.create(payment);
 
-    // Salvar cartão se solicitado (apenas para novos cartões)
     if (cardData && cardData.saveCard && cardData.cardNumber && !cardData.savedCardId) {
       try {
         await this.savedCardRepository.create(userId, {
@@ -225,7 +214,6 @@ export class CreateOneTimePaymentUseCase {
         console.log('Card saved successfully for user:', userId);
       } catch (error) {
         console.error('Error saving card:', error);
-        // Não falhar o pagamento se não conseguir salvar o cartão
       }
     }
 

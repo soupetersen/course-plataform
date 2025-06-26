@@ -33,7 +33,6 @@ async function buildApp() {
       level: process.env.LOG_LEVEL || 'info'
     }  });
 
-  // Registrar WebSocket plugin
   await fastify.register(websocket);
 
   await fastify.addHook('onSend', async (request, reply) => {
@@ -89,7 +88,6 @@ async function buildApp() {
   await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });  await fastify.register(questionRoutes, { prefix: '/api' });
   await fastify.register(lessonProgressRoutes, { prefix: '/api' });
   
-  // Register WebSocket routes
   await fastify.register(lessonWebSocketRoutes);
   
     const s3Service = container.resolve<S3Service>('S3Service');
@@ -145,7 +143,6 @@ async function start() {
     const port = parseInt(process.env.PORT || '3000');
     const host = process.env.HOST || '0.0.0.0';    await app.listen({ port, host });
     
-    // Aguardar o servidor estar pronto
     await app.ready();
     
     app.log.info(`🚀 Server listening on http://${host}:${port}`);

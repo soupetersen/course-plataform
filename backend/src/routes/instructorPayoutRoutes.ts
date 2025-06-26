@@ -3,6 +3,7 @@ import { InstructorPayoutController } from '@/controllers/InstructorPayoutContro
 import { AuthMiddleware } from '@/middlewares/AuthMiddleware';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { InstructorPayoutService } from '@/services/InstructorPayoutService';
+import { CalculateFeesUseCase } from '@/use-cases/CalculateFeesUseCase';
 
 export async function instructorPayoutRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;
@@ -10,7 +11,6 @@ export async function instructorPayoutRoutes(fastify: FastifyInstance) {
   const instructorPayoutController = new InstructorPayoutController(instructorPayoutService);
   const authMiddleware = new AuthMiddleware();
 
-  // Registrar rotas com autenticação
   fastify.register(async function(fastify) {
     fastify.addHook('preHandler', authMiddleware.authenticate.bind(authMiddleware));
     fastify.addHook('preHandler', authMiddleware.requireInstructor());
@@ -187,7 +187,6 @@ export async function instructorPayoutRoutes(fastify: FastifyInstance) {
     fastify.get('/instructor/payout/transactions', instructorPayoutController.getTransactionHistory.bind(instructorPayoutController));
   });
 
-  // Rotas de cálculo de taxas (sem autenticação)
   /**
    * @swagger
    * /payment/fees/calculate:
@@ -237,14 +236,18 @@ export async function instructorPayoutRoutes(fastify: FastifyInstance) {
     const { amount, paymentMethod = 'PIX', discountAmount = 0 } = request.body as any;
     
     try {
-      // Simular chamada ao CalculateFeesUseCase
-      const finalAmount = Math.max(0, amount - discountAmount);
+      const container = (fastify as any).diContainer as DIContainer;
+      const calculateFeesUseCase = container.resolve<CalculateFeesUseCase>('CalculateFeesUseCase');
       
-      // Importar o PaymentFeeService
+      const feesResult = await calculateFeesUseCase.execute({
+        coursePrice: amount,
+        discountAmount,
+        paymentMethod
+      });
+      
       const { PaymentFeeService } = await import('@/services/PaymentFeeService');
-      
-      const breakdown = PaymentFeeService.calculateFullBreakdown(finalAmount, paymentMethod);
-      const allOptions = PaymentFeeService.getPaymentOptionsWithFees(finalAmount);
+      const allOptions = PaymentFeeService.getPaymentOptionsWithFees(feesResult.finalAmount);
+      const breakdown = PaymentFeeService.calculateFullBreakdown(feesResult.finalAmount, paymentMethod);
       
       reply.send({
         success: true,
@@ -255,7 +258,7 @@ export async function instructorPayoutRoutes(fastify: FastifyInstance) {
           },
           allOptions,
           recommendation: {
-            cheapest: PaymentFeeService.getCheapestPaymentOption(finalAmount),
+            cheapest: PaymentFeeService.getCheapestPaymentOption(feesResult.finalAmount),
             savings: (() => {
               const selectedOption = allOptions.find(opt => opt.method === paymentMethod);
               const pixOption = allOptions.find(opt => opt.method === 'PIX');

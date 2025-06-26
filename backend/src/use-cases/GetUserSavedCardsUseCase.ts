@@ -9,7 +9,6 @@ export class GetUserSavedCardsUseCase {
   ) {}
 
   async execute(userId: string): Promise<SavedCard[]> {
-    // Verificar se o usuário existe
     const user = await this.userRepository.findById(userId);
     if (!user) {
       throw new Error('Usuário não encontrado');

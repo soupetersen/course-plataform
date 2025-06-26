@@ -82,11 +82,9 @@ export class PaymentController {
         cardData,
       });
 
-      // Buscar dados do usuário e curso para envio de email
       const user = await this.userRepository.findById(userInfo.userId);
       const course = await this.courseRepository.findById(courseId);
 
-      // Se o pagamento for PIX, enviar email com instruções
       if (paymentMethod === 'PIX' && result.paymentData && user && course) {
         try {
           await this.emailService.sendPixPaymentInstructionsEmail(user.email, {
@@ -96,12 +94,11 @@ export class PaymentController {
             currency: result.payment.currency,
             pixCode: result.paymentData.pixCode || result.paymentData.qr_code || '',
             qrCode: result.paymentData.qr_code_base64,
-            expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 horas
+            expirationDate: new Date(Date.now() + 24 * 60 * 60 * 1000),
           });
           console.log(`✅ Email PIX enviado para ${user.email}`);
         } catch (emailError) {
           console.error('❌ Erro ao enviar email PIX:', emailError);
-          // Não falha o pagamento por causa do email
         }
       }
 
@@ -167,7 +164,6 @@ export class PaymentController {
     try {
       console.log('🔔 Webhook recebido via PaymentController, delegando para WebhookController');
       
-      // Detectar o tipo de gateway baseado no cabeçalho ou corpo da requisição
       const userAgent = req.headers['user-agent'] || '';
       const body = req.body as any;
       
@@ -197,7 +193,6 @@ export class PaymentController {
       const userId = userInfo.userId; 
       const payments = await this.paymentRepository.findByUserId(userId);
       
-      // Buscar os dados dos cursos para cada pagamento
       const paymentsWithCourseInfo = await Promise.all(
         payments.map(async (payment) => {
           const course = await this.courseRepository.findById(payment.courseId);
@@ -241,7 +236,6 @@ export class PaymentController {
         return;
       }
 
-      // Buscar pagamento no banco
       const payment = await this.paymentRepository.findById(paymentId);
       if (!payment) {
         reply.status(404).send({
@@ -251,7 +245,6 @@ export class PaymentController {
         return;
       }
 
-      // Verificar se o pagamento pertence ao usuário
       if (payment.userId !== userInfo.userId) {
         reply.status(403).send({
           success: false,
@@ -262,7 +255,6 @@ export class PaymentController {
 
       console.log(`📋 Consultando status do pagamento ${paymentId} (provider: ${payment.gatewayProvider})`);
 
-      // Se o pagamento já está finalizado (approved/rejected/cancelled), retorna do banco
       if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(payment.status)) {
         console.log(`✅ Pagamento ${paymentId} já finalizado com status: ${payment.status}`);
         reply.status(200).send({
@@ -280,7 +272,6 @@ export class PaymentController {
         return;
       }
 
-      // Para pagamentos pendentes, buscar status atualizado na API do gateway
       try {
         if (payment.gatewayProvider === 'MERCADOPAGO' && payment.externalPaymentId) {
           const gateway = this.paymentGatewayFactory.getGateway('MERCADOPAGO');
@@ -288,12 +279,10 @@ export class PaymentController {
           
           if (statusResponse.success) {
             console.log(`🔄 Status do Mercado Pago: ${statusResponse.status} para pagamento ${paymentId}`);
-              // Se o status mudou, atualizar no banco
             const domainStatus = this.mapGatewayStatusToDomain(statusResponse.status);
             if (domainStatus !== payment.status) {
               console.log(`🔄 Atualizando status do pagamento ${paymentId}: ${payment.status} -> ${domainStatus}`);
               
-              // Criar um novo objeto Payment com o status atualizado
               const updatedPayment = new Payment(
                 payment.id,
                 payment.userId,
@@ -304,7 +293,7 @@ export class PaymentController {
                 domainStatus,
                 payment.paymentType,
                 payment.createdAt,
-                new Date(), // updatedAt
+                new Date(), 
                 payment.externalOrderId,
                 payment.paymentData,
                 payment.paymentMethod,
@@ -317,7 +306,6 @@ export class PaymentController {
               
               console.log(`✅ Status do pagamento ${paymentId} atualizado no banco para: ${domainStatus}`);
               
-              // Retornar o status atualizado
               reply.status(200).send({
                 success: true,
                 data: {
@@ -338,10 +326,8 @@ export class PaymentController {
         }
       } catch (gatewayError) {
         console.error(`❌ Erro ao consultar gateway para pagamento ${paymentId}:`, gatewayError);
-        // Continua e retorna o status do banco mesmo se houver erro no gateway
       }
 
-      // Retornar status atual do banco (não houve mudança ou erro no gateway)
       reply.status(200).send({
         success: true,
         data: {
@@ -374,7 +360,6 @@ export class PaymentController {
         return;
       }
 
-      // Buscar pagamento pendente para este curso e usuário
       const pendingPayment = await this.paymentRepository.findPendingByCourseAndUser(courseId, userInfo.userId);
       
       if (pendingPayment) {
@@ -462,7 +447,6 @@ export class PaymentController {
         discountAmount?: number 
       };
 
-      // Buscar o curso para obter o preço
       const course = await this.courseRepository.findById(courseId);
       if (!course) {
         reply.status(404).send({
@@ -583,7 +567,7 @@ export class PaymentController {
         reply.status(401).send({ success: false, error: 'Você precisa estar logado para calcular o pedido.' });
         return;
       }
-      const userId = userInfo.userId;      // Buscar o curso para obter o preço original SEGURO
+      const userId = userInfo.userId;     
       const course = await this.courseRepository.findById(courseId);
       if (!course) {
         reply.status(404).send({ success: false, error: 'Curso não encontrado.' });
@@ -595,7 +579,6 @@ export class PaymentController {
       let discountAmount = 0;
       let couponData = null;
       
-      // Validar cupom se fornecido
       if (couponCode) {
         const couponResult = await this.validateCouponUseCase.execute({
           code: couponCode,
@@ -620,7 +603,8 @@ export class PaymentController {
         finalPrice,
         platformFee: feesResult.platformFee,
         instructorAmount: feesResult.instructorAmount,
-        stripeFeeEstimate: feesResult.stripeFee, // Apenas para transparência        totalWithFees: finalPrice, // Usuário paga APENAS o valor do curso
+        stripeFeeEstimate: feesResult.stripeFee,        
+        totalWithFees: finalPrice, 
         coupon: couponData ? {
           code: couponCode,
           discountType: couponData.discountType,
@@ -641,7 +625,7 @@ export class PaymentController {
       });
     }
   }
-  // Método para obter ganhos do instrutor (simplificado - dados mock por enquanto)
+
   async getInstructorEarnings(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const userInfo = (req as any).userInfo;
@@ -664,40 +648,52 @@ export class PaymentController {
         return;
       }
 
-      // TODO: Implementar busca real quando os métodos estiverem disponíveis
-      // Por enquanto, retornar dados de exemplo
-      const totalEarnings = 2450.00;
-      const totalSales = 27;
-      
-      const recentTransactions = [
-        {
-          id: '1',
-          amount: 90.00,
-          courseTitle: 'React Avançado',
-          date: new Date().toISOString().split('T')[0],
-          status: 'completed' as const,
-        },
-        {
-          id: '2',
-          amount: 135.00,
-          courseTitle: 'Node.js do Zero',
-          date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-          status: 'completed' as const,
+      try {
+        const instructorBalance = await this.instructorPayoutService.getInstructorBalance(userId);
+        
+        const totalEarnings = instructorBalance.totalEarnings;
+        const totalSales = 0; 
+        
+        const allPayments = await this.paymentRepository.findByUserId(userId);
+        const completedPayments = allPayments.filter(payment => payment.status === 'COMPLETED');
+        
+        let recentTransactions: any[] = [];
+        
+        if (completedPayments.length > 0) {
+          recentTransactions = await Promise.all(
+            completedPayments.slice(0, 10).map(async (payment) => {
+              const course = await this.courseRepository.findById(payment.courseId);
+              return {
+                id: payment.id,
+                amount: payment.instructorAmount || (payment.amount * 0.9),
+                courseTitle: course?.title || 'Curso não encontrado',
+                date: payment.createdAt.toISOString().split('T')[0],
+                status: 'completed' as const,
+              };
+            })
+          );
         }
-      ];
 
       reply.status(200).send({
         success: true,
         data: {
           totalEarnings,
           totalSales,
-          currentBalance: totalEarnings, // Simplificado - todos os ganhos estão disponíveis
+          currentBalance: totalEarnings,
           pendingBalance: 0,
           recentTransactions,
         },
       });
+      } catch (error) {
+        req.log.error('Error fetching instructor earnings:', error);
+        reply.status(500).send({
+          success: false,
+          error: 'Erro ao buscar ganhos do instrutor.',
+        });
+      }
     } catch (error) {
-      req.log.error('Error fetching instructor earnings:', error);      reply.status(500).send({
+      req.log.error('Error fetching instructor earnings:', error);
+      reply.status(500).send({
         success: false,
         error: 'Erro ao buscar ganhos do instrutor.',
       });
@@ -719,11 +715,13 @@ export class PaymentController {
           isUsingNgrok: !!process.env.NGROK_URL,
           environment: process.env.NODE_ENV || 'development',
         },
-      });    } catch (error) {
+      });
+    } catch (error) {
       req.log.error('Error fetching webhook config:', error);
       reply.status(500).send({
         success: false,
-        error: 'Erro ao buscar configuração de webhook.',      });
+        error: 'Erro ao buscar configuração de webhook.',
+      });
     }
   }
 
@@ -735,7 +733,6 @@ export class PaymentController {
 
       console.log(`🎭 [DEV] Simulando ${status} para PIX ${paymentId}`);
 
-      // Buscar pagamento no banco
       const payment = await this.paymentRepository.findById(paymentId);
       if (!payment) {
         reply.status(404).send({
@@ -761,7 +758,6 @@ export class PaymentController {
         return;
       }
 
-      // Simular mudança de status
       const newStatus = status === 'approved' ? PaymentStatus.COMPLETED : PaymentStatus.FAILED;
       
       const updatedPayment = new Payment(
@@ -774,7 +770,7 @@ export class PaymentController {
         newStatus,
         payment.paymentType,
         payment.createdAt,
-        new Date(), // updatedAt
+        new Date(),
         payment.externalOrderId,
         payment.paymentData,
         payment.paymentMethod,
@@ -804,7 +800,8 @@ export class PaymentController {
       req.log.error('Error simulating PIX:', error);
       reply.status(500).send({
         success: false,
-        error: 'Não foi possível simular o PIX. Tente novamente.',      });
+        error: 'Não foi possível simular o PIX. Tente novamente.',
+      });
     }
   }
 
@@ -888,7 +885,6 @@ export class PaymentController {
 
       console.log(`🎭 Admin aprovando pagamento ${paymentId} por ${userInfo.email}`);
 
-      // Buscar pagamento no banco
       const payment = await this.paymentRepository.findById(paymentId);
       if (!payment) {
         reply.status(404).send({
@@ -898,7 +894,6 @@ export class PaymentController {
         return;
       }
 
-      // Verificar se o pagamento pode ser alterado
       if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(payment.status)) {
         reply.status(400).send({
           success: false,
@@ -907,7 +902,6 @@ export class PaymentController {
         return;
       }
 
-      // Atualizar status do pagamento para COMPLETED
       const updatedPayment = new Payment(
         payment.id,
         payment.userId,
@@ -918,7 +912,7 @@ export class PaymentController {
         PaymentStatus.COMPLETED,
         payment.paymentType,
         payment.createdAt,
-        new Date(), // updatedAt
+        new Date(), 
         payment.externalOrderId,
         payment.paymentData,
         payment.paymentMethod,
@@ -927,7 +921,6 @@ export class PaymentController {
         payment.gatewayProvider
       );      await this.paymentRepository.update(updatedPayment);
 
-      // Gerenciar status da matrícula quando pagamento é aprovado pelo admin
       const enrollmentResult = await this.manageEnrollmentStatusUseCase.execute({
         paymentId: updatedPayment.id,
         newStatus: PaymentStatus.COMPLETED

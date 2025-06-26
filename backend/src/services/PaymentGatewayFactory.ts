@@ -19,7 +19,6 @@ export class PaymentGatewayFactory {
   }
 
   private initializeGateways(): void {
-    // Inicializar apenas o Mercado Pago
     try {
       if (process.env.MERCADOPAGO_ACCESS_TOKEN) {
         this.gateways.set('MERCADOPAGO', new MercadoPagoService());
@@ -33,7 +32,6 @@ export class PaymentGatewayFactory {
   }
 
   getGateway(type?: PaymentGatewayType): PaymentGateway {
-    // Se tipo não especificado, usar o padrão das variáveis de ambiente
     if (!type) {
       type = this.getDefaultGateway();
     }
@@ -47,7 +45,6 @@ export class PaymentGatewayFactory {
   }
 
   private getDefaultGateway(): PaymentGatewayType {
-    // Prioridade baseada nas variáveis de ambiente configuradas
     if (process.env.MERCADOPAGO_ACCESS_TOKEN) {
       return 'MERCADOPAGO';
     }

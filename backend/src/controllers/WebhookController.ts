@@ -71,7 +71,6 @@ export class WebhookController {
 
   private async updatePaymentStatus(externalPaymentId: string, status: string): Promise<void> {
     try {
-      // Buscar pagamento pelo ID externo
       const payment = await this.paymentRepository.findByExternalPaymentId(externalPaymentId);
       
       if (!payment) {
@@ -79,7 +78,6 @@ export class WebhookController {
         return;
       }
 
-      // Mapear status
       let newStatus: PaymentStatus;
       switch (status) {
         case 'APPROVED':
@@ -96,12 +94,10 @@ export class WebhookController {
           newStatus = PaymentStatus.PENDING;
       }
 
-      // Atualizar status se mudou
       if (payment.status !== newStatus) {
         const updatedPayment = payment.updateStatus(newStatus);
         await this.paymentRepository.update(updatedPayment);
 
-        // Gerenciar status da matrícula baseado no status do pagamento
         const enrollmentResult = await this.manageEnrollmentStatusUseCase.execute({
           paymentId: payment.id,
           newStatus: newStatus
@@ -120,7 +116,6 @@ export class WebhookController {
           console.error(`❌ Erro ao gerenciar matrícula: ${enrollmentResult.error}`);
         }
 
-        // Creditar saldo do instrutor se pagamento foi aprovado
         if (newStatus === PaymentStatus.COMPLETED && payment.instructorAmount) {
           await this.creditInstructorBalance(payment.courseId, payment.instructorAmount, payment.id);
         }
@@ -133,7 +128,6 @@ export class WebhookController {
 
   private async creditInstructorBalance(courseId: string, amount: number, paymentId: string): Promise<void> {
     try {
-      // Buscar curso para pegar o instructorId
       const course = await this.courseRepository.findById(courseId);
       
       if (!course) {
@@ -146,7 +140,6 @@ export class WebhookController {
         return;
       }
 
-      // Creditar saldo do instrutor usando o service
       await this.instructorPayoutService.creditInstructorBalance(
         course.instructorId,
         amount,
@@ -157,7 +150,6 @@ export class WebhookController {
       
     } catch (error) {
       console.error('Erro ao creditar saldo do instrutor:', error);
-      // Não relançar o erro para não quebrar o webhook
     }
   }
 }

@@ -151,7 +151,6 @@ describe('Course Entity', () => {
       const newTitle = 'Updated Title';
       const originalUpdatedAt = course.updatedAt;
 
-      // Small delay to ensure time difference
       await new Promise(resolve => setTimeout(resolve, 1));
       
       course.update({ title: newTitle });
@@ -216,7 +215,6 @@ describe('Course Entity', () => {
 
       const originalUpdatedAt = course.updatedAt;
       
-      // Small delay to ensure time difference
       await new Promise(resolve => setTimeout(resolve, 1));
       
       course.publish();
@@ -240,7 +238,6 @@ describe('Course Entity', () => {
 
       const originalUpdatedAt = course.updatedAt;
       
-      // Small delay to ensure time difference
       await new Promise(resolve => setTimeout(resolve, 1));
       
       course.archive();

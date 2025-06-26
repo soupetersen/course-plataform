@@ -244,7 +244,6 @@ export class PrismaLessonRepository implements LessonRepository {
     currentTime: number,
     isCompleted: boolean
   ): Promise<void> {
-    // Buscar o courseId da lição
     const lesson = await this.prisma.lesson.findUnique({
       where: { id: lessonId },
       select: { courseId: true }

@@ -236,8 +236,6 @@ export class LessonController {
       return reply.status(500).send({ success: false, error: error.message || 'Failed to delete lesson' });
     }
   }
-  // Progress methods moved to LessonProgressController
-  // updateProgress method removed - use LessonProgressController.updateVideoProgress instead
 
   async addComment(request: FastifyRequest, reply: FastifyReply) {
     try {

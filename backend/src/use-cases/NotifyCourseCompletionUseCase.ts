@@ -23,7 +23,6 @@ export class NotifyCourseCompletionUseCase {
     try {
       const { enrollment } = request;
 
-      // Verificar se o curso foi realmente concluído
       if (!enrollment.isCompleted()) {
         return {
           success: false,
@@ -31,7 +30,6 @@ export class NotifyCourseCompletionUseCase {
         };
       }
 
-      // Buscar dados do usuário e curso
       const user = await this.userRepository.findById(enrollment.userId);
       const course = await this.courseRepository.findById(enrollment.courseId);
 
@@ -42,7 +40,6 @@ export class NotifyCourseCompletionUseCase {
         };
       }
 
-      // Enviar email de conclusão
       await this.emailService.sendCourseCompletionEmail(user.email, {
         userName: user.name,
         courseName: course.title,

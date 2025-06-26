@@ -28,24 +28,19 @@ interface LessonRoom {
   lastActivity: Date;
 }
 
-// Map para armazenar conexões ativas por usuário
 const activeConnections = new Map<string, UserConnection>();
 
-// Map para armazenar salas de aulas (rooms por lição)
 const lessonRooms = new Map<string, LessonRoom>();
 
 export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
   const prisma = new PrismaClient();
   const jwtService = new JwtService();
 
-  // Cleanup de conexões inativas a cada 5 minutos
   setInterval(() => {
     cleanupInactiveConnections();
   }, 5 * 60 * 1000);
 
-  // WebSocket para aulas em tempo real
   fastify.get('/ws/lessons', { websocket: true }, async (socket, request) => {
-    // Autenticação via query string (token)
     const query = request.query as { token?: string };
     const token = query.token;
     
@@ -61,7 +56,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       const decoded = jwtService.verifyToken(token);
       userId = decoded.userId;
       
-      // Buscar informações completas do usuário
       userInfo = await prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -83,7 +77,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    // Registrar conexão
     const connectionId = `${userId}-${Date.now()}`;
     const connection: UserConnection = {
       userId,
@@ -98,7 +91,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
 
     fastify.log.info(`🔌 User ${userInfo.name} (${userId}) connected to lesson WebSocket`);
 
-    // Enviar confirmação de conexão
     socket.send(JSON.stringify({
       type: 'connected',
       data: { 
@@ -110,13 +102,11 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       }
     }));
 
-    // Manipular mensagens
     socket.on('message', async (rawMessage: Buffer) => {
       try {
         const message: WebSocketMessage = JSON.parse(rawMessage.toString());
         message.timestamp = Date.now();
         
-        // Atualizar última atividade
         connection.lastActivity = new Date();
         
         await handleWebSocketMessage(connectionId, message, prisma, fastify);
@@ -130,12 +120,10 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       }
     });
 
-    // Cleanup ao desconectar
     socket.on('close', () => {
       handleDisconnection(connectionId, fastify);
     });
 
-    // Tratamento de erro
     socket.on('error', (error: any) => {
       fastify.log.error('WebSocket error:', error);
       handleDisconnection(connectionId, fastify);
@@ -194,7 +182,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     const { userId, socket } = connection;
     const { lessonId, courseId } = data;
 
-    // Verificar se o usuário está matriculado no curso
     const enrollment = await prisma.enrollment.findFirst({
       where: { userId, courseId, isActive: true }
     });
@@ -207,11 +194,9 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       return;
     }
 
-    // Atualizar informações da conexão
     connection.currentLessonId = lessonId;
     connection.currentCourseId = courseId;
 
-    // Buscar progresso atual
     const progress = await prisma.lessonProgress.findUnique({
       where: {
         userId_lessonId: { userId, lessonId }
@@ -244,7 +229,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // Atualizar ou criar progresso
       const progress = await prisma.lessonProgress.upsert({
         where: {
           userId_lessonId: { userId, lessonId: currentLessonId }
@@ -345,7 +329,11 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // Buscar perguntas da lição
+      const lesson = await prisma.lesson.findUnique({
+        where: { id: currentLessonId },
+        select: { quizPassingScore: true }
+      });
+
       const questions = await prisma.question.findMany({
         where: { lessonId: currentLessonId },
         include: { options: true }
@@ -359,7 +347,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         return;
       }
 
-      // Calcular pontuação
       let correctAnswers = 0;
       let totalPoints = 0;
       let earnedPoints = 0;
@@ -379,9 +366,9 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       }
 
       const score = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0;
-      const isPassing = score >= 70; // TODO: Buscar da lição
+      const passingScore = lesson?.quizPassingScore || 70; // Default 70% se não configurado
+      const isPassing = score >= passingScore;
 
-      // Criar tentativa de quiz
       const quizAttempt = await prisma.quizAttempt.create({
         data: {
           id: randomUUID(),
@@ -396,7 +383,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         }
       });
 
-      // Criar respostas
       for (const answer of data.answers) {
         const question = questions.find(q => q.id === answer.questionId);
         if (!question) continue;
@@ -416,7 +402,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         });
       }
 
-      // Se passou, marcar lição como concluída
       if (isPassing) {
         await handleCompleteLesson(connection, {}, prisma);
       }
@@ -464,7 +449,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
 
     try {
-      // Verificar se o usuário está matriculado no curso
       const enrollment = await prisma.enrollment.findFirst({
         where: { userId, courseId: currentCourseId, isActive: true }
       });
@@ -477,7 +461,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         return;
       }
 
-      // Buscar dados do usuário
       const user = await prisma.user.findUnique({
         where: { id: userId },
         select: { id: true, name: true, email: true }
@@ -491,7 +474,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         return;
       }
 
-      // Criar o comentário
       const comment = await prisma.lessonComment.create({
         data: {
           id: randomUUID(),
@@ -506,13 +488,11 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         }
       });
 
-      // Enviar confirmação para o autor
       socket.send(JSON.stringify({
         type: 'comment_sent',
         data: { commentId: comment.id, message: 'Comentário enviado com sucesso!' }
       }));
 
-      // Broadcast do comentário para todos na sala da lição
       const room = lessonRooms.get(currentLessonId);
       if (room) {
         const commentData = {
@@ -528,13 +508,11 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
           }
         };
 
-        // Enviar para todos os usuários conectados na sala
         for (const [connId, roomConnection] of room.connections) {
           try {
             roomConnection.socket.send(JSON.stringify(commentData));
           } catch (error) {
             console.error(`Error sending comment to connection ${connId}:`, error);
-            // Remover conexão inválida
             room.connections.delete(connId);
             activeConnections.delete(connId);
           }
@@ -550,11 +528,9 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
   }
 
-  // Função para lidar com desconexão
   function handleDisconnection(connectionId: string, fastify: FastifyInstance) {
     const connection = activeConnections.get(connectionId);
     if (connection) {
-      // Remover da sala da lição se estiver em uma
       if (connection.currentLessonId) {
         const room = lessonRooms.get(connection.currentLessonId);
         if (room) {
@@ -570,7 +546,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
   }
 
-  // Função para limpeza de conexões inativas
   function cleanupInactiveConnections() {
     const now = new Date();
     const timeout = 30 * 60 * 1000; // 30 minutos
@@ -580,7 +555,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         connection.socket.close(1000, 'Connection timeout');
         activeConnections.delete(connectionId);
         
-        // Remover da sala se estiver em uma
         if (connection.currentLessonId) {
           const room = lessonRooms.get(connection.currentLessonId);
           if (room) {
@@ -593,7 +567,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
       }
     }
 
-    // Limpar salas vazias
     for (const [lessonId, room] of lessonRooms.entries()) {
       if (room.connections.size === 0) {
         lessonRooms.delete(lessonId);
@@ -601,7 +574,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
     }
   }
 
-  // Função para broadcast para todos os usuários em uma lição
   function broadcastToLesson(lessonId: string, message: any, excludeConnectionId?: string) {
     const room = lessonRooms.get(lessonId);
     if (!room) return;
@@ -613,7 +585,6 @@ export async function lessonWebSocketRoutes(fastify: FastifyInstance) {
         connection.socket.send(JSON.stringify(message));
       } catch (error) {
         console.error('Error broadcasting message:', error);
-        // Remover conexão com erro
         room.connections.delete(connectionId);
         activeConnections.delete(connectionId);
       }

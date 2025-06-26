@@ -11,7 +11,6 @@ export class ResetPasswordUseCase {
 
   async execute(email: string, code: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     try {
-      // Verificar se o código é válido
       const resetRecord = await this.passwordResetRepository.findByEmailAndCode(email, code);
       
       if (!resetRecord) {
@@ -21,7 +20,6 @@ export class ResetPasswordUseCase {
         };
       }
 
-      // Verificar se o usuário existe
       const user = await this.userRepository.findByEmail(email);
       
       if (!user) {
@@ -31,7 +29,6 @@ export class ResetPasswordUseCase {
         };
       }
 
-      // Validar a nova senha
       if (newPassword.length < 8) {
         return {
           success: false,
@@ -39,16 +36,12 @@ export class ResetPasswordUseCase {
         };
       }
 
-      // Criptografar a nova senha
       const hashedPassword = await this.passwordService.hashPassword(newPassword);
 
-      // Atualizar a senha do usuário
       await this.userRepository.updatePassword(user.id, hashedPassword);
 
-      // Marcar o código como usado
       await this.passwordResetRepository.markAsUsed(resetRecord.id);
 
-      // Limpar outros códigos deste email
       await this.passwordResetRepository.deleteByEmail(email);
 
       return {

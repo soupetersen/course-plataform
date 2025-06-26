@@ -37,11 +37,9 @@ export class LessonProgressController {
     try {
       const { userId, lessonId, courseId, watchTime } = request.body;
 
-      // Buscar progresso existente
       let progress = await this.progressRepository.findProgressByUserAndLesson(userId, lessonId);
 
       if (!progress) {
-        // Criar novo progresso
         progress = await this.progressRepository.createProgress({
           id: crypto.randomUUID(),
           userId,
@@ -54,7 +52,6 @@ export class LessonProgressController {
           updatedAt: new Date(),
         });
       } else {
-        // Atualizar progresso existente
         const newWatchTime = Math.max(progress.watchTime, watchTime);
         progress = await this.progressRepository.updateProgress(progress.id, {
           watchTime: newWatchTime,
@@ -84,11 +81,9 @@ export class LessonProgressController {
     try {
       const { userId, lessonId, courseId } = request.body;
 
-      // Buscar progresso existente
       let progress = await this.progressRepository.findProgressByUserAndLesson(userId, lessonId);
 
       if (!progress) {
-        // Criar novo progresso como completo
         progress = await this.progressRepository.createProgress({
           id: crypto.randomUUID(),
           userId,
@@ -101,7 +96,6 @@ export class LessonProgressController {
           updatedAt: new Date(),
         });
       } else if (!progress.isCompleted) {
-        // Marcar como completo
         progress = await this.progressRepository.updateProgress(progress.id, {
           isCompleted: true,
           completedAt: new Date(),
@@ -131,7 +125,6 @@ export class LessonProgressController {
     try {
       const { userId, lessonId, courseId, answers } = request.body;
 
-      // Buscar todas as perguntas da lição
       const questions = await this.questionRepository.findByLessonId(lessonId);
       
       if (questions.length === 0) {
@@ -141,7 +134,6 @@ export class LessonProgressController {
         });
       }
 
-      // Buscar as opções para cada pergunta
       const questionsWithOptions = await Promise.all(
         questions.map(async (question) => {
           const options = await this.questionRepository.findOptionsByQuestionId(question.id);
@@ -149,7 +141,6 @@ export class LessonProgressController {
         })
       );
 
-      // Calcular pontuação
       let correctAnswers = 0;
       let totalPoints = 0;
       let earnedPoints = 0;
@@ -180,13 +171,10 @@ export class LessonProgressController {
         });
       }
 
-      // Calcular porcentagem
       const score = totalPoints > 0 ? (earnedPoints / totalPoints) * 100 : 0;
 
-      // TODO: Buscar quizPassingScore da lição para determinar se passou
-      const isPassing = score >= 70; // Temporário, deveria vir da lição
+      const isPassing = score >= 70; 
 
-      // Criar tentativa de quiz
       const quizAttempt = await this.progressRepository.createQuizAttempt({
         id: crypto.randomUUID(),
         userId,
@@ -200,7 +188,6 @@ export class LessonProgressController {
         timeSpent: quizAnswers.reduce((total, ans) => total + ans.timeSpent, 0),
       });
 
-      // Criar respostas
       const createdAnswers = [];
       for (const answerData of quizAnswers) {
         const quizAnswer = await this.progressRepository.createQuizAnswer({
@@ -210,7 +197,6 @@ export class LessonProgressController {
         createdAnswers.push(quizAnswer);
       }
 
-      // Se passou no quiz, marcar lição como concluída
       if (isPassing) {
         await this.completeLesson({ body: { userId, lessonId, courseId } } as any, reply);
       }
@@ -263,7 +249,6 @@ export class LessonProgressController {
 
       const attempts = await this.progressRepository.findQuizAttemptsByUserAndLesson(userId, lessonId);
 
-      // Buscar respostas para cada tentativa
       const attemptsWithAnswers = await Promise.all(
         attempts.map(async (attempt) => {
           const answers = await this.progressRepository.findQuizAnswersByAttempt(attempt.id);

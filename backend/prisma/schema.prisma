@@ -12,7 +12,7 @@ model User {
   email                   String             @unique
   name                    String
   password                String
-  avatar                  String? // URL do avatar do usuário
+  avatar                  String?
   role                    Role               @default(STUDENT)
   isActive                Boolean            @default(true)
   paymentCustomerId       String? // ID do cliente no gateway (genérico)

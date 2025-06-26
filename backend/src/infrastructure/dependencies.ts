@@ -13,6 +13,7 @@ import { CategoryRepository } from '@/interfaces/CategoryRepository';
 import { ReviewRepository } from '@/interfaces/ReviewRepository';
 import { SavedCardRepository } from '@/interfaces/SavedCardRepository';
 import { PasswordResetRepository } from '@/interfaces/PasswordResetRepository';
+import { PlatformSettingRepository } from '@/interfaces/PlatformSettingRepository';
 
 import { PrismaUserRepository } from '@/repositories/PrismaUserRepository';
 import { PrismaCourseRepository } from '@/repositories/PrismaCourseRepository';
@@ -75,10 +76,8 @@ export function setupDependencies(): DIContainer {
   container.registerSingleton('S3Service', () => new S3Service());
   container.registerSingleton('EmailService', () => new EmailService());
 
-  // Registrar MercadoPagoService primeiro
   container.registerSingleton('MercadoPagoService', () => new MercadoPagoService());
 
-  // Registrar InstructorPayoutService com suas dependências
   container.registerSingleton('InstructorPayoutService', () => {
     const prisma = container.resolve<PrismaClient>('PrismaClient');
     const mercadoPagoService = container.resolve<MercadoPagoService>('MercadoPagoService');
@@ -215,8 +214,9 @@ export function setupDependencies(): DIContainer {
     const courseRepository = container.resolve<CourseRepository>('CourseRepository');
     const userRepository = container.resolve<UserRepository>('UserRepository');
     const savedCardRepository = container.resolve<SavedCardRepository>('SavedCardRepository');
+    const platformSettingRepository = container.resolve<PlatformSettingRepository>('PlatformSettingRepository');
     const paymentGatewayFactory = container.resolve<PaymentGatewayFactory>('PaymentGatewayFactory');
-    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, savedCardRepository, paymentGatewayFactory);
+    return new CreateOneTimePaymentUseCase(paymentRepository, courseRepository, userRepository, savedCardRepository, platformSettingRepository, paymentGatewayFactory);
   });
   container.register('CreateSubscriptionPaymentUseCase', () => {
     const paymentRepository = container.resolve<PaymentRepository>('PaymentRepository');

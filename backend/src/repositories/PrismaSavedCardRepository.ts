@@ -21,7 +21,6 @@ export class PrismaSavedCardRepository implements SavedCardRepository {
     const cardBrand = this.getCardBrand(cleanCardNumber);
     const cardNumberLast4 = cleanCardNumber.slice(-4);
 
-    // Se for marcado como padrão, desmarcar outros cartões
     if (data.isDefault) {
       await this.prisma.savedCard.updateMany({
         where: { userId },
@@ -63,7 +62,6 @@ export class PrismaSavedCardRepository implements SavedCardRepository {
   }
 
   async update(id: string, data: UpdateSavedCardRequest): Promise<SavedCard> {
-    // Se for marcado como padrão, desmarcar outros cartões do mesmo usuário
     if (data.isDefault) {
       const card = await this.prisma.savedCard.findUnique({
         where: { id },
@@ -94,13 +92,11 @@ export class PrismaSavedCardRepository implements SavedCardRepository {
   }
 
   async setAsDefault(userId: string, cardId: string): Promise<void> {
-    // Primeiro, desmarcar todos os cartões como padrão
     await this.prisma.savedCard.updateMany({
       where: { userId },
       data: { isDefault: false }
     });
 
-    // Depois, marcar o cartão específico como padrão
     await this.prisma.savedCard.update({
       where: { id: cardId },
       data: { isDefault: true }

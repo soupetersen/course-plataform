@@ -60,7 +60,6 @@ export async function paymentRoutes(fastify: FastifyInstance) {
     }
   }, paymentController.handleWebhook.bind(paymentController));
 
-  // Rota GET para webhook apenas para debug/informação
   fastify.get('/webhook', {
     config: {
       skipAuth: true
@@ -210,18 +209,16 @@ export async function paymentRoutes(fastify: FastifyInstance) {
         }      }
     }
   }, paymentController.calculateOrderSummary.bind(paymentController));
-  // Rota para ganhos do instrutor
   fastify.get('/instructor/earnings', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
-  }, paymentController.getInstructorEarnings.bind(paymentController));  // Rota para configuração do webhook (desenvolvimento)
+  }, paymentController.getInstructorEarnings.bind(paymentController)); 
   fastify.get('/webhook-config', {
     preHandler: authMiddleware.authenticate.bind(authMiddleware)
   }, paymentController.getWebhookConfig.bind(paymentController));
 
-  // Rota para simular aprovação PIX (apenas desenvolvimento)
   fastify.post('/dev/simulate-pix/:paymentId', {
     config: {
-      skipAuth: true // Para facilitar o teste
+      skipAuth: true 
     },
     schema: {
       params: {
@@ -243,8 +240,6 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       }
     }  }, paymentController.simulatePixPayment.bind(paymentController));
 
-  // === ROTAS DE ADMINISTRAÇÃO ===
-    // Listar todos os pagamentos (admin)
   fastify.get('/admin/all', {
     preHandler: [
       authMiddleware.authenticate.bind(authMiddleware),
@@ -260,7 +255,7 @@ export async function paymentRoutes(fastify: FastifyInstance) {
         }
       }
     }
-  }, paymentController.getAllPayments.bind(paymentController));  // Aprovar pagamento manualmente (admin)
+  }, paymentController.getAllPayments.bind(paymentController)); 
   fastify.post('/admin/:paymentId/approve', {
     preHandler: [
       authMiddleware.authenticate.bind(authMiddleware),
@@ -282,7 +277,6 @@ export async function paymentRoutes(fastify: FastifyInstance) {
       }
     }
   }, paymentController.adminApprovePayment.bind(paymentController));
-  // Rejeitar pagamento manualmente (admin)
   fastify.post('/admin/:paymentId/reject', {
     preHandler: [
       authMiddleware.authenticate.bind(authMiddleware),

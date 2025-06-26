@@ -4,7 +4,6 @@ import { QuestionController } from '@/controllers/QuestionController';
 export const questionRoutes = async (fastify: FastifyInstance) => {
   const questionController = new QuestionController();
 
-  // Rotas para questões
   fastify.post('/lessons/:lessonId/questions', {
     handler: questionController.createQuestion.bind(questionController),
   });
@@ -21,7 +20,6 @@ export const questionRoutes = async (fastify: FastifyInstance) => {
     handler: questionController.deleteQuestion.bind(questionController),
   });
 
-  // Rotas para opções de questões
   fastify.put('/questions/:questionId/options/:optionId', {
     handler: questionController.updateQuestionOption.bind(questionController),
   });

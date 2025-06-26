@@ -161,14 +161,12 @@ export class EnrollmentController {
       enrollment.updateProgress(progress);
       const updatedEnrollment = await enrollmentRepository.update(id, enrollment);
 
-      // Se o curso foi concluído agora, enviar notificação
       if (previousProgress < 100 && enrollment.progress >= 100) {
         try {
           const notifyCourseCompletionUseCase = this.container.resolve<NotifyCourseCompletionUseCase>('NotifyCourseCompletionUseCase');
           await notifyCourseCompletionUseCase.execute({ enrollment: updatedEnrollment });
         } catch (emailError) {
           console.error('❌ Erro ao enviar notificação de conclusão:', emailError);
-          // Não falha a atualização por causa do email
         }
       }
 

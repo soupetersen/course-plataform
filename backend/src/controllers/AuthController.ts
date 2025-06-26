@@ -115,7 +115,6 @@ export class AuthController {
 
       const userRepository = this.container.resolve<UserRepository>('UserRepository');
       
-      // Verificar se o usuário existe
       const existingUser = await userRepository.findById(userInfo.userId);
       if (!existingUser) {
         return reply.status(404).send({
@@ -124,7 +123,6 @@ export class AuthController {
         });
       }
 
-      // Atualizar o usuário
       const updateData: any = {};
       if (name) updateData.name = name;
       if (avatar) updateData.avatar = avatar;

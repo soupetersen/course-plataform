@@ -37,7 +37,6 @@ export class UploadController {
         return;
       }
 
-      // Comprimir imagem se necessário
       let finalBuffer = buffer;
       if (this.compressionService.needsCompression(buffer, 2)) { // Comprimir se > 2MB
         finalBuffer = await this.compressionService.compressImage(buffer, {
@@ -228,7 +227,6 @@ export class UploadController {
         return;
       }
 
-      // Validar tipo de arquivo
       const allowedMimeTypes = [
         'video/mp4',
         'video/mpeg',
@@ -265,7 +263,6 @@ export class UploadController {
       const buffer = Buffer.concat(chunks);
       const { filename } = data;
 
-      // Comprimir vídeo se necessário
       let finalBuffer = buffer;
       if (this.compressionService.needsCompression(buffer, 30)) { // Comprimir se > 30MB
         try {

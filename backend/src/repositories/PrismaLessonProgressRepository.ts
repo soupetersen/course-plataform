@@ -5,7 +5,6 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaLessonProgressRepository implements LessonProgressRepository {
   constructor(private prisma: PrismaClient) {}
 
-  // Lesson Progress Methods
   async createProgress(data: Partial<LessonProgress>): Promise<LessonProgress> {
     const progress = await this.prisma.lessonProgress.create({
       data: {
@@ -130,7 +129,6 @@ export class PrismaLessonProgressRepository implements LessonProgressRepository 
     await this.prisma.lessonProgress.delete({ where: { id } });
   }
 
-  // Quiz Attempt Methods
   async createQuizAttempt(data: Partial<QuizAttempt>): Promise<QuizAttempt> {
     const attempt = await this.prisma.quizAttempt.create({
       data: {
@@ -224,7 +222,6 @@ export class PrismaLessonProgressRepository implements LessonProgressRepository 
     );
   }
 
-  // Quiz Answer Methods
   async createQuizAnswer(data: Partial<QuizAnswer>): Promise<QuizAnswer> {
     const answer = await this.prisma.quizAnswer.create({
       data: {

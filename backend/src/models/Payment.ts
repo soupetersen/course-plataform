@@ -16,16 +16,15 @@ export class Payment {
     public readonly id: string,
     public readonly userId: string,
     public readonly courseId: string,
-    public readonly externalPaymentId: string, // ID genérico do pagamento no gateway
+    public readonly externalPaymentId: string, 
     public readonly amount: number,
     public readonly currency: string,
     public readonly status: PaymentStatus,
     public readonly paymentType: PaymentType,
     public readonly createdAt: Date,
     public readonly updatedAt: Date,
-    // Campos opcionais para dados específicos do gateway
     public readonly externalOrderId?: string,
-    public readonly paymentData?: string, // JSON com dados específicos (PIX QR code, etc.)
+    public readonly paymentData?: string, 
     public readonly paymentMethod?: string,
     public readonly platformFeeAmount?: number,
     public readonly instructorAmount?: number,

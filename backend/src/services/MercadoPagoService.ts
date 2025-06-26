@@ -44,9 +44,7 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
 
   async createPayment(request: CreatePaymentRequest): Promise<CreatePaymentResponse> {
     try {
-      // Para PIX - usar Payment API
       if (request.paymentMethod === 'PIX') {
-        // Definir tempo de expiração baseado no valor
         const getPixExpirationMinutes = (amount: number): number => {
           if (amount <= 100) return 10;   // 15 min para valores baixos
           if (amount <= 500) return 20;   // 30 min para valores médios  
@@ -70,9 +68,8 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             last_name: request.customerName.split(' ').slice(1).join(' ') || '',
           },
           description: request.description,
-          date_of_expiration: expirationDate.toISOString(), // Sempre UTC para evitar problemas de fuso
+          date_of_expiration: expirationDate.toISOString(), 
           metadata: request.metadata || {},
-          // notification_url removida para usar apenas configuração do painel
         };
 
         const payment = await this.payment.create({ body: paymentData });
@@ -80,7 +77,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         if (payment.id) {
           console.log(`✅ PIX criado: ${payment.id}, expira em: ${payment.date_of_expiration}`);
           
-          // Debug: verificar dados do QR Code
           console.log('🔍 Dados do QR Code recebidos do Mercado Pago:', {
             qr_code: payment.point_of_interaction?.transaction_data?.qr_code ? 'Presente' : 'Ausente',
             qr_code_base64: payment.point_of_interaction?.transaction_data?.qr_code_base64 ? 'Presente' : 'Ausente',
@@ -92,11 +88,11 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             paymentId: payment.id.toString(),
             status: this.mapToStandardStatus(payment.status || 'pending'),
             paymentData: {
-              pixQrCodeText: payment.point_of_interaction?.transaction_data?.qr_code, // String para "Copia e Cola"
-              pixQrCodeImage: payment.point_of_interaction?.transaction_data?.qr_code_base64, // Imagem PNG base64
+              pixQrCodeText: payment.point_of_interaction?.transaction_data?.qr_code, 
+              pixQrCodeImage: payment.point_of_interaction?.transaction_data?.qr_code_base64, 
               ticketUrl: payment.point_of_interaction?.transaction_data?.ticket_url,
-              expirationDate: payment.date_of_expiration, // Data de expiração para o frontend
-              expirationMinutes: expirationMinutes, // Minutos restantes
+              expirationDate: payment.date_of_expiration, 
+              expirationMinutes: expirationMinutes, 
             }
           };
         }
@@ -110,13 +106,12 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
       }
 
       if (request.paymentMethod === 'CREDIT_CARD') {
-        // Usar Payment API direta para cartão (melhor UX + status imediato)
         const paymentData = {
           transaction_amount: request.amount,
-          token: request.cardData?.token, // Token do cartão processado pelo frontend
+          token: request.cardData?.token,
           description: request.description,
           installments: request.cardData?.installments || 1,
-          payment_method_id: request.cardData?.paymentMethodId || 'visa', // ex: visa, master, etc
+          payment_method_id: request.cardData?.paymentMethodId || 'visa', 
           issuer_id: request.cardData?.issuerId ? parseInt(request.cardData.issuerId) : undefined,
           payer: {
             email: request.customerEmail,
@@ -128,7 +123,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             },
           },
           metadata: request.metadata || {},
-          // notification_url removida para usar apenas configuração do painel
         };
 
         console.log('🔄 Criando pagamento via Payment API para cartão:', {
@@ -149,7 +143,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             paymentId: payment.id.toString(),
             status,
             paymentData: {
-              // Para cartão aprovado, não precisa de dados extras
               transactionId: payment.id.toString(),
               authorizationCode: payment.authorization_code,
               lastFourDigits: payment.card?.last_four_digits,
@@ -165,7 +158,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         };
       }
 
-      // Para outros métodos (boleto) - usar Preference API (checkout pro)
       if (request.paymentMethod === 'BOLETO') {
         const preferenceData = {
           items: [
@@ -184,9 +176,9 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
           payment_methods: {
             excluded_payment_methods: [],
             excluded_payment_types: [
-              { id: 'credit_card' }, // Excluir cartão de crédito
-              { id: 'debit_card' }, // Excluir cartão de débito
-              { id: 'bank_transfer' }, // Excluir transferência
+              { id: 'credit_card' }, 
+              { id: 'debit_card' }, 
+              { id: 'bank_transfer' }, 
             ],
             installments: 1,
           },
@@ -195,7 +187,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             failure: request.returnUrl,
             pending: request.returnUrl,
           },
-          // notification_url removida para usar apenas configuração do painel
           metadata: request.metadata || {},
         };
 
@@ -243,15 +234,11 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
   async getPaymentStatus(paymentId: string): Promise<PaymentStatusResponse> {
     try {
       console.log(`🔍 Buscando status do pagamento ${paymentId} na API do Mercado Pago`);
-      
-      // Com Payment API, todos os IDs são Payment IDs diretos (PIX e Cartão)
-      // Apenas Boleto ainda usa Preference
       const isPreferenceId = paymentId.includes('-');
       
       if (isPreferenceId) {
         console.log(`📋 ID identificado como Preference (Boleto): ${paymentId}`);
         
-        // Para Boleto (Preference), buscar pagamentos associados
         try {
           const searchResponse = await fetch(`https://api.mercadopago.com/v1/payments/search?external_reference=${paymentId}`, {
             method: 'GET',
@@ -280,7 +267,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
             } else {
               console.log(`📋 Nenhum pagamento encontrado para Preference: ${paymentId} (aguardando)`);
               
-              // Preference existe mas ainda não foi paga
               return {
                 success: true,
                 status: 'PENDING',
@@ -299,7 +285,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
       } else {
         console.log(`💳 ID identificado como Payment (PIX/Cartão): ${paymentId}`);
         
-        // Para Payment IDs diretos (PIX e Cartão)
         const payment = await this.payment.get({ id: paymentId });
         
         if (payment) {
@@ -400,7 +385,6 @@ export class MercadoPagoService implements PaymentGateway, StatusMapper {
         reason: request.description,
         payer_email: request.customerEmail,
         back_url: request.returnUrl,
-        // notification_url removida para usar apenas configuração do painel
         auto_recurring: {
           frequency: request.frequency,
           frequency_type: request.frequencyType,

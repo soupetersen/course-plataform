@@ -120,14 +120,14 @@ describe('PasswordService', () => {
 
     it('should return false for weak passwords', () => {
       const weakPasswords = [
-        'password',         // no uppercase, no number
-        'PASSWORD',         // no lowercase, no number
-        '12345678',         // no letters
-        'Pass1',           // too short
-        'password123',     // no uppercase
-        'PASSWORD123',     // no lowercase
-        'PasswordABC',     // no numbers
-        ''                 // empty
+        'password',       
+        'PASSWORD',        
+        '12345678',        
+        'Pass1',           
+        'password123',     
+        'PASSWORD123',   
+        'PasswordABC',   
+        ''               
       ];
 
       weakPasswords.forEach(password => {

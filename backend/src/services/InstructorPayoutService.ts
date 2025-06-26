@@ -79,7 +79,6 @@ export class InstructorPayoutService {
    * Obter saldo do instrutor
    */
   async getInstructorBalance(instructorId: string): Promise<InstructorBalance> {
-    // Buscar ou criar saldo do instrutor
     let balance = await this.prisma.instructorBalance.findUnique({
       where: { instructorId }
     });
@@ -96,7 +95,6 @@ export class InstructorPayoutService {
       });
     }
 
-    // Calcular próxima data de liberação de saldo (30 dias após vendas)
     const nextPayoutDate = await this.calculateNextPayoutDate(instructorId);
 
     return {
@@ -112,7 +110,6 @@ export class InstructorPayoutService {
    * Solicitar saque (máximo 1 por mês)
    */
   async requestPayout(instructorId: string, data: RequestPayoutRequest) {
-    // Verificar se instrutor está verificado
     const instructor = await this.prisma.user.findUnique({
       where: { id: instructorId }
     });
@@ -121,7 +118,6 @@ export class InstructorPayoutService {
       throw new Error('Instrutor precisa ter dados verificados para solicitar saque');
     }
 
-    // Verificar se já solicitou saque este mês
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
@@ -138,19 +134,16 @@ export class InstructorPayoutService {
       throw new Error('Você já solicitou um saque este mês. Apenas um saque por mês é permitido.');
     }
 
-    // Verificar saldo disponível
     const balance = await this.getInstructorBalance(instructorId);
     
     if (balance.availableBalance < data.amount) {
       throw new Error('Saldo insuficiente para saque');
     }
 
-    // Valor mínimo de saque
     if (data.amount < 50) {
       throw new Error('Valor mínimo de saque é R$ 50,00');
     }
 
-    // Preparar dados bancários
     let bankDetails: any = {};
     
     if (data.method === 'PIX') {
@@ -166,7 +159,6 @@ export class InstructorPayoutService {
         throw new Error('Dados bancários não cadastrados');
       }
       
-      // Tratar bankData como Json
       const bankData = instructor.bankData as any;
       bankDetails = {
         method: 'BANK_TRANSFER',
@@ -174,7 +166,6 @@ export class InstructorPayoutService {
       };
     }
 
-    // Criar solicitação de saque
     const payoutRequest = await this.prisma.payoutRequest.create({
       data: {
         instructorId,
@@ -187,7 +178,6 @@ export class InstructorPayoutService {
       }
     });
 
-    // Notificar admin sobre nova solicitação
     console.log(`Nova solicitação de payout: R$ ${data.amount} para ${instructor.name}`);
 
     return {
@@ -203,7 +193,6 @@ export class InstructorPayoutService {
    * Creditar saldo do instrutor (chamado quando pagamento é aprovado)
    */
   async creditInstructorBalance(instructorId: string, amount: number, paymentId: string) {
-    // Buscar ou criar saldo
     let balance = await this.prisma.instructorBalance.findUnique({
       where: { instructorId }
     });
@@ -220,7 +209,6 @@ export class InstructorPayoutService {
       });
     }
 
-    // Atualizar saldo (vai para pendente por 30 dias)
     await this.prisma.instructorBalance.update({
       where: { instructorId },
       data: {
@@ -229,7 +217,6 @@ export class InstructorPayoutService {
       }
     });
 
-    // Registrar transação
     await this.prisma.balanceTransaction.create({
       data: {
         instructorId,
@@ -243,14 +230,10 @@ export class InstructorPayoutService {
     console.log(`✅ Creditado R$ ${amount} para instrutor ${instructorId} (pendente)`);
   }
 
-  /**
-   * Liberar saldo pendente após 30 dias
-   */
   async releaseExpiredPendingBalance() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Buscar transações de crédito com mais de 30 dias
     const expiredTransactions = await this.prisma.balanceTransaction.findMany({
       where: {
         type: 'CREDIT',

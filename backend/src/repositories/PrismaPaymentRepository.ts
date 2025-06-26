@@ -53,7 +53,6 @@ export class PrismaPaymentRepository implements PaymentRepository {
   }
 
   async findByStripePaymentId(stripePaymentId: string): Promise<Payment | null> {
-    // Para compatibilidade, redirecionar para o método genérico
     return this.findByExternalPaymentId(stripePaymentId);
   }
 

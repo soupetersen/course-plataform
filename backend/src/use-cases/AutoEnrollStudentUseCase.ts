@@ -27,7 +27,6 @@ export class AutoEnrollStudentUseCase {
 
   async execute(request: AutoEnrollRequest): Promise<AutoEnrollResponse> {
     try {
-      // 1. Buscar o pagamento
       const payment = await this.paymentRepository.findById(request.paymentId);
       if (!payment) {
         return {
@@ -36,7 +35,6 @@ export class AutoEnrollStudentUseCase {
         };
       }
 
-      // 2. Verificar se o pagamento foi aprovado
       if (payment.status !== PaymentStatus.COMPLETED) {
         return {
           success: false,
@@ -44,7 +42,6 @@ export class AutoEnrollStudentUseCase {
         };
       }
 
-      // 3. Verificar se o usuário existe
       const user = await this.userRepository.findById(payment.userId);
       if (!user) {
         return {
@@ -53,7 +50,6 @@ export class AutoEnrollStudentUseCase {
         };
       }
 
-      // 4. Verificar se o curso existe
       const course = await this.courseRepository.findById(payment.courseId);
       if (!course) {
         return {
@@ -62,7 +58,6 @@ export class AutoEnrollStudentUseCase {
         };
       }
 
-      // 5. Verificar se o aluno já está matriculado
       const existingEnrollment = await this.enrollmentRepository.findByUserAndCourse(
         payment.userId,
         payment.courseId
@@ -76,7 +71,6 @@ export class AutoEnrollStudentUseCase {
         };
       }
 
-      // 6. Criar a matrícula
       const enrollment = Enrollment.create({
         userId: payment.userId,
         courseId: payment.courseId
@@ -84,7 +78,6 @@ export class AutoEnrollStudentUseCase {
 
       const createdEnrollment = await this.enrollmentRepository.create(enrollment);
 
-      // 7. Enviar email de confirmação de matrícula
       try {
         const instructor = await this.userRepository.findById(course.instructorId);
         
@@ -100,7 +93,6 @@ export class AutoEnrollStudentUseCase {
         console.log(`✅ Email de confirmação de matrícula enviado para ${user.email}`);
       } catch (emailError) {
         console.error('❌ Erro ao enviar email de confirmação de matrícula:', emailError);
-        // Não falha a matrícula por causa do email
       }
 
       return {
