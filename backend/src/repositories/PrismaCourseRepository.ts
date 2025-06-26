@@ -108,4 +108,25 @@ export class PrismaCourseRepository implements CourseRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.course.delete({ where: { id } });
   }
+
+  async findByInstructorId(instructorId: string): Promise<Course[]> {
+    const courses = await this.prisma.course.findMany({
+      where: { instructorId }
+    });
+    return courses.map(course => new Course({
+      id: course.id,
+      title: course.title,
+      description: course.description || '',
+      imageUrl: course.imageUrl || undefined,
+      price: course.price,
+      level: 'BEGINNER' as CourseLevel,
+      duration: 0,
+      status: course.isPublished ? 'PUBLISHED' : 'DRAFT' as CourseStatus,
+      isActive: true,
+      instructorId: course.instructorId,
+      categoryId: course.categoryId || '',
+      createdAt: course.createdAt,
+      updatedAt: course.updatedAt,
+    }));
+  }
 }

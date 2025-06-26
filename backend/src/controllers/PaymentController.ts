@@ -652,10 +652,21 @@ export class PaymentController {
         const instructorBalance = await this.instructorPayoutService.getInstructorBalance(userId);
         
         const totalEarnings = instructorBalance.totalEarnings;
-        const totalSales = 0; 
         
-        const allPayments = await this.paymentRepository.findByUserId(userId);
-        const completedPayments = allPayments.filter(payment => payment.status === 'COMPLETED');
+        const instructorCourses = await this.courseRepository.findByInstructorId(userId);
+        
+        let totalSales = 0;
+        const allInstructorPayments: any[] = [];
+        
+        for (const course of instructorCourses) {
+          const coursePayments = await this.paymentRepository.findByCourseId(course.id);
+          const completedCoursePayments = coursePayments.filter(payment => payment.status === 'COMPLETED');
+          allInstructorPayments.push(...completedCoursePayments);
+          
+          totalSales += completedCoursePayments.reduce((sum, payment) => sum + payment.amount, 0);
+        }
+        
+        const completedPayments = allInstructorPayments;
         
         let recentTransactions: any[] = [];
         
