@@ -101,7 +101,7 @@ export function EnhancedPurchaseButton({
       )}
 
       <div className="space-y-3">
-        {/* Main purchase button - goes to checkout with coupon support */}
+        
         <Button
           onClick={navigateToCheckout}
           className="w-full"
@@ -112,7 +112,7 @@ export function EnhancedPurchaseButton({
           Comprar Agora - {paymentUtils.formatCurrency(course.price)}
         </Button>
 
-        {/* Quick purchase button - direct payment without coupons */}
+        
         <Button
           onClick={handlePurchase}
           variant="outline"
@@ -139,3 +139,4 @@ export function EnhancedPurchaseButton({
     </div>
   );
 }
+

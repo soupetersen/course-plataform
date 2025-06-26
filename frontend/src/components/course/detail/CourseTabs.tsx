@@ -1,4 +1,4 @@
-ï»¿import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { Clock, Users, Award, BookOpen, User } from "lucide-react";
@@ -58,9 +58,9 @@ export const CourseTabs = ({
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           {" "}
-          <TabsTrigger value="overview">VisÃ£o Geral</TabsTrigger>
-          <TabsTrigger value="curriculum">ConteÃºdo</TabsTrigger>
-          <TabsTrigger value="reviews">AvaliaÃ§Ãµes</TabsTrigger>
+          <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+          <TabsTrigger value="curriculum">Conteúdo</TabsTrigger>
+          <TabsTrigger value="reviews">Avaliações</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="space-y-6">
           <Card>
@@ -80,29 +80,29 @@ export const CourseTabs = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>InformaÃ§Ãµes do curso</CardTitle>
+                <CardTitle>Informações do curso</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">
-                    DuraÃ§Ã£o: {course.duration} horas
+                    Duração: {course.duration} horas
                   </span>
                 </div>{" "}
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">
-                    NÃ­vel: {getLevelText(course.level)}
+                    Nível: {getLevelText(course.level)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Award className="h-4 w-4 text-gray-500" />
-                  <span className="text-sm">Certificado de conclusÃ£o</span>
+                  <span className="text-sm">Certificado de conclusão</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4 text-gray-500" />
                   <span className="text-sm">
-                    Instrutor: {course.instructor?.name || "NÃ£o informado"}
+                    Instrutor: {course.instructor?.name || "Não informado"}
                   </span>
                 </div>
               </CardContent>
@@ -110,7 +110,7 @@ export const CourseTabs = ({
 
             <Card>
               <CardHeader>
-                <CardTitle>O que vocÃª vai aprender</CardTitle>
+                <CardTitle>O que você vai aprender</CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -123,7 +123,7 @@ export const CourseTabs = ({
                     )
                   ) || (
                     <li className="text-sm text-gray-500">
-                      Objetivos nÃ£o especificados
+                      Objetivos não especificados
                     </li>
                   )}
                 </ul>
@@ -137,7 +137,7 @@ export const CourseTabs = ({
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>
-                    MÃ³dulo {module.order}: {module.title}
+                    Módulo {module.order}: {module.title}
                   </span>
                   <Badge variant="outline">
                     {module.lessons?.length || 0} aulas
@@ -212,3 +212,4 @@ export const CourseTabs = ({
     </div>
   );
 };
+

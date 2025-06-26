@@ -1,4 +1,4 @@
-ï»¿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Plus, BookOpen, Users, TrendingUp, Edit } from "lucide-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -27,7 +27,7 @@ export const InstructorSection = ({ courses }: InstructorSectionProps) => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            Ãrea do Instrutor
+            Área do Instrutor
           </h2>
           <p className="text-gray-600">
             Gerencie seus cursos e acompanhe seu desempenho
@@ -100,7 +100,7 @@ export const InstructorSection = ({ courses }: InstructorSectionProps) => {
             <div className="text-center py-8">
               <BookOpen className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                VocÃª ainda nÃ£o criou nenhum curso
+                Você ainda não criou nenhum curso
               </h3>
               <p className="text-gray-600 mb-4">
                 Comece criando seu primeiro curso e compartilhe seu conhecimento
@@ -190,3 +190,4 @@ export const InstructorSection = ({ courses }: InstructorSectionProps) => {
     </div>
   );
 };
+

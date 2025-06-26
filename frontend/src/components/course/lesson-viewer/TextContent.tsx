@@ -40,3 +40,4 @@ export const TextContent: React.FC<TextContentProps> = ({ content, title }) => {
     </div>
   );
 };
+

@@ -99,7 +99,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
   }
 
   return isModal ? (
-    // Versão para modal - sem card, mais limpa
     <div className="space-y-6">
       <div className="text-center">
         <div className="flex items-center justify-center space-x-3 mb-4">
@@ -126,7 +125,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
       </div>
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-        {/* Rating Section */}
         <div className="space-y-3">
           <Label className="text-sm font-medium text-gray-900 block text-center">
             Sua avaliação *
@@ -172,7 +170,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
           )}
         </div>
 
-        {/* Comment Section */}
         <div className="space-y-2">
           <Label
             htmlFor="comment"
@@ -192,7 +189,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex items-center justify-between pt-4">
           <Button
             type="button"
@@ -230,7 +226,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
       </form>
     </div>
   ) : (
-    // Versão original para card
     <Card className="mb-6 border-l-4 border-l-primary bg-gradient-to-r from-blue-50/50 to-indigo-50/30 shadow-md animate-slide-in-down">
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
@@ -271,7 +266,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
 
       <CardContent>
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          {/* Rating Section */}
           <div className="space-y-3">
             <Label className="text-sm font-medium text-gray-900">
               Sua avaliação *
@@ -312,7 +306,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
             </div>
           </div>
 
-          {/* Comment Section */}
           <div className="space-y-3">
             <Label
               htmlFor="comment"
@@ -342,7 +335,6 @@ export const CourseReviewSection: React.FC<CourseReviewSectionProps> = ({
             </div>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex items-center space-x-3 pt-2">
             <Button
               type="submit"

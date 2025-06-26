@@ -186,7 +186,7 @@ export const CourseGrid = ({
 
             <div className="text-xs text-gray-600 mb-3">
               <span className="font-medium">por</span>{" "}
-              {course.instructor?.name || "Instrutor n�o informado"}
+              {course.instructor?.name || "Instrutor não informado"}
             </div>
 
             {course.averageRating && course.averageRating > 0 && (

@@ -8,7 +8,6 @@ export function LessonPage() {
     lessonId: string;
   }>();
 
-  // Por enquanto, usar localStorage. Em produção, isso viria do contexto de auth
   const token = localStorage.getItem("authToken") || "";
 
   if (!lessonId || !courseId) {
@@ -42,3 +41,4 @@ export function LessonPage() {
     </ProtectedRoute>
   );
 }
+

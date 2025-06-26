@@ -54,11 +54,9 @@ export function PaymentCheckout({
   onPaymentSuccess,
   onPaymentError,
 }: PaymentCheckoutProps) {
-  // States para o fluxo de steps
   const [currentStep, setCurrentStep] = useState("method");
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
-  // States existentes
   const [couponCode, setCouponCode] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<CouponValidation | null>(
     null
@@ -260,12 +258,10 @@ export function PaymentCheckout({
     const currentIndex = steps.indexOf(currentStep);
 
     if (currentIndex < steps.length - 1) {
-      // Marcar step atual como completo
       if (!completedSteps.includes(currentStep)) {
         setCompletedSteps((prev) => [...prev, currentStep]);
       }
 
-      // Ir para próximo step
       setCurrentStep(steps[currentIndex + 1]);
     }
   };
@@ -292,7 +288,7 @@ export function PaymentCheckout({
         }
         return false;
       case "coupon":
-        return true; // Cupom é opcional
+        return true;
       case "review":
         return true;
       default:
@@ -388,16 +384,13 @@ export function PaymentCheckout({
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
-      {/* Steps indicator */}
       <PaymentSteps
         currentStep={currentStep}
         completedSteps={completedSteps}
         onStepChange={handleStepChange}
       />
 
-      {/* Content */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main content */}
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
@@ -411,7 +404,6 @@ export function PaymentCheckout({
             <CardContent>{renderStepContent()}</CardContent>
           </Card>
 
-          {/* Navigation buttons */}
           <div className="flex justify-between mt-6">
             <Button
               variant="outline"
@@ -442,7 +434,6 @@ export function PaymentCheckout({
           </div>
         </div>
 
-        {/* Sidebar com resumo */}
         <div className="space-y-6">
           <CourseSummary course={course} formatCurrency={formatCurrency} />
           {feeCalculation && (
@@ -455,7 +446,6 @@ export function PaymentCheckout({
         </div>
       </div>
 
-      {/* PIX Modal */}
       {showPixModal && pixData && (
         <PixPaymentModal
           isOpen={showPixModal}

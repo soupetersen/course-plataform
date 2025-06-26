@@ -21,3 +21,4 @@ export interface QuizFormData {
   allowRetakes: boolean;
   randomizeQuestions: boolean;
 }
+

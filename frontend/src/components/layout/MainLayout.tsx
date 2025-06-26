@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { Header } from "./Header";
 import { useAuth } from "../../hooks/useAuth";
@@ -37,3 +37,4 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     </div>
   );
 };
+

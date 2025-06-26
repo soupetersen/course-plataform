@@ -108,7 +108,7 @@ export const InstructorDashboard: React.FC = () => {
 
         <TabsContent value="payments" className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Analytics Card */}
+            
             <Card>
               <CardHeader>
                 <CardTitle>Payment Analytics</CardTitle>
@@ -121,7 +121,7 @@ export const InstructorDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Payouts Card */}
+            
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -153,3 +153,4 @@ export const InstructorDashboard: React.FC = () => {
     </div>
   );
 };
+

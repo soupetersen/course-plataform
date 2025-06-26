@@ -118,3 +118,4 @@ export const uploadCourseImage = async (file: File, onProgress?: UploadProgressC
     xhr.send(formData);
   });
 };
+

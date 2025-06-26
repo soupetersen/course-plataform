@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useAdminApi } from "@/hooks/usePaymentApi";
 import {
   CreditCard,
   Smartphone,
@@ -62,6 +62,8 @@ export default function PaymentFeeCalculator({
   );
   const [loading, setLoading] = useState(true);
 
+  const { getPlatformSettings } = useAdminApi();
+
   const paymentIcons = {
     PIX: Smartphone,
     CREDIT_CARD: CreditCard,
@@ -76,25 +78,11 @@ export default function PaymentFeeCalculator({
     BOLETO: "text-orange-600 bg-orange-50",
   };
 
-  useEffect(() => {
-    loadPaymentOptions();
-  }, [coursePrice]);
-
-  useEffect(() => {
-    if (selectedMethod) {
-      loadMethodBreakdown();
-    }
-  }, [selectedMethod]);
-
-  const loadPaymentOptions = async () => {
+  const loadPaymentOptions = useCallback(async () => {
     try {
       setLoading(true);
 
-      // TODO: Substituir por chamada real à API
-      // const response = await api.get(`/payment/fees/options?amount=${coursePrice}`);
-
-      // Simular resposta da API
-      const mockOptions: PaymentFeeOption[] = [
+      const calculatedOptions: PaymentFeeOption[] = [
         {
           method: "PIX",
           description: "PIX - Taxa mais baixa",
@@ -128,31 +116,41 @@ export default function PaymentFeeCalculator({
           recommended: false,
         },
       ];
-
-      setOptions(mockOptions);
+      setOptions(calculatedOptions);
     } catch (error) {
       console.error("Erro ao carregar opções de pagamento:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [coursePrice]);
 
-  const loadMethodBreakdown = async () => {
+  const loadMethodBreakdown = useCallback(async () => {
     try {
-      // TODO: Substituir por chamada real à API
-      // const response = await api.post('/payment/fees/calculate', {
-      //   amount: coursePrice,
-      //   paymentMethod: selectedMethod
-      // });
-
-      // Simular breakdown
       const selectedOption = options.find(
         (opt) => opt.method === selectedMethod
       );
       if (!selectedOption) return;
 
       const netAmount = selectedOption.netAmount;
-      const platformFee = Math.round(netAmount * 0.1 * 100) / 100; // 10%
+
+      let platformFeePercentage = 10;
+      try {
+        const platformSettings = await getPlatformSettings();
+        if (platformSettings?.data) {
+          const platformFeeSetting = platformSettings.data.find(
+            (setting: { key: string; value: string }) =>
+              setting.key === "platform-fee-percentage"
+          );
+          if (platformFeeSetting) {
+            platformFeePercentage = parseFloat(platformFeeSetting.value) || 10;
+          }
+        }
+      } catch (error) {
+        console.warn("Usando taxa padrão da plataforma:", error);
+      }
+
+      const platformFee =
+        Math.round(netAmount * (platformFeePercentage / 100) * 100) / 100;
       const instructorAmount = netAmount - platformFee;
 
       const mockBreakdown: PaymentMethodBreakdown = {
@@ -181,7 +179,7 @@ export default function PaymentFeeCalculator({
         },
         platform: {
           fee: platformFee,
-          percentage: 10,
+          percentage: platformFeePercentage,
         },
         instructor: {
           amount: instructorAmount,
@@ -198,7 +196,23 @@ export default function PaymentFeeCalculator({
     } catch (error) {
       console.error("Erro ao calcular breakdown:", error);
     }
-  };
+  }, [
+    selectedMethod,
+    options,
+    coursePrice,
+    onMethodSelect,
+    getPlatformSettings,
+  ]);
+
+  useEffect(() => {
+    loadPaymentOptions();
+  }, [loadPaymentOptions]);
+
+  useEffect(() => {
+    if (selectedMethod) {
+      loadMethodBreakdown();
+    }
+  }, [selectedMethod, loadMethodBreakdown]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("pt-BR", {
@@ -225,7 +239,6 @@ export default function PaymentFeeCalculator({
 
   return (
     <div className="space-y-6">
-      {/* Seletor de Método de Pagamento */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -301,7 +314,6 @@ export default function PaymentFeeCalculator({
         </CardContent>
       </Card>
 
-      {/* Breakdown Detalhado */}
       {breakdown && (
         <Card>
           <CardHeader>
@@ -312,7 +324,6 @@ export default function PaymentFeeCalculator({
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Valores */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
                   <p className="text-sm text-gray-600">Aluno Paga</p>
@@ -358,7 +369,6 @@ export default function PaymentFeeCalculator({
                 </div>
               </div>
 
-              {/* Recomendação */}
               {selectedMethod !== "PIX" && (
                 <div className="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-800 rounded-lg">
                   <AlertCircle className="w-4 h-4" />

@@ -1,4 +1,4 @@
-ï»¿import { Badge } from "../../ui/badge";
+import { Badge } from "../../ui/badge";
 import { BookOpen, Clock, Users, Star } from "lucide-react";
 import type { Course, CourseRatingStats } from "@/types/api";
 
@@ -33,9 +33,9 @@ export const CourseHeader = ({
       case "BEGINNER":
         return "Iniciante";
       case "INTERMEDIATE":
-        return "IntermediÃ¡rio";
+        return "Intermediário";
       case "ADVANCED":
-        return "AvanÃ§ado";
+        return "Avançado";
       default:
         return level;
     }
@@ -56,7 +56,7 @@ export const CourseHeader = ({
         </Badge>
         {course.category && (
           <>
-            <span className="text-sm text-gray-600">â€¢</span>
+            <span className="text-sm text-gray-600">•</span>
             <span className="text-sm text-gray-600">
               {course.category.name}
             </span>
@@ -83,10 +83,10 @@ export const CourseHeader = ({
           {ratingStats ? (
             <>
               {ratingStats.averageRating.toFixed(1)} ({ratingStats.totalReviews}{" "}
-              avaliaÃ§Ãµes)
+              avaliações)
             </>
           ) : (
-            "Sem avaliaÃ§Ãµes"
+            "Sem avaliações"
           )}
         </div>
       </div>{" "}
@@ -112,3 +112,4 @@ export const CourseHeader = ({
     </div>
   );
 };
+

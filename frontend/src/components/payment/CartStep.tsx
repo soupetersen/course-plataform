@@ -46,7 +46,7 @@ export function CartStep({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      
       <div className="text-center space-y-2 animate-in fade-in duration-300">
         <h2 className="text-2xl font-bold">Revisar Produto</h2>
         <p className="text-muted-foreground">
@@ -54,7 +54,7 @@ export function CartStep({
         </p>
       </div>
 
-      {/* Course Details Card */}
+      
       <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500 delay-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -63,7 +63,7 @@ export function CartStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Course Info */}
+          
           <div className="space-y-4">
             <div className="flex justify-between items-start gap-4">
               <div className="flex-1">
@@ -94,7 +94,7 @@ export function CartStep({
               </div>
             </div>
 
-            {/* Course Stats */}
+            
             {(course.rating || course.students || course.duration) && (
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                 {course.rating && (
@@ -118,7 +118,7 @@ export function CartStep({
               </div>
             )}
 
-            {/* Course Features */}
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {course.modules && (
                 <div className="flex items-center gap-2 text-sm">
@@ -138,7 +138,7 @@ export function CartStep({
               </div>
             </div>
 
-            {/* Level Badge */}
+            
             {course.level && (
               <div className="flex gap-2">
                 <Badge className={getLevelColor(course.level)}>
@@ -158,7 +158,7 @@ export function CartStep({
 
           <Separator />
 
-          {/* Payment Type Info */}
+          
           <div className="bg-muted/50 rounded-lg p-4">
             <h4 className="font-medium mb-2">
               {isSubscription ? "Plano de Assinatura" : "Compra Única"}
@@ -170,7 +170,7 @@ export function CartStep({
             </p>
           </div>
 
-          {/* Continue Button */}
+          
           <Button
             onClick={onContinue}
             size="lg"
@@ -182,10 +182,11 @@ export function CartStep({
         </CardContent>
       </Card>
 
-      {/* Security Notice */}
+      
       <div className="text-center text-xs text-muted-foreground">
         <p>🔒 Seus dados estão protegidos com criptografia SSL</p>
       </div>
     </div>
   );
 }
+

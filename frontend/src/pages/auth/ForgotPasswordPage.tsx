@@ -44,7 +44,7 @@ export function ForgotPasswordPage() {
           handleSuccess("Código enviado para seu email!");
           navigate(`/reset-password/verify?email=${encodeURIComponent(email)}`);
         },
-        onError: (error: any) => {
+        onError: (error) => {
           handleError(error, {
             title: "Erro ao enviar código",
           });

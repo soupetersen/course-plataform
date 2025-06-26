@@ -238,7 +238,7 @@ export const UserPaymentHistory: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* Desktop Table */}
+            
             <div className="hidden md:block">
               <Table>
                 <TableHeader>
@@ -295,7 +295,7 @@ export const UserPaymentHistory: React.FC = () => {
               </Table>
             </div>
 
-            {/* Mobile Cards */}
+            
             <div className="md:hidden space-y-3">
               {payments.map((payment) => (
                 <Card key={payment.id} className="border border-gray-200">
@@ -353,3 +353,4 @@ export const UserPaymentHistory: React.FC = () => {
     </Card>
   );
 };
+

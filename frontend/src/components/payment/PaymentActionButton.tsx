@@ -86,7 +86,7 @@ export function PaymentActionButton({
   return (
     <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500">
       <CardContent className="p-6 space-y-4">
-        {/* Payment method info */}
+        
         <div className="flex items-center justify-between animate-in slide-in-from-left-4 fade-in duration-500 delay-100">
           <div className="flex items-center gap-2">
             <div className="animate-in zoom-in fade-in duration-300 delay-200">
@@ -110,13 +110,13 @@ export function PaymentActionButton({
           </div>
         </div>
 
-        {/* Security info */}
+        
         <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-500 delay-300">
           <Shield className="w-4 h-4" />
           <span>Pagamento 100% seguro e criptografado</span>
         </div>
 
-        {/* Action button */}
+        
         <Button
           onClick={onProcessPayment}
           disabled={disabled || isProcessingPayment}
@@ -140,7 +140,7 @@ export function PaymentActionButton({
           )}
         </Button>
 
-        {/* Additional info for PIX */}
+        
         {selectedPaymentMethod === "PIX" && !isProcessingPayment && (
           <div className="text-xs text-center text-muted-foreground">
             Após clicar em pagar, você receberá um QR Code para escaneá-lo no
@@ -148,14 +148,14 @@ export function PaymentActionButton({
           </div>
         )}
 
-        {/* Additional info for Credit Card */}
+        
         {selectedPaymentMethod === "CREDIT_CARD" && !isProcessingPayment && (
           <div className="text-xs text-center text-muted-foreground">
             Seu cartão será processado de forma segura pelo Mercado Pago
           </div>
         )}
 
-        {/* Additional info for Boleto */}
+        
         {selectedPaymentMethod === "BOLETO" && !isProcessingPayment && (
           <div className="text-xs text-center text-muted-foreground">
             O boleto será gerado e você poderá imprimi-lo ou copiá-lo para pagar
@@ -166,3 +166,4 @@ export function PaymentActionButton({
     </Card>
   );
 }
+

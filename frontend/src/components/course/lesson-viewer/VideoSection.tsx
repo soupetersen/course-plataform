@@ -63,7 +63,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
   };
 
   const handleSkip = (direction: "forward" | "backward") => {
-    const skipAmount = 10; // 10 segundos
+    const skipAmount = 10;
     const newTime =
       direction === "forward"
         ? Math.min(currentTime + skipAmount, duration || 0)
@@ -83,11 +83,9 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
 
   const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
-  // Garantir que a velocidade seja aplicada quando mudada
   useEffect(() => {
     if (playerRef.current) {
       console.log("Aplicando nova velocidade:", playbackRate);
-      // Forçar atualização do player
       playerRef.current.getInternalPlayer()?.load?.();
     }
   }, [playbackRate]);
@@ -104,7 +102,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
       </div>
 
       <div className="p-6 space-y-6">
-        {/* Player de Vídeo Melhorado */}
         <div
           ref={containerRef}
           className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg group"
@@ -128,7 +125,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               }
               onDuration={() => {}}
               onReady={() => {
-                // Garantir que a velocidade seja aplicada quando o player estiver pronto
                 console.log(
                   "Player ready, setting playback rate to:",
                   playbackRate
@@ -167,10 +163,8 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
             </div>
           )}
 
-          {/* Controles Customizados */}
           {showControls && (
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
-              {/* Barra de Progresso */}
               <div className="mb-3">
                 <Slider
                   value={[currentTime]}
@@ -183,7 +177,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  {/* Play/Pause */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -197,7 +190,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     )}
                   </Button>
 
-                  {/* Skip Buttons */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -216,7 +208,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     <SkipForward className="w-4 h-4" />
                   </Button>
 
-                  {/* Volume */}
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="ghost"
@@ -239,7 +230,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     </div>
                   </div>
 
-                  {/* Tempo */}
                   <span className="text-white text-sm font-medium ml-2">
                     {formatTime(currentTime)}{" "}
                     {duration && `/ ${formatTime(duration)}`}
@@ -247,7 +237,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  {/* Velocidade de Reprodução */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
@@ -284,7 +273,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  {/* Fullscreen */}
                   <Button
                     variant="ghost"
                     size="sm"
@@ -299,7 +287,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
           )}
         </div>
 
-        {/* Conteúdo adicional da lição */}
         {content && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
@@ -312,7 +299,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
           </div>
         )}
 
-        {/* Controles e Progresso */}
         <div className="bg-gray-50 rounded-lg p-4 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-gray-600">

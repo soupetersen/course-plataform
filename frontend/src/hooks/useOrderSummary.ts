@@ -6,8 +6,8 @@ interface OrderSummary {
   finalPrice: number;
   platformFee: number;
   instructorAmount: number;
-  stripeFeeEstimate: number; // Apenas para exibição
-  totalWithFees: number; // Mesmo valor que finalPrice
+  stripeFeeEstimate: number;
+  totalWithFees: number; 
   coupon: {
     code: string;
     discountType: string;
@@ -72,3 +72,4 @@ export const useOrderSummary = (): UseOrderSummaryResult => {
     calculateSummary,
   };
 };
+

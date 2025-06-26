@@ -21,8 +21,8 @@ interface PixPaymentModalProps {
     amount: number;
     currency: string;
     paymentId: string;
-    expirationDate?: string; // Data de expiração do PIX
-    expirationMinutes?: number; // Minutos de expiração configurados
+    expirationDate?: string;
+    expirationMinutes?: number;
   };
   onPaymentConfirmed?: () => void;
 }
@@ -33,7 +33,6 @@ export function PixPaymentModal({
   pixData,
   onPaymentConfirmed,
 }: PixPaymentModalProps) {
-  // Calcular tempo de expiração real baseado nos dados do backend
   const getInitialTimeLeft = useCallback(() => {
     if (pixData.expirationDate) {
       const now = new Date();
@@ -59,7 +58,6 @@ export function PixPaymentModal({
         Math.floor(timeLeftSeconds / 60)
       );
 
-      // Se o tempo calculado for negativo ou muito pequeno, usar fallback
       if (timeLeftSeconds <= 10) {
         console.log("⚠️ Tempo muito pequeno, usando fallback");
         const fallbackTime = pixData.expirationMinutes
@@ -71,7 +69,6 @@ export function PixPaymentModal({
 
       return timeLeftSeconds;
     }
-    // Fallback para tempo padrão se não tiver dados de expiração
     const fallbackTime = pixData.expirationMinutes
       ? pixData.expirationMinutes * 60
       : 900;
@@ -87,7 +84,6 @@ export function PixPaymentModal({
   const [generatedQrCode, setGeneratedQrCode] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Gerar QR Code se não vier da API
   useEffect(() => {
     const generateQrCode = async () => {
       if (!pixData.qrCodeBase64 && pixData.qrCode) {
@@ -112,7 +108,6 @@ export function PixPaymentModal({
     }
   }, [isOpen, pixData.qrCode, pixData.qrCodeBase64]);
 
-  // Recalcular timeLeft quando pixData mudar
   useEffect(() => {
     setTimeLeft(getInitialTimeLeft());
   }, [getInitialTimeLeft]);
@@ -304,7 +299,6 @@ export function PixPaymentModal({
 
           {paymentStatus === "pending" && (
             <>
-              {/* QR Code - da API ou gerado localmente */}
               {(pixData.qrCodeBase64 || generatedQrCode) && (
                 <Card>
                   <CardContent className="pt-2 pb-1">

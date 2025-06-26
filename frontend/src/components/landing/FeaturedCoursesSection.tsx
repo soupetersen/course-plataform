@@ -1,4 +1,4 @@
-﻿import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Badge } from "../ui/badge";
@@ -101,7 +101,7 @@ export const FeaturedCoursesSection = () => {
                       {course.title}
                     </h3>
                     <p className="text-muted-foreground text-xs md:text-sm mb-2 md:mb-3 break-words leading-relaxed">
-                      Por {course.instructor?.name || "Instrutor não informado"}
+                      Por {course.instructor?.name || "Instrutor n�o informado"}
                     </p>
                     <div className="flex items-center text-xs md:text-sm text-muted-foreground mb-3 md:mb-4">
                       <Users className="h-3 w-3 md:h-4 md:w-4 mr-1 flex-shrink-0" />
@@ -153,3 +153,4 @@ export const FeaturedCoursesSection = () => {
     </section>
   );
 };
+

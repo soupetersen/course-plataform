@@ -132,3 +132,4 @@ export const CourseReviewPrompt: React.FC<CourseReviewPromptProps> = ({
     </Card>
   );
 };
+

@@ -1,6 +1,5 @@
 import { Payment } from './payment';
 
-// Query keys para React Query
 export const queryKeys = {
   auth: ['auth'],
   user: (id: string) => ['user', id],
@@ -37,7 +36,6 @@ export interface ForgotPasswordRequest {
   email: string;
 }
 
-// Auth types
 export interface AuthResponse {
   success: boolean;
   data: {
@@ -177,7 +175,6 @@ export interface UpdateCourseRequest {
   isPublished?: boolean;
 }
 
-// Course input types
 export interface CreateCourseInput {
   title: string;
   description: string;
@@ -485,7 +482,6 @@ export interface InstructorAnalytics {
   }[];
 }
 
-// Module input types
 export interface CreateModuleInput {
   title: string;
   description?: string;
@@ -493,7 +489,6 @@ export interface CreateModuleInput {
   courseId: string;
 }
 
-// Lesson types
 export type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'ASSIGNMENT';
 
 export interface CreateLessonInput {
@@ -524,7 +519,6 @@ export interface UpdateLessonInput {
   quizPassingScore?: number;
 }
 
-// Review types
 export interface CreateReviewInput {
   rating: number;
   comment?: string;
@@ -548,7 +542,6 @@ export interface CourseRatingStats {
   };
 }
 
-// Comment types
 export interface LessonComment {
   id: string;
   content: string;
@@ -591,3 +584,4 @@ export type ApiEndpoints = {
   updateReview: (id: string, data: UpdateReviewRequest) => Review;
   deleteReview: (id: string) => { success: boolean };
 };
+

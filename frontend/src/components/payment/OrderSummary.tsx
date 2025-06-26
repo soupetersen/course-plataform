@@ -56,7 +56,7 @@ export function OrderSummary({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Course Info */}
+        
         <div className="space-y-2">
           <h3 className="font-medium text-sm">{course.title}</h3>
           <div className="flex justify-between items-center">
@@ -71,7 +71,7 @@ export function OrderSummary({
           </div>
         </div>
 
-        {/* Applied Coupon */}
+        
         {appliedCoupon && (
           <div className="space-y-2">
             <Separator />
@@ -98,7 +98,7 @@ export function OrderSummary({
           </div>
         )}
 
-        {/* Fee Breakdown */}
+        
         {feeCalculation && (
           <div className="space-y-2">
             <Separator />
@@ -143,7 +143,7 @@ export function OrderSummary({
           </div>
         )}
 
-        {/* Total */}
+        
         <div className="space-y-2">
           <Separator />
           <div className="flex justify-between items-center font-bold text-lg">
@@ -162,3 +162,4 @@ export function OrderSummary({
     </Card>
   );
 }
+

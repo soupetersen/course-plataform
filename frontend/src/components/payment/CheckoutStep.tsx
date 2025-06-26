@@ -142,7 +142,7 @@ export function CheckoutStep({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      
       <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-400">
         <h2 className="text-2xl font-bold">Finalizar Pagamento</h2>
         <p className="text-muted-foreground">
@@ -150,7 +150,7 @@ export function CheckoutStep({
         </p>
       </div>
 
-      {/* Aviso de Pagamento Pendente */}
+      
       {hasPendingPayment && (
         <Card className="border-yellow-200 bg-yellow-50 animate-in slide-in-from-top-4 duration-400">
           <CardContent className="pt-6">
@@ -183,7 +183,7 @@ export function CheckoutStep({
         </Card>
       )}
 
-      {/* Course Summary */}
+      
       <Card className="shadow-sm animate-in zoom-in-95 fade-in duration-500 delay-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -192,7 +192,7 @@ export function CheckoutStep({
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Course Info */}
+          
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-medium">{course.title}</h3>
@@ -212,7 +212,7 @@ export function CheckoutStep({
             </div>
           </div>
 
-          {/* Applied Coupon */}
+          
           {appliedCoupon && (
             <div className="space-y-2">
               <Separator />
@@ -239,7 +239,7 @@ export function CheckoutStep({
             </div>
           )}
 
-          {/* Fee Breakdown */}
+          
           {feeCalculation && (
             <div className="space-y-2">
               <Separator />
@@ -284,7 +284,7 @@ export function CheckoutStep({
             </div>
           )}
 
-          {/* Total */}
+          
           <div className="space-y-2">
             <Separator />
             <div className="flex justify-between items-center font-bold text-lg">
@@ -300,7 +300,7 @@ export function CheckoutStep({
         </CardContent>
       </Card>
 
-      {/* Payment Method Confirmation */}
+      
       <Card className="shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -324,7 +324,7 @@ export function CheckoutStep({
             </Button>
           </div>
 
-          {/* Payment Method Info */}
+          
           <div className="mt-3 text-sm text-muted-foreground">
             {selectedPaymentMethod === "PIX" && (
               <p>
@@ -344,16 +344,16 @@ export function CheckoutStep({
         </CardContent>
       </Card>
 
-      {/* Security and Action */}
+      
       <Card className="shadow-sm animate-in slide-in-from-bottom-6 fade-in duration-600 delay-300">
         <CardContent className="p-6 space-y-4">
-          {/* Security info */}
+          
           <div className="flex items-center gap-2 text-sm text-muted-foreground animate-in fade-in duration-500 delay-500">
             <Shield className="w-4 h-4" />
             <span>Pagamento 100% seguro e criptografado</span>
           </div>
 
-          {/* Action buttons */}
+          
           <div className="flex gap-3 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-600">
             <Button
               variant="outline"
@@ -398,3 +398,4 @@ export function CheckoutStep({
     </div>
   );
 }
+

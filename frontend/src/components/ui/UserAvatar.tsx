@@ -11,7 +11,6 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   size = "md",
   className = "",
 }) => {
-  // Função para gerar iniciais do nome
   const getInitials = (fullName: string): string => {
     return fullName
       .split(" ")
@@ -20,7 +19,6 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       .join("");
   };
 
-  // Função para gerar cor baseada no nome
   const getColorFromName = (name: string): string => {
     const colors = [
       "bg-blue-500",

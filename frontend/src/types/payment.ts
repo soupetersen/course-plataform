@@ -488,3 +488,4 @@ export interface CouponListResponse {
     total: number;
   };
 }
+

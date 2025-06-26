@@ -32,7 +32,6 @@ export function SavedCardSelector({
       const cards = await savedCardsService.getUserSavedCards();
       setSavedCards(cards);
 
-      // Se houver um cartão padrão, selecione-o
       const defaultCard = cards.find((card) => card.isDefault);
       if (defaultCard) {
         setSelectedCardId(defaultCard.id);
@@ -81,7 +80,6 @@ export function SavedCardSelector({
 
       setSavedCards((prev) => prev.filter((card) => card.id !== cardId));
 
-      // Se o cartão deletado estava selecionado, selecionar outro
       if (selectedCardId === cardId) {
         const remainingCards = savedCards.filter((card) => card.id !== cardId);
         if (remainingCards.length > 0) {
@@ -164,7 +162,6 @@ export function SavedCardSelector({
       </CardHeader>
       <CardContent className="space-y-4">
         <RadioGroup value={selectedCardId} onValueChange={setSelectedCardId}>
-          {/* Opção para novo cartão */}
           <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
             <RadioGroupItem value="new" id="new" disabled={isLoading} />
             <Label
@@ -176,7 +173,6 @@ export function SavedCardSelector({
             </Label>
           </div>
 
-          {/* Cartões salvos */}
           {savedCards.map((card) => (
             <div
               key={card.id}
@@ -240,7 +236,6 @@ export function SavedCardSelector({
           ))}
         </RadioGroup>
 
-        {/* Campo CVV para cartão salvo */}
         {selectedCardId !== "new" && (
           <div className="space-y-2 pt-2 border-t">
             <Label

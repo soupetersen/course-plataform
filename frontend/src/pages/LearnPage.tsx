@@ -9,7 +9,6 @@ import {
   CheckCircle,
   Star,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Collapsible,
@@ -24,6 +23,7 @@ import { useMyReviews, useCreateReview } from "@/hooks/useReviews";
 import { useLessonWebSocket } from "@/hooks/useLessonWebSocket";
 import { CourseReviewSection } from "@/components/course/lesson-viewer/CourseReviewSection";
 import LessonViewer from "@/components/course/LessonViewer";
+import { Button } from "@/components/ui/button";
 
 export function LearnPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -88,14 +88,10 @@ export function LearnPage() {
     }
   }, [courseId]);
 
-  // Detectar quando o progresso muda via WebSocket para mostrar review automaticamente
   useEffect(() => {
     if (lessonProgress?.isCompleted && canReview && !reviewDismissed) {
-      // Pequeno delay para dar tempo do progresso ser atualizado no backend
       const timer = setTimeout(() => {
-        // Verificar novamente se ainda pode revisar depois da conclusão da lição
         if (progress >= 20 && !hasReviewed && !reviewDismissed) {
-          // Abrir automaticamente o modal de review
           setIsReviewModalOpen(true);
         }
       }, 1000);
@@ -110,13 +106,11 @@ export function LearnPage() {
     hasReviewed,
   ]);
 
-  // Carregar aulas concluídas dos dados dos módulos
   useEffect(() => {
     if (modules.length > 0) {
       const completed = new Set<string>();
       modules.forEach((module) => {
         module.lessons?.forEach((lesson) => {
-          // Verificar se a aula está concluída através do progresso
           if (lesson.progress && lesson.progress.isCompleted) {
             completed.add(lesson.id);
           }
@@ -132,7 +126,6 @@ export function LearnPage() {
     }
   }, [modules]);
 
-  // Atualizar aulas concluídas quando uma lição for completada
   useEffect(() => {
     console.log("🔍 Debug - lessonProgress:", lessonProgress);
     console.log("🔍 Debug - selectedLessonId:", selectedLessonId);
@@ -148,18 +141,15 @@ export function LearnPage() {
     }
   }, [lessonProgress, selectedLessonId]);
 
-  // Selecionar o primeiro módulo por padrão e a próxima aula não concluída
   useEffect(() => {
     if (!selectedModuleId && modules.length > 0) {
       setSelectedModuleId(modules[0].id);
       setOpenModules((prev) => ({ ...prev, [modules[0].id]: true }));
     }
 
-    // Selecionar automaticamente a próxima aula não concluída se nenhuma estiver selecionada
     if (!selectedLessonId && modules.length > 0 && !isLoadingProgress) {
       let nextLesson: { id: string; moduleId: string } | null = null;
 
-      // Procurar a primeira aula não concluída
       for (const module of modules) {
         if (module.lessons) {
           for (const lesson of module.lessons) {
@@ -172,7 +162,6 @@ export function LearnPage() {
         }
       }
 
-      // Se encontrou uma aula não concluída, selecione ela
       if (nextLesson) {
         setSelectedLessonId(nextLesson.id);
         setSelectedModuleId(nextLesson.moduleId);
@@ -199,7 +188,6 @@ export function LearnPage() {
     setSelectedLessonId(null);
   };
 
-  // Função para submeter a review
   const handleReviewSubmit = async (data: {
     rating: number;
     comment: string;
@@ -211,7 +199,6 @@ export function LearnPage() {
         comment: data.comment,
       });
       setIsReviewModalOpen(false);
-      // Remover o estado de dispensado quando a review for enviada
       localStorage.removeItem(`review_dismissed_${courseId}`);
       setReviewDismissed(false);
     } catch (error) {
@@ -219,7 +206,6 @@ export function LearnPage() {
     }
   };
 
-  // Função para dispensar o prompt de review temporariamente
   const handleDismissReview = () => {
     if (courseId) {
       localStorage.setItem(`review_dismissed_${courseId}`, "true");
@@ -279,10 +265,8 @@ export function LearnPage() {
 
   return (
     <div className="h-full bg-gradient-to-br from-gray-50 to-blue-50/30 flex">
-      {/* Sidebar - Módulos */}
       <div className="w-80 bg-white/95 backdrop-blur-sm border-r border-gray-200/50 overflow-y-auto shadow-xl">
         <div className="p-4">
-          {/* Header do Curso */}
           <div className="mb-6">
             <div className="bg-gradient-to-r from-primary/5 via-blue-50/50 to-indigo-50/30 rounded-xl p-5 border border-primary/10 shadow-sm backdrop-blur-sm">
               <div className="flex items-center justify-between mb-3">
@@ -315,7 +299,6 @@ export function LearnPage() {
                 </div>
               </div>
 
-              {/* Progresso */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-700 font-medium">
@@ -364,13 +347,11 @@ export function LearnPage() {
             </div>
           </div>
 
-          {/* Lista de Módulos */}
           <div className="space-y-1.5">
             {modules.map((module, moduleIndex) => {
               const isOpen = openModules[module.id];
               const isSelected = selectedModuleId === module.id;
 
-              // Calcular progresso do módulo
               const totalLessonsInModule = module.lessons?.length || 0;
               const completedLessonsInModule =
                 module.lessons?.filter((lesson) => {
@@ -393,7 +374,6 @@ export function LearnPage() {
                       : "border-l-gray-200 bg-white hover:border-l-primary/50 hover:bg-gray-50/50"
                   }`}
                 >
-                  {/* Badge de status simplificado */}
                   {moduleProgress === 100 && (
                     <div className="absolute top-2 right-2 z-10">
                       <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
@@ -568,7 +548,6 @@ export function LearnPage() {
         </div>
       </div>
 
-      {/* Conteúdo Principal */}
       <div className="flex-1 overflow-y-auto bg-white">
         {selectedLessonId && courseId ? (
           <LessonViewer

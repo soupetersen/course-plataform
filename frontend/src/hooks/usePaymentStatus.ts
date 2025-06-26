@@ -63,7 +63,6 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
         const paymentData = data.data;
         setPayment(paymentData);
         
-        // Se o pagamento foi finalizado, parar polling e chamar callback
         if (['COMPLETED', 'FAILED', 'CANCELLED', 'REFUNDED'].includes(paymentData.status)) {
           stopPolling();
           if (onCompleteRef.current) {
@@ -74,15 +73,12 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
         const errorMessage = data.error || 'Erro ao verificar status do pagamento';
         setError(errorMessage);
         
-        // Se o pagamento não for encontrado, parar o polling
         if (errorMessage.includes('Pagamento não encontrado') || errorMessage.includes('Payment not found')) {
           console.log('Pagamento não encontrado, parando polling...');
           stopPolling();
-          // Callback específico para pagamento não encontrado
           if (onNotFoundRef.current) {
             onNotFoundRef.current();
           }
-          // Callback padrão com status de erro se existir
           if (onCompleteRef.current) {
             onCompleteRef.current({ 
               id: targetId, 
@@ -99,10 +95,6 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
       const errorMessage = 'Erro de conexão ao verificar pagamento';
       setError(errorMessage);
       console.error('Payment status error:', err);
-      
-      // Se houver erro de conexão durante o polling, parar após algumas tentativas
-      // Este é um caso mais complexo que pode ser implementado com contador de tentativas
-      // Por agora, apenas logamos o erro
     } finally {
       setLoading(false);
     }
@@ -113,17 +105,14 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
     onComplete?: (status: PaymentStatus) => void,
     onNotFound?: () => void
   ) => {
-    // Parar polling anterior se existir
     stopPolling();
     
     setIsPolling(true);
     onCompleteRef.current = onComplete;
     onNotFoundRef.current = onNotFound;
     
-    // Primeira busca imediata
     fetchPaymentStatus(id);
     
-    // Configurar polling a cada 3 segundos
     intervalRef.current = setInterval(() => {
       fetchPaymentStatus(id);
     }, 3000);
@@ -133,7 +122,6 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
     await fetchPaymentStatus();
   }, [fetchPaymentStatus]);
 
-  // Cleanup no unmount
   useEffect(() => {
     return () => {
       stopPolling();
@@ -156,3 +144,4 @@ export const usePaymentStatus = (paymentId: string | null): UsePaymentStatusResu
     stopPolling,
   };
 };
+

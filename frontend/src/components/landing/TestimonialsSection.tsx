@@ -1,4 +1,4 @@
-ï»¿import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Star } from "lucide-react";
 
 export const TestimonialsSection = () => {
@@ -7,7 +7,7 @@ export const TestimonialsSection = () => {
       name: "Ana Carolina",
       role: "Desenvolvedora Frontend",
       content:
-        "Os cursos me ajudaram a conseguir minha primeira vaga como dev. ConteÃºdo excelente!",
+        "Os cursos me ajudaram a conseguir minha primeira vaga como dev. Conteúdo excelente!",
       rating: 5,
     },
     {
@@ -34,7 +34,7 @@ export const TestimonialsSection = () => {
             O que nossos alunos dizem
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            HistÃ³rias reais de transformaÃ§Ã£o e sucesso
+            Histórias reais de transformação e sucesso
           </p>
         </div>
 
@@ -74,3 +74,4 @@ export const TestimonialsSection = () => {
     </section>
   );
 };
+

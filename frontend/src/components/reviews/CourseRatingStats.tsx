@@ -77,3 +77,4 @@ export const CourseRatingStatsComponent: React.FC<CourseRatingStatsProps> = ({
     </Card>
   );
 };
+

@@ -109,7 +109,7 @@ export const EditCoursePage = () => {
             title: "Erro no upload da imagem",
             description: "Verifique sua conexão e tente novamente",
           });
-          return; // Parar aqui se o upload falhou
+          return;
         } finally {
           setIsUploadingImage(false);
         }
@@ -155,10 +155,8 @@ export const EditCoursePage = () => {
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Limpar erro anterior
       setUploadError(null);
 
-      // Validar tipo de arquivo
       if (!file.type.startsWith("image/")) {
         const errorMsg = "Por favor, selecione um arquivo de imagem válido.";
         setUploadError(errorMsg);
@@ -167,8 +165,7 @@ export const EditCoursePage = () => {
         return;
       }
 
-      // Validar tamanho (10MB máximo)
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
         const errorMsg = "A imagem deve ter no máximo 10MB.";
         setUploadError(errorMsg);
@@ -486,3 +483,4 @@ export const EditCoursePage = () => {
     </div>
   );
 };
+

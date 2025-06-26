@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   Home,
@@ -29,7 +29,6 @@ export const Sidebar = ({
   const location = useLocation();
   const { user } = useAuth();
 
-  // Fechar sidebar mobile ao navegar
   useEffect(() => {
     if (setIsMobileOpen) {
       setIsMobileOpen(false);
@@ -85,14 +84,12 @@ export const Sidebar = ({
   const isActive = (href: string) => location.pathname === href;
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside
         className={cn(
           "hidden lg:fixed lg:left-0 lg:top-16 lg:block h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-all duration-300 z-40",
           isCollapsed ? "w-16" : "w-64"
         )}
       >
-        {/* Toggle Button */}
         <div className="absolute -right-3 top-6">
           <Button
             variant="outline"
@@ -108,7 +105,6 @@ export const Sidebar = ({
           </Button>
         </div>
 
-        {/* Navigation */}
         <nav className="p-4 space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -132,14 +128,12 @@ export const Sidebar = ({
           })}
         </nav>
       </aside>{" "}
-      {/* Mobile Sidebar Overlay */}
       {isMobileOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
           onClick={() => setIsMobileOpen?.(false)}
         />
       )}
-      {/* Mobile Sidebar */}
       <aside
         className={cn(
           "lg:hidden fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white border-r border-gray-200 transition-transform duration-300 z-50 w-64",
@@ -147,7 +141,6 @@ export const Sidebar = ({
         )}
       >
         {" "}
-        {/* Close Button */}
         <div className="absolute right-4 top-4">
           <Button
             variant="ghost"
@@ -158,7 +151,6 @@ export const Sidebar = ({
             <X className="h-4 w-4" />
           </Button>
         </div>
-        {/* Navigation */}
         <nav className="p-4 space-y-2 pt-16">
           {menuItems.map((item) => {
             const Icon = item.icon;

@@ -28,3 +28,4 @@ export function ErrorProvider({ children }: ErrorProviderProps) {
     </ErrorContext.Provider>
   );
 }
+

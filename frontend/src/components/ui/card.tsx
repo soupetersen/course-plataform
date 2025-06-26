@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { cn } from "@/lib/utils";
 import { VariantProps, cva } from "class-variance-authority";
 
@@ -259,3 +259,4 @@ export {
   CardDescription,
   CardContent,
 };
+

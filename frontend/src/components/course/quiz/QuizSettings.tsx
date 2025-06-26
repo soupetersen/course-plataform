@@ -88,3 +88,4 @@ export const QuizSettings: React.FC<QuizSettingsProps> = ({
     </Card>
   );
 };
+

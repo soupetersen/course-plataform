@@ -38,7 +38,6 @@ export const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      // Aqui você pode implementar a lógica para salvar os dados do perfil
       setIsEditing(false);
     } catch (error) {
       console.error("Erro ao salvar perfil:", error);
@@ -61,7 +60,6 @@ export const ProfilePage = () => {
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      // 2MB
       toast({
         title: "Erro",
         description: "A imagem deve ter no máximo 2MB.",
@@ -73,7 +71,6 @@ export const ProfilePage = () => {
     setIsUploadingAvatar(true);
 
     try {
-      // Upload do avatar
       const formData = new FormData();
       formData.append("file", file);
 
@@ -84,7 +81,6 @@ export const ProfilePage = () => {
       });
 
       if (uploadResponse.data.success) {
-        // Atualizar perfil com a nova URL do avatar
         const avatarUrl = uploadResponse.data.data.url;
 
         const profileResponse = await api.put("/api/auth/profile", {
@@ -96,8 +92,7 @@ export const ProfilePage = () => {
             title: "Sucesso!",
             description: "Avatar atualizado com sucesso!",
           });
-          // Atualizar o contexto do usuário ou recarregar os dados
-          window.location.reload(); // Temporário - melhor seria atualizar o contexto
+          window.location.reload();
         }
       }
     } catch (error) {
@@ -173,7 +168,7 @@ export const ProfilePage = () => {
               </AvatarFallback>
             </Avatar>
 
-            {/* Botão de upload de avatar */}
+            
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploadingAvatar}
@@ -186,7 +181,7 @@ export const ProfilePage = () => {
               )}
             </button>
 
-            {/* Input oculto para upload */}
+            
             <input
               ref={fileInputRef}
               type="file"
@@ -466,3 +461,4 @@ export const ProfilePage = () => {
     </div>
   );
 };
+

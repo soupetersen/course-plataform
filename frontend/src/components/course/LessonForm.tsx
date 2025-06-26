@@ -154,26 +154,21 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Limpar erro anterior
     setUploadError(null);
 
-    // Validar tipo de arquivo
     if (!file.type.startsWith("video/")) {
       const errorMsg = "Por favor, selecione um arquivo de vídeo válido.";
       setUploadError(errorMsg);
       handleError(errorMsg, { title: "Arquivo inválido" });
-      // Limpar input para permitir re-seleção do mesmo arquivo
       event.target.value = "";
       return;
     }
 
-    // Validar tamanho (50MB máximo - conforme o backend)
     const maxSize = 50 * 1024 * 1024; // 50MB
     if (file.size > maxSize) {
       const errorMsg = "O arquivo de vídeo deve ter no máximo 50MB.";
       setUploadError(errorMsg);
       handleError(errorMsg, { title: "Arquivo muito grande" });
-      // Limpar input para permitir re-seleção do mesmo arquivo
       event.target.value = "";
       return;
     }
@@ -181,7 +176,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
     setIsUploadingVideo(true);
     setUploadProgress(0);
     try {
-      // Upload real para S3 via backend
       const response = (await uploadVideo.mutateAsync({
         file,
         onProgress: (progress) => {
@@ -191,9 +185,8 @@ export const LessonForm: React.FC<LessonFormProps> = ({
 
       if (response && response.url) {
         setValue("videoUrl", response.url);
-        setUploadError(null); // Limpar erro em caso de sucesso
+        setUploadError(null);
 
-        // Usar duração do backend se disponível, senão calcular no frontend
         if (response.duration && response.duration > 0) {
           setValue("duration", response.duration);
           handleSuccess(
@@ -202,7 +195,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
             }`
           );
         } else {
-          // Fallback para detecção no frontend
           const video = document.createElement("video");
           video.preload = "metadata";
           video.onloadedmetadata = () => {
@@ -228,7 +220,6 @@ export const LessonForm: React.FC<LessonFormProps> = ({
       });
     } finally {
       setIsUploadingVideo(false);
-      // Limpar input para permitir re-seleção do mesmo arquivo
       event.target.value = "";
     }
   };

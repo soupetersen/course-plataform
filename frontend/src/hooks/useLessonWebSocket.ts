@@ -57,7 +57,7 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     }
 
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return; // Já conectado
+      return;
     }
 
     try {
@@ -151,7 +151,6 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
         setIsConnected(false);
         setConnectionState('disconnected');
         
-        // Tentar reconectar automaticamente
         if (reconnectAttempts.current < maxReconnectAttempts) {
           reconnectAttempts.current++;
           const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 30000);
@@ -203,7 +202,6 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     }
   }, []);
 
-  // Métodos públicos
   const joinLesson = useCallback((lessonId: string, courseId: string) => {
     sendMessage({
       type: 'join_lesson',
@@ -239,18 +237,16 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     });
   }, [sendMessage]);
 
-  // Ping para manter conexão viva
   useEffect(() => {
     if (!isConnected) return;
 
     const pingInterval = setInterval(() => {
       sendMessage({ type: 'ping', data: {} });
-    }, 30000); // Ping a cada 30 segundos
+    }, 30000);
 
     return () => clearInterval(pingInterval);
   }, [isConnected, sendMessage]);
 
-  // Conectar automaticamente quando tiver token
   useEffect(() => {
     if (token) {
       connect();
@@ -261,7 +257,6 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     };
   }, [token, connect, disconnect]);
 
-  // Cleanup ao desmontar
   useEffect(() => {
     return () => {
       disconnect();
@@ -283,3 +278,4 @@ export const useLessonWebSocket = (token?: string): UseLessonWebSocketReturn => 
     error
   };
 };
+

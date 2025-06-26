@@ -1,4 +1,4 @@
-﻿import { Navigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 interface ProtectedRouteProps {
@@ -42,3 +42,4 @@ export const ProtectedRoute = ({
 
   return <>{children}</>;
 };
+

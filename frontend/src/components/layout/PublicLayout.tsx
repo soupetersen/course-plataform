@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import { PublicHeader } from "./PublicHeader";
 
 interface PublicLayoutProps {
@@ -13,3 +13,4 @@ export function PublicLayout({ children }: PublicLayoutProps) {
     </div>
   );
 }
+

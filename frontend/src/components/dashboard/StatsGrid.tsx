@@ -1,4 +1,4 @@
-﻿import { Card, CardContent } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { BookOpen, Clock, Star, TrendingUp } from "lucide-react";
 import type { Enrollment } from "../../types/api";
 
@@ -30,7 +30,7 @@ export const StatsGrid = ({ enrollments }: StatsGridProps) => {
       bgColor: "bg-tertiary/10",
     },
     {
-      title: "Progresso Médio",
+      title: "Progresso M�dio",
       value: `${Math.round(
         enrollments.reduce((acc, e) => acc + e.progress, 0) /
           enrollments.length || 0
@@ -70,3 +70,4 @@ export const StatsGrid = ({ enrollments }: StatsGridProps) => {
     </div>
   );
 };
+

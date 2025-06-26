@@ -182,7 +182,6 @@ export function usePaymentApi() {
     []
   );
 
-  // Admin payment functions
   const approvePayment = useCallback(
     async (paymentId: string, reason?: string): Promise<PaymentApprovalResponse | null> => {
       try {
@@ -256,7 +255,6 @@ export function usePaymentApi() {
     requestRefund,
     getUserPayments,
     getUserRefundRequests,
-    // Admin functions
     approvePayment,
     rejectPayment,
     getAllPayments,
@@ -940,3 +938,4 @@ export const paymentUtils = {
     return texts[status] || status;
   },
 };
+

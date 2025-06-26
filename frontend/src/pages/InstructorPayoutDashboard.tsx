@@ -64,7 +64,6 @@ export default function InstructorPayoutDashboard() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Formulário de saque
   const [payoutAmount, setPayoutAmount] = useState("");
   const [payoutMethod, setPayoutMethod] = useState<"PIX" | "BANK_TRANSFER">(
     "PIX"
@@ -75,7 +74,6 @@ export default function InstructorPayoutDashboard() {
     try {
       setLoading(true);
 
-      // Chamadas reais à API usando os hooks
       const [balanceData, historyData, transactionsData] = await Promise.all([
         getBalance(),
         getPayoutHistory(),
@@ -124,7 +122,6 @@ export default function InstructorPayoutDashboard() {
     try {
       setIsRequestingPayout(true);
 
-      // Chamada real à API usando o hook
       const result = await apiRequestPayout({
         amount: parseFloat(payoutAmount),
         method: payoutMethod,
@@ -136,7 +133,7 @@ export default function InstructorPayoutDashboard() {
           description: "Solicitação de saque enviada com sucesso!",
         });
         setPayoutAmount("");
-        loadData(); // Recarregar dados
+        loadData();
       } else {
         throw new Error("Falha ao processar solicitação");
       }
@@ -214,7 +211,7 @@ export default function InstructorPayoutDashboard() {
         <h1 className="text-3xl font-bold">Pagamentos</h1>
       </div>
 
-      {/* Cards de Resumo */}
+      
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -274,7 +271,7 @@ export default function InstructorPayoutDashboard() {
         </Card>
       </div>
 
-      {/* Seção de Saque */}
+      
       <Card>
         <CardHeader>
           <CardTitle>Solicitar Saque</CardTitle>
@@ -340,7 +337,7 @@ export default function InstructorPayoutDashboard() {
         </CardContent>
       </Card>
 
-      {/* Tabs de Histórico */}
+      
       <Tabs defaultValue="payouts" className="w-full">
         <TabsList>
           <TabsTrigger value="payouts">Histórico de Saques</TabsTrigger>
@@ -434,3 +431,4 @@ export default function InstructorPayoutDashboard() {
     </div>
   );
 }
+

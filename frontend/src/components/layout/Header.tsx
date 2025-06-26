@@ -1,4 +1,4 @@
-ï»¿import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -30,9 +30,9 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 w-full min-h-[64px]">
       <div className="max-w-full px-2 sm:px-4 lg:px-6">
         <div className="flex justify-between items-center h-16 min-h-[64px]">
-          {/* Left side - Logo and Navigation */}
+          
           <div className="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
-            {/* Mobile Menu Button (apenas quando autenticado) */}
+            
             {user && (
               <Button
                 variant="ghost"
@@ -54,7 +54,7 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
             </Link>
           </div>
 
-          {/* Right side - User Actions */}
+          
           <div className="flex items-center space-x-2 md:space-x-4 flex-shrink-0">
             {user ? (
               <DropdownMenu>
@@ -95,7 +95,7 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem onClick={() => navigate("/settings")}>
-                    ConfiguraÃ§Ãµes
+                    Configurações
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
@@ -128,3 +128,4 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
     </header>
   );
 }
+

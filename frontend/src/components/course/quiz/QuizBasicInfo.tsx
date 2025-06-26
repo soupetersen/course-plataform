@@ -68,3 +68,4 @@ export const QuizBasicInfo: React.FC<QuizBasicInfoProps> = ({
     </>
   );
 };
+

@@ -71,7 +71,7 @@ export function MyLearningPage() {
         key={enrollment.id}
         className="hover:shadow-lg transition-shadow cursor-pointer overflow-hidden"
       >
-        {/* Imagem do curso - altura reduzida */}
+        
         <div className="h-32 bg-gray-200 flex items-center justify-center overflow-hidden">
           {course.imageUrl ? (
             <img
@@ -84,16 +84,16 @@ export function MyLearningPage() {
           )}
         </div>
 
-        {/* Header compacto */}
+        
         <CardHeader className="pb-2 pt-3">
           <div className="flex justify-between items-start gap-2 mb-2">
-            {/* Badge de categoria - só exibe se tiver dados */}
+            
             {course.category?.name && (
               <Badge variant="secondary" className="text-xs shrink-0">
                 {course.category.name}
               </Badge>
             )}
-            {/* Badge de conclusão - só exibe se estiver concluído */}
+            
             {enrollment.progress === 100 && (
               <Badge
                 variant="default"
@@ -109,15 +109,15 @@ export function MyLearningPage() {
             {course.title || "Título não disponível"}
           </CardTitle>
 
-          {/* Instrutor */}
+          
           <div className="text-xs text-gray-600">
             por {course.instructor?.name || "Instrutor não definido"}
           </div>
         </CardHeader>
 
-        {/* Content compacto */}
+        
         <CardContent className="pt-0 pb-3">
-          {/* Barra de progresso melhorada */}
+          
           <div className="space-y-1 mb-3">
             <div className="flex justify-between items-center text-xs">
               <span className="text-gray-600">Progresso</span>
@@ -133,7 +133,7 @@ export function MyLearningPage() {
             </div>
           </div>
 
-          {/* Footer com data e botão */}
+          
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1 text-xs text-gray-500">
               <Calendar className="h-3 w-3" />
@@ -165,7 +165,7 @@ export function MyLearningPage() {
             )}
           </div>
 
-          {/* Data de conclusão - só exibe se tiver */}
+          
           {enrollment.completedAt && (
             <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
               <Award className="h-3 w-3" />
@@ -227,7 +227,7 @@ export function MyLearningPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Estatísticas */}
+        
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -422,3 +422,4 @@ export function MyLearningPage() {
     </div>
   );
 }
+

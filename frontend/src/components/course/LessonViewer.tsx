@@ -37,7 +37,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
 
-  // Debug: Log dos dados da lição
   useEffect(() => {
     if (lesson) {
       console.log("🎓 Dados da lição:", {
@@ -53,14 +52,12 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
     }
   }, [lesson]);
 
-  // Entrar na lição quando conectar
   useEffect(() => {
     if (isConnected && lessonId && courseId) {
       joinLesson(lessonId, courseId);
     }
   }, [isConnected, lessonId, courseId, joinLesson]);
 
-  // Atualizar progresso do vídeo a cada 5 segundos
   useEffect(() => {
     if (!isPlaying || lesson?.type !== "VIDEO") return;
 
@@ -137,7 +134,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
   return (
     <div className="space-y-6 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        {/* Cabeçalho da Lição */}
         <LessonHeader
           title={lesson.title}
           description={lesson.description}
@@ -147,14 +143,12 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
           isCompleted={lessonProgress?.isCompleted}
         />
 
-        {/* Erro do WebSocket */}
         {wsError && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <p className="text-red-700 text-sm">{wsError}</p>
           </div>
         )}
 
-        {/* Conteúdo da Lição baseado no tipo */}
         {lesson.type === "VIDEO" && (
           <VideoSection
             videoUrl={lesson.videoUrl}
@@ -171,7 +165,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
 
         {lesson.type === "TEXT" && <TextContent content={lesson.content} />}
 
-        {/* Fallback para tipos de lição não especificados */}
         {lesson.type !== "VIDEO" &&
           lesson.type !== "TEXT" &&
           lesson.type !== "QUIZ" && (
@@ -231,7 +224,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
                 </button>
               </div>
 
-              {/* Resultado do Quiz */}
               {quizResult && (
                 <div
                   className={`p-4 border rounded-lg ${
@@ -254,7 +246,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
           </div>
         )}
 
-        {/* Ações da Lição */}
         <LessonActions
           isCompleted={lessonProgress?.isCompleted || false}
           completedAt={
@@ -267,7 +258,6 @@ const LessonViewer: React.FC<LessonViewerProps> = ({
           onComplete={handleCompleteLesson}
         />
 
-        {/* Seção de Comentários */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
           <LessonComments lessonId={lessonId} />
         </div>

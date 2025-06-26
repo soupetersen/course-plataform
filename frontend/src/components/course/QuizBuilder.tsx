@@ -106,7 +106,6 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
   const toggleCorrectOption = (questionIndex: number, optionIndex: number) => {
     const currentQuestions = [...questions];
 
-    // Marcar apenas uma opção como correta
     currentQuestions[questionIndex].options.forEach((option, index) => {
       option.isCorrect = index === optionIndex;
     });
@@ -117,7 +116,6 @@ export const QuizBuilder: React.FC<QuizBuilderProps> = ({
   const onSubmit = async (data: QuizFormData) => {
     setIsSubmitting(true);
     try {
-      // Validar que cada pergunta tem pelo menos uma resposta correta
       const invalidQuestions = data.questions.filter(
         (q) => !q.options.some((opt) => opt.isCorrect)
       );

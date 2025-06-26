@@ -1,4 +1,4 @@
-Ôªøimport { Card, CardDescription, CardTitle } from "../ui/card";
+import { Card, CardDescription, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { BookOpen, Users, Play, User } from "lucide-react";
@@ -37,7 +37,7 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
               padding="none"
               className="course-card group overflow-hidden flex flex-col h-full hover:scale-[1.02] transition-all duration-300"
             >
-              {/* Course Image */}
+              
               <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
                 {enrollment.course?.imageUrl ? (
                   <img
@@ -53,7 +53,7 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                 )}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
 
-                {/* Progress overlay */}
+                
                 <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
                   <div className="flex items-center justify-between text-white text-sm">
                     <span>{enrollment.progress}% completo</span>
@@ -77,7 +77,7 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
               </div>
 
               <div className="flex flex-col flex-1 p-4">
-                {/* Category Badge */}
+                
                 {enrollment.course?.category && (
                   <div className="flex items-center mb-3">
                     <Badge variant="secondary" className="text-xs">
@@ -86,9 +86,9 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                   </div>
                 )}
                 <CardTitle className="group-hover:text-primary transition-colors duration-200 text-base md:text-lg leading-tight mb-2 line-clamp-2 min-h-[3rem]">
-                  {enrollment.course?.title || "T√≠tulo n√£o dispon√≠vel"}
+                  {enrollment.course?.title || "TÌtulo n„o disponÌvel"}
                 </CardTitle>
-                {/* Instructor */}
+                
                 {enrollment.course?.instructor && (
                   <div className="flex items-center text-xs text-gray-600 mb-3">
                     <User className="w-3 h-3 mr-1" />
@@ -96,9 +96,9 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                   </div>
                 )}
                 <CardDescription className="text-sm leading-relaxed flex-1 mb-4 line-clamp-3">
-                  {enrollment.course?.description || "Descri√ß√£o n√£o dispon√≠vel"}
+                  {enrollment.course?.description || "DescriÁ„o n„o disponÌvel"}
                 </CardDescription>
-                {/* Course Stats */}
+                
                 <div className="flex items-center justify-between text-xs text-gray-500 mb-4 pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
@@ -109,7 +109,7 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
                     <span>
-                      {enrollment.course?.modules?.length || 0} m√≥dulos
+                      {enrollment.course?.modules?.length || 0} mÛdulos
                     </span>
                   </div>
                 </div>{" "}
@@ -132,3 +132,4 @@ export const ContinueLearning = ({ enrollments }: ContineLearningProps) => {
     </div>
   );
 };
+

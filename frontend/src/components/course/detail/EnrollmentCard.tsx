@@ -1,4 +1,4 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
 import { Button } from "../../ui/button";
 import { Badge } from "../../ui/badge";
 import {
@@ -42,7 +42,7 @@ export const EnrollmentCard = ({
     if (course.price === 0) {
       onEnroll();
       return;
-    } // Redirecionar para página de checkout
+    }
     navigate(`/checkout/${course.id}`);
   };
 
@@ -61,7 +61,7 @@ export const EnrollmentCard = ({
               <div className="text-center p-3 bg-green-50 border border-green-200 rounded-lg">
                 <div className="flex items-center justify-center gap-2 text-green-700 font-semibold">
                   <Users className="h-5 w-5" />
-                  Você já está matriculado
+                  Voc� j� est� matriculado
                 </div>
               </div>
               <Button
@@ -104,7 +104,7 @@ export const EnrollmentCard = ({
             <div className="flex items-center gap-2">
               <Star className="h-4 w-4 text-yellow-500" />
               <span className="text-sm">
-                {course.averageRating?.toFixed(1) || "0.0"} de avaliação
+                {course.averageRating?.toFixed(1) || "0.0"} de avalia��o
               </span>
             </div>
 
@@ -117,10 +117,10 @@ export const EnrollmentCard = ({
             <h4 className="font-semibold mb-2">Inclui:</h4>
             <ul className="space-y-1 text-sm text-gray-600">
               {" "}
-              <li>• Acesso vitalício ao curso</li>
-              <li>• Certificado de conclusão</li>
-              <li>• Suporte do instrutor</li>
-              <li>• Acesso em dispositivos móveis</li>
+              <li>� Acesso vital�cio ao curso</li>
+              <li>� Certificado de conclus�o</li>
+              <li>� Suporte do instrutor</li>
+              <li>� Acesso em dispositivos m�veis</li>
             </ul>
           </div>{" "}
           <div className="pt-4 border-t">

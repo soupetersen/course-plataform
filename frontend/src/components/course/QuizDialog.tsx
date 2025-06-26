@@ -29,8 +29,6 @@ export const QuizDialog: React.FC<QuizDialogProps> = ({
   const handleSave = async (data: QuizFormData) => {
     try {
       console.log("Saving quiz data:", data);
-      // Aqui você integraria com a API para salvar o quiz
-      // await saveQuiz(lessonId, data);
       onClose();
     } catch (error) {
       console.error("Error saving quiz:", error);

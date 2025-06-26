@@ -43,3 +43,4 @@ export const CoursePagination = ({
     </div>
   );
 };
+

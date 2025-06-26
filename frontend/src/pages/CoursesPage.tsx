@@ -103,10 +103,8 @@ export const CoursesPage = () => {
     );
   }
 
-  // Para usu�rios n�o logados, usa layout completo
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header de Descoberta para visitantes */}
       <div className="bg-gradient-to-br from-primary-50 to-secondary-50 py-12 animate-in fade-in duration-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -132,7 +130,6 @@ export const CoursesPage = () => {
         </div>
       </div>
 
-      {/* Conte�do dos Cursos para visitantes */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
           <Link

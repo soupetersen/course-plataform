@@ -106,3 +106,4 @@ export const CouponTable: React.FC<CouponTableProps> = ({
     </Card>
   );
 };
+

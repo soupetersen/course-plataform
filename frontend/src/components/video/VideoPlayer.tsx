@@ -114,7 +114,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     "auto",
   ];
 
-  // Configuração para suportar diferentes qualidades
   const getPlayerConfig = () => {
     return {
       file: {
@@ -199,13 +198,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         />
       </div>
 
-      {/* Custom Controls Overlay */}
       <div
         className={`absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 transition-opacity duration-300 ${
           showControls ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         }`}
       >
-        {/* Play/Pause Button - Center */}
         <div className="absolute inset-0 flex items-center justify-center">
           <button
             onClick={togglePlay}
@@ -219,9 +216,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           </button>
         </div>
 
-        {/* Bottom Controls */}
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          {/* Progress Bar */}
           <div className="mb-4">
             <input
               type="range"
@@ -233,10 +228,8 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             />
           </div>
 
-          {/* Control Bar */}
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center space-x-3">
-              {/* Skip Backward */}
               <button
                 onClick={() => skipTime(-10)}
                 className="video-control-button"
@@ -245,12 +238,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <RotateCcw size={20} />
               </button>
 
-              {/* Play/Pause */}
               <button onClick={togglePlay} className="video-control-button">
                 {isPlaying ? <Pause size={20} /> : <Play size={20} />}
               </button>
 
-              {/* Skip Forward */}
               <button
                 onClick={() => skipTime(10)}
                 className="video-control-button"
@@ -259,12 +250,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 <RotateCw size={20} />
               </button>
 
-              {/* Time Display */}
               <span className="time-display">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
 
-              {/* Quality Display */}
               <span
                 className={`quality-badge ${
                   quality.includes("1080") ||
@@ -279,7 +268,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             </div>
 
             <div className="flex items-center space-x-3">
-              {/* Volume Controls */}
               <div className="flex items-center space-x-2">
                 <button onClick={toggleMute} className="video-control-button">
                   {isMuted || volume === 0 ? (
@@ -299,7 +287,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 />
               </div>
 
-              {/* Settings */}
               <div className="relative">
                 <button
                   onClick={() => setShowSettings(!showSettings)}
@@ -310,7 +297,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
                 {showSettings && (
                   <div className="video-settings-menu">
-                    {/* Quality Settings */}
                     <div className="video-settings-section">
                       <div className="video-settings-title">Quality</div>
                       <div className="space-y-1">
@@ -338,7 +324,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                       </div>
                     </div>
 
-                    {/* Playback Speed */}
                     <div className="video-settings-section">
                       <div className="video-settings-title">Playback Speed</div>
                       <div className="space-y-1">
@@ -359,7 +344,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 )}
               </div>
 
-              {/* Fullscreen */}
               <button
                 onClick={toggleFullscreen}
                 className="video-control-button"

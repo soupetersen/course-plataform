@@ -292,7 +292,7 @@ export function AdminPayments() {
         </Button>
       </div>
 
-      {/* Cards de Estatísticas */}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -345,7 +345,7 @@ export function AdminPayments() {
         </Card>
       </div>
 
-      {/* Tabela de Pagamentos */}
+      
       <Card>
         <CardHeader>
           <CardTitle>Lista de Pagamentos</CardTitle>
@@ -452,3 +452,4 @@ export function AdminPayments() {
     </div>
   );
 }
+

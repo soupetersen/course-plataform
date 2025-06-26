@@ -71,10 +71,8 @@ export function CreditCardForm({
     setCardData(updatedData);
     onCardDataChange(updatedData);
 
-    // Não validar campo saveCard (boolean)
     if (field === "saveCard") return;
 
-    // Validar campo e limpar erro se válido
     const isValid = validateField(field, value as string | number);
     if (errors[field] && isValid) {
       setErrors({ ...errors, [field]: undefined });
@@ -84,11 +82,9 @@ export function CreditCardForm({
   };
 
   const formatCardNumber = (value: string) => {
-    // Remove espaços e caracteres não numéricos
     const cleanValue = value.replace(/\D/g, "");
-    // Adiciona espaços a cada 4 dígitos
     const formattedValue = cleanValue.replace(/(\d{4})(?=\d)/g, "$1 ");
-    return formattedValue.slice(0, 19); // Máximo 16 dígitos + 3 espaços
+    return formattedValue.slice(0, 19);
   };
 
   const formatCPF = (value: string) => {
@@ -163,7 +159,6 @@ export function CreditCardForm({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 p-4 sm:p-6 pt-0">
-        {/* Número do Cartão */}
         <div className="space-y-2">
           <Label htmlFor="cardNumber" className="text-sm font-medium">
             Número do Cartão
@@ -185,7 +180,6 @@ export function CreditCardForm({
           )}
         </div>
 
-        {/* Nome no Cartão */}
         <div className="space-y-2">
           <Label htmlFor="cardHolderName" className="text-sm font-medium">
             Nome no Cartão
@@ -206,7 +200,6 @@ export function CreditCardForm({
           )}
         </div>
 
-        {/* Validade e CVV */}
         <div className="grid grid-cols-3 gap-3">
           <div className="space-y-2">
             <Label htmlFor="expirationMonth" className="text-sm font-medium">
@@ -284,7 +277,6 @@ export function CreditCardForm({
           </div>
         </div>
 
-        {/* Parcelas */}
         <div className="space-y-2">
           <Label htmlFor="installments" className="text-sm font-medium">
             Parcelas
@@ -314,7 +306,6 @@ export function CreditCardForm({
           </Select>
         </div>
 
-        {/* Dados Pessoais */}
         <div className="border-t pt-4 space-y-4">
           <h4 className="text-sm font-medium text-gray-700">Dados Pessoais</h4>
 
@@ -330,7 +321,7 @@ export function CreditCardForm({
                 value={cardData.identificationType}
                 onValueChange={(value) => {
                   updateCardData("identificationType", value);
-                  updateCardData("identificationNumber", ""); // Limpar número quando trocar tipo
+                  updateCardData("identificationNumber", "");
                 }}
                 disabled={isLoading}
               >
@@ -379,7 +370,6 @@ export function CreditCardForm({
           </div>
         </div>
 
-        {/* Opção para salvar cartão */}
         <div className="flex items-center space-x-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
           <input
             id="saveCard"
@@ -400,7 +390,6 @@ export function CreditCardForm({
           </Label>
         </div>
 
-        {/* Segurança */}
         <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
           <Lock className="w-4 h-4" />
           <span>Seus dados estão protegidos com criptografia SSL</span>

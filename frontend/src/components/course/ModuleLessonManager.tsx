@@ -1,4 +1,4 @@
-Ôªøimport React, { useState } from "react";
+import React, { useState } from "react";
 import {
   Plus,
   Edit,
@@ -148,15 +148,15 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
       <div className="flex justify-between items-center">
         <div>
           {" "}
-          <h2 className="text-2xl font-bold text-[#00224D]">M√≥dulos e Aulas</h2>
-          <p className="text-gray-600">Gerencie o conte√∫do do seu curso</p>
+          <h2 className="text-2xl font-bold text-[#00224D]">MÛdulos e Aulas</h2>
+          <p className="text-gray-600">Gerencie o conte˙do do seu curso</p>
         </div>
         <Button
           onClick={handleCreateModule}
           className="bg-[#FF204E] hover:bg-[#E01D4A]"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Novo M√≥dulo
+          Novo MÛdulo
         </Button>
       </div>
 
@@ -169,17 +169,17 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                 <ClipboardList className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum m√≥dulo criado
+                Nenhum mÛdulo criado
               </h3>
               <p className="text-gray-600 mb-4">
-                Crie seu primeiro m√≥dulo para come√ßar a organizar o conte√∫do
+                Crie seu primeiro mÛdulo para comeÁar a organizar o conte˙do
               </p>
               <Button
                 onClick={handleCreateModule}
                 className="bg-[#FF204E] hover:bg-[#E01D4A]"
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Criar Primeiro M√≥dulo
+                Criar Primeiro MÛdulo
               </Button>
             </CardContent>
           </Card>
@@ -210,7 +210,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                     <Badge variant="secondary">
                       {module.lessons?.length || 0} aulas
                     </Badge>
-                    <Tooltip content="Editar m√≥dulo">
+                    <Tooltip content="Editar mÛdulo">
                       <Button
                         variant="outline"
                         size="sm"
@@ -276,7 +276,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                                   </Badge>
                                 </Tooltip>
                                 {lesson.isPreview && (
-                                  <Tooltip content="Esta aula pode ser visualizada sem inscri√ß√£o">
+                                  <Tooltip content="Esta aula pode ser visualizada sem inscriÁ„o">
                                     <Badge
                                       variant="outline"
                                       className="text-green-600 border-green-600"
@@ -287,7 +287,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                                   </Tooltip>
                                 )}
                                 {lesson.isLocked && (
-                                  <Tooltip content="Esta aula est√° bloqueada e requer pr√©-requisitos">
+                                  <Tooltip content="Esta aula est· bloqueada e requer prÈ-requisitos">
                                     <Badge
                                       variant="outline"
                                       className="text-orange-600 border-orange-600"
@@ -308,7 +308,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                                 )}{" "}
                                 {lesson.videoUrl && (
                                   <span className="text-green-600">
-                                    V√≠deo dispon√≠vel
+                                    VÌdeo disponÌvel
                                   </span>
                                 )}
                               </div>
@@ -351,7 +351,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
                   <div className="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
                     <Video className="w-8 h-8 mx-auto text-gray-400 mb-2" />{" "}
                     <p className="text-gray-600 text-sm">
-                      Nenhuma aula criada neste m√≥dulo
+                      Nenhuma aula criada neste mÛdulo
                     </p>
                     <Button
                       variant="outline"
@@ -375,7 +375,7 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>
-              {selectedModule ? "Editar M√≥dulo" : "Novo M√≥dulo"}
+              {selectedModule ? "Editar MÛdulo" : "Novo MÛdulo"}
             </DialogTitle>
           </DialogHeader>
           <div className="p-4">
@@ -409,21 +409,21 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Delete Lesson Confirmation Dialog */}
+      
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Remo√ß√£o</AlertDialogTitle>
+            <AlertDialogTitle>Confirmar RemoÁ„o</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja remover a aula "{lessonToDelete?.title}"?
               <br />
               <br />
-              <strong>Esta a√ß√£o n√£o pode ser desfeita.</strong> A aula ser√°
+              <strong>Esta aÁ„o n„o pode ser desfeita.</strong> A aula ser·
               permanentemente removida do curso e todos os dados associados
-              ser√£o perdidos.
+              ser„o perdidos.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -443,3 +443,4 @@ export const ModuleLessonManager: React.FC<ModuleLessonManagerProps> = ({
     </div>
   );
 };
+

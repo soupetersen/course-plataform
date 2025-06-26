@@ -98,7 +98,6 @@ export const InstructorEarningsPage: React.FC = () => {
       );
       const data = await response.json();
       if (data.success) {
-        // Redirecionar para onboarding do Stripe
         window.open(data.data.onboardingUrl, "_blank");
       }
     } catch (error) {
@@ -156,7 +155,6 @@ export const InstructorEarningsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Status da Conta Stripe */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -228,7 +226,6 @@ export const InstructorEarningsPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Resumo Financeiro */}
       {earnings && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -297,7 +294,6 @@ export const InstructorEarningsPage: React.FC = () => {
             </Card>
           </div>
 
-          {/* Como Funcionam os Saques */}
           <Card>
             <CardHeader>
               <CardTitle>Como Funciona o Saque dos Seus Ganhos</CardTitle>
@@ -348,7 +344,6 @@ export const InstructorEarningsPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Transações Recentes */}
           <Card>
             <CardHeader>
               <CardTitle>Transações Recentes</CardTitle>

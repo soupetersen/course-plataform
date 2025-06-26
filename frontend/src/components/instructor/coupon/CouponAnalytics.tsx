@@ -80,3 +80,4 @@ export const CouponAnalytics: React.FC<CouponAnalyticsProps> = ({
     </div>
   );
 };
+

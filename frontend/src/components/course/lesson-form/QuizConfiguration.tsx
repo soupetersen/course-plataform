@@ -83,3 +83,4 @@ export const QuizConfiguration: React.FC<QuizConfigurationProps> = ({
     </div>
   );
 };
+

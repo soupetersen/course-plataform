@@ -335,7 +335,7 @@ export function RefundManagement() {
         </CardContent>
       </Card>
 
-      {/* Refund Requests */}
+      
       {refundRequests.length > 0 && (
         <Card>
           <CardHeader>
@@ -472,3 +472,4 @@ export function RefundManagement() {
     </div>
   );
 }
+

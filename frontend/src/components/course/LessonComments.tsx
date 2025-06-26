@@ -26,7 +26,6 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
   );
   const commentsEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto scroll para o último comentário
   const scrollToBottom = () => {
     commentsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -37,17 +36,14 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
     }
   }, [comments]);
 
-  // Marcar comentários como recentes por 3 segundos
   useEffect(() => {
     if (comments.length > 0) {
       const lastComment = comments[comments.length - 1];
       const commentAge = Date.now() - new Date(lastComment.createdAt).getTime();
 
-      // Se o comentário foi criado há menos de 5 segundos, é considerado recente
       if (commentAge < 5000) {
         setRecentCommentIds((prev) => new Set([...prev, lastComment.id]));
 
-        // Remover da lista de recentes após 3 segundos
         setTimeout(() => {
           setRecentCommentIds((prev) => {
             const newSet = new Set(prev);
@@ -94,14 +90,12 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
 
   return (
     <div className="space-y-6">
-      {/* Título da seção com status de conexão */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900">
           <MessageCircle className="w-5 h-5" />
           Comentários ({comments.length})
         </div>
 
-        {/* Indicador de status da conexão */}
         <div
           className={`flex items-center gap-2 text-sm connection-status ${
             isConnected ? "connected" : "disconnected"
@@ -121,7 +115,6 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
         </div>
       </div>
 
-      {/* Erro de conexão */}
       {error && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-3">
           <p className="text-red-700 text-sm">
@@ -130,7 +123,6 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
         </div>
       )}
 
-      {/* Formulário para novo comentário */}
       {user && (
         <form onSubmit={handleSubmitComment} className="space-y-4">
           <div className="space-y-2">
@@ -163,7 +155,6 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
         </form>
       )}
 
-      {/* Lista de comentários */}
       <div className="space-y-4 max-h-96 overflow-y-auto comments-container">
         {comments.length === 0 ? (
           <div className="text-center py-8 text-gray-500">
@@ -192,7 +183,6 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
                       : "animate-fade-in"
                   }`}
                 >
-                  {/* Cabeçalho do comentário */}
                   <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                       {comment.user.avatar ? (
@@ -234,14 +224,13 @@ export const LessonComments: React.FC<LessonCommentsProps> = ({ lessonId }) => {
                     </div>
                   </div>
 
-                  {/* Conteúdo do comentário */}
                   <div className="text-gray-700 leading-relaxed ml-11">
                     {comment.content}
                   </div>
                 </div>
               );
             })}
-            {/* Referência para scroll automático */}
+
             <div ref={commentsEndRef} />
           </>
         )}

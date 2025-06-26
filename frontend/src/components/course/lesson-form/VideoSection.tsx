@@ -60,15 +60,13 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validar tamanho máximo (50MB)
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 50 * 1024 * 1024;
     if (file.size > maxSize) {
       alert("O arquivo é muito grande. O tamanho máximo permitido é 50MB.");
-      event.target.value = ""; // Limpar seleção
+      event.target.value = "";
       return;
     }
 
-    // Validar tipo de arquivo
     const allowedTypes = [
       "video/mp4",
       "video/mpeg",
@@ -80,7 +78,7 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
       alert(
         "Tipo de arquivo não suportado. Apenas vídeos MP4, MPEG, MOV, AVI e WebM são permitidos."
       );
-      event.target.value = ""; // Limpar seleção
+      event.target.value = "";
       return;
     }
 
@@ -159,12 +157,11 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
               variant="outline"
               size="sm"
               onClick={() => {
-                // Trigger o input file para nova seleção
                 const fileInput = document.querySelector(
                   'input[type="file"][accept*="video"]'
                 ) as HTMLInputElement;
                 if (fileInput) {
-                  fileInput.value = ""; // Limpar valor anterior
+                  fileInput.value = "";
                   fileInput.click();
                 }
               }}
@@ -191,7 +188,6 @@ export const VideoSection: React.FC<VideoSectionProps> = ({
         )}
       </div>
 
-      {/* Campo de duração oculto - apenas para o formulário */}
       <input
         type="hidden"
         {...register("duration", {

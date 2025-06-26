@@ -26,7 +26,6 @@ interface PaymentStepProps {
   isProcessingPayment: boolean;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
 
-  // Coupon props
   couponCode: string;
   setCouponCode: (code: string) => void;
   appliedCoupon: CouponValidation | null;
@@ -65,16 +64,14 @@ export function PaymentStep({
   selectedSavedCard,
   savedCardCvv,
 }: PaymentStepProps) {
-  // Atualizada lógica para considerar cartões salvos
   const canContinue = () => {
     if (!selectedPaymentMethod) return false;
 
     if (selectedPaymentMethod !== "CREDIT_CARD") {
-      return true; // PIX ou Boleto podem continuar
+      return true;
     }
 
     if (useNewCard) {
-      // Para novo cartão, verificar se dados básicos estão preenchidos
       const isValid =
         creditCardData &&
         creditCardData.cardNumber &&
@@ -88,7 +85,6 @@ export function PaymentStep({
       console.log("🎯 PaymentStep - Novo cartão:", { isValid, creditCardData });
       return isValid;
     } else {
-      // Para cartão salvo, verificar se cartão foi selecionado e CVV preenchido
       const isValid =
         selectedSavedCard && savedCardCvv && savedCardCvv.length >= 3;
 
@@ -103,7 +99,6 @@ export function PaymentStep({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="text-center space-y-2 animate-in fade-in slide-in-from-top-4 duration-400">
         <h2 className="text-2xl font-bold">Método de Pagamento</h2>
         <p className="text-muted-foreground">
@@ -112,7 +107,6 @@ export function PaymentStep({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Payment Methods - Takes 2 columns */}
         <div className="lg:col-span-2 animate-in slide-in-from-left-6 fade-in duration-600 delay-200">
           <PaymentMethodsSection
             selectedPaymentMethod={selectedPaymentMethod}
@@ -127,7 +121,6 @@ export function PaymentStep({
           />
         </div>
 
-        {/* Coupon Section - Takes 1 column (sidebar) */}
         <div className="space-y-4 animate-in slide-in-from-right-6 fade-in duration-600 delay-400">
           <CouponSectionCard
             couponCode={couponCode}
@@ -141,7 +134,6 @@ export function PaymentStep({
         </div>
       </div>
 
-      {/* Navigation Buttons */}
       <div className="flex gap-4 pt-4 animate-in slide-in-from-bottom-4 fade-in duration-500 delay-600">
         <Button
           variant="outline"

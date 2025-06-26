@@ -3,14 +3,12 @@ import { useToast } from "@/hooks/use-toast";
 import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 
-// New modular components
 import { PaymentSteps } from "./PaymentSteps";
 import { CartStep } from "./CartStep";
 import { PaymentStep } from "./PaymentStep";
 import { CheckoutStep } from "./CheckoutStep";
 import { PixPaymentModal } from "./PixPaymentModal";
 
-// Types and services
 import { CreditCardData } from "./CreditCardForm";
 import { SavedCard } from "@/services/savedCards";
 import { usePaymentStatus } from "@/hooks/usePaymentStatus";
@@ -54,7 +52,6 @@ export function PaymentCheckout({
   onPaymentSuccess,
   onPaymentError,
 }: PaymentCheckoutProps) {
-  // Step management
   const [currentStep, setCurrentStep] = useState<string>("cart");
   const [completedSteps, setCompletedSteps] = useState<string[]>([]);
 
@@ -92,18 +89,15 @@ export function PaymentCheckout({
   } | null>(null);
   const [showPixModal, setShowPixModal] = useState(false);
 
-  // Payment waiting states
   const [currentPaymentId, setCurrentPaymentId] = useState<string | null>(null);
   const [pendingPayments, setPendingPayments] = useState<Set<string>>(
     new Set()
   );
 
-  // Payment status hook
   const { isPolling, startPolling } = usePaymentStatus(currentPaymentId);
 
   const { toast } = useToast();
 
-  // Verificar se já existe pagamento pendente para este curso
   const checkPendingPayment = useCallback(async () => {
     try {
       const response = await api.get(
@@ -113,11 +107,9 @@ export function PaymentCheckout({
         const pendingPayment = response.data.data;
         console.log("Pagamento pendente encontrado:", pendingPayment);
 
-        // Adicionar à lista de pagamentos pendentes
         setPendingPayments((prev) => new Set(prev).add(course.id));
         setCurrentPaymentId(pendingPayment.id);
 
-        // Iniciar polling para este pagamento
         startPolling(
           pendingPayment.id,
           (status) => {
@@ -135,7 +127,6 @@ export function PaymentCheckout({
             }
           },
           () => {
-            // Callback para quando pagamento não for encontrado
             console.log(
               "Pagamento pendente não encontrado, cancelando operação"
             );
@@ -159,7 +150,6 @@ export function PaymentCheckout({
     }
   }, [course.id, startPolling, onPaymentSuccess, toast]);
 
-  // Verificar pagamento pendente ao carregar o componente
   useEffect(() => {
     checkPendingPayment();
   }, [checkPendingPayment]);
@@ -268,7 +258,6 @@ export function PaymentCheckout({
       savedCardCvv,
     });
 
-    // Verificar se já existe pagamento pendente para este curso
     if (pendingPayments.has(course.id)) {
       toast({
         title: "Pagamento em andamento",
@@ -315,7 +304,7 @@ export function PaymentCheckout({
               ? {
                   savedCardId: selectedSavedCard.id,
                   securityCode: savedCardCvv,
-                  installments: 1, // Pode ser configurável
+                  installments: 1,
                 }
               : undefined,
         }),
@@ -333,13 +322,13 @@ export function PaymentCheckout({
 
           if (paymentData.pixQrCodeText || paymentData.pixQrCodeImage) {
             const pixDataForModal = {
-              qrCode: paymentData.pixQrCodeText, // String para "Copia e Cola"
-              qrCodeBase64: paymentData.pixQrCodeImage, // Imagem PNG base64
+              qrCode: paymentData.pixQrCodeText,
+              qrCodeBase64: paymentData.pixQrCodeImage,
               amount: feeCalculation?.total || course.price,
               currency: "BRL",
               paymentId: responseData.paymentId,
-              expirationDate: paymentData.expirationDate, // Data de expiração do backend
-              expirationMinutes: paymentData.expirationMinutes, // Minutos configurados
+              expirationDate: paymentData.expirationDate,
+              expirationMinutes: paymentData.expirationMinutes,
             };
 
             setPixData(pixDataForModal);
@@ -357,24 +346,20 @@ export function PaymentCheckout({
           console.log("Has payment data?", !!responseData.paymentData);
         }
 
-        // Para cartão de crédito, iniciar o polling e aguardar confirmação do webhook
         if (selectedPaymentMethod === "CREDIT_CARD" && responseData.paymentId) {
           console.log(
             "Iniciando polling para pagamento:",
             responseData.paymentId
           );
 
-          // Adicionar à lista de pagamentos pendentes
           setPendingPayments((prev) => new Set(prev).add(course.id));
           setCurrentPaymentId(responseData.paymentId);
 
-          // Iniciar polling
           startPolling(
             responseData.paymentId,
             (status) => {
               console.log("Polling finalizado com status:", status);
 
-              // Remover da lista de pendentes
               setPendingPayments((prev) => {
                 const newSet = new Set(prev);
                 newSet.delete(course.id);
@@ -386,13 +371,11 @@ export function PaymentCheckout({
               if (status.status === "COMPLETED") {
                 onPaymentSuccess(status.id);
               } else {
-                // Para status de falha, permitir nova tentativa
                 setCurrentPaymentId(null);
                 onPaymentError(`Pagamento ${status.status.toLowerCase()}`);
               }
             },
             () => {
-              // Callback para quando pagamento não for encontrado
               console.log(
                 "Pagamento não encontrado durante polling, cancelando operação"
               );
@@ -412,7 +395,7 @@ export function PaymentCheckout({
             }
           );
 
-          return; // Não chamar onPaymentSuccess imediatamente
+          return;
         }
 
         if (responseData.url) {
@@ -450,12 +433,10 @@ export function PaymentCheckout({
       });
       onPaymentError(errorMessage);
     } finally {
-      // Sempre resetar isProcessingPayment
       setIsProcessingPayment(false);
     }
   };
 
-  // Step navigation functions
   const handleStepChange = (stepId: string) => {
     if (completedSteps.includes(stepId) || stepId === currentStep) {
       setCurrentStep(stepId);
@@ -470,7 +451,6 @@ export function PaymentCheckout({
       const nextStep = stepOrder[currentIndex + 1];
       setCurrentStep(nextStep);
 
-      // Mark current step as completed
       if (!completedSteps.includes(currentStep)) {
         setCompletedSteps((prev) => [...prev, currentStep]);
       }
@@ -505,7 +485,6 @@ export function PaymentCheckout({
   return (
     <div className="bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-4 sm:py-8 max-w-7xl">
-        {/* Payment Steps Header */}
         <div className="mb-8">
           <PaymentSteps
             currentStep={currentStep}
@@ -514,7 +493,6 @@ export function PaymentCheckout({
           />
         </div>
 
-        {/* Step Content */}
         <div className="max-w-5xl mx-auto">
           {currentStep === "cart" && (
             <div className="animate-in slide-in-from-left-8 fade-in duration-500">
@@ -567,7 +545,6 @@ export function PaymentCheckout({
                 hasPendingPayment={pendingPayments.has(course.id)}
                 isPolling={isPolling}
                 onCancelPendingPayment={() => {
-                  // Cancelar pagamento pendente
                   setPendingPayments((prev) => {
                     const newSet = new Set(prev);
                     newSet.delete(course.id);
@@ -589,7 +566,6 @@ export function PaymentCheckout({
         </div>
       </div>
 
-      {/* PIX Modal */}
       {pixData && (
         <PixPaymentModal
           isOpen={showPixModal}

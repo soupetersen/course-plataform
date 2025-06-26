@@ -50,3 +50,4 @@ export function CourseSummary({ course, formatCurrency }: CourseSummaryProps) {
     </Card>
   );
 }
+

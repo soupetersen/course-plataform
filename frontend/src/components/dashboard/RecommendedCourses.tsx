@@ -1,4 +1,4 @@
-﻿import { Card, CardDescription, CardTitle } from "../ui/card";
+import { Card, CardDescription, CardTitle } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { BookOpen, Users } from "lucide-react";
@@ -105,7 +105,7 @@ export const RecommendedCourses = ({
                   </div>
                   <div className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    <span>{course.modules?.length || 0} módulos</span>
+                    <span>{course.modules?.length || 0} m�dulos</span>
                   </div>
                 </div>
                 <Link to={`/courses/${course.id}`} className="block">
@@ -124,3 +124,4 @@ export const RecommendedCourses = ({
     </div>
   );
 };
+

@@ -46,7 +46,7 @@ export const MDXEditor: React.FC<MDXEditorProps> = ({
       </div>
       {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
 
-      {/* Preview da sintaxe Markdown */}
+      
       <div className="text-xs text-gray-500 mt-2 p-3 bg-gray-50 rounded border">
         <strong>Dicas de formatação:</strong>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
@@ -73,3 +73,4 @@ export const MDXEditor: React.FC<MDXEditorProps> = ({
     </div>
   );
 };
+

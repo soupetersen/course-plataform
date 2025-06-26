@@ -67,18 +67,15 @@ export function PaymentMethodSelection({
 
   const getAvailableMethods = () => {
     if (paymentType === "SUBSCRIPTION") {
-      // Para recorrência, apenas cartão de crédito é suportado
       return gateway.supportedMethods.filter(
         (method) => method.type === "CREDIT_CARD"
       );
     }
-    // Para pagamento único, todos os métodos são suportados
     return gateway.supportedMethods;
   };
 
   const availableMethods = getAvailableMethods();
 
-  // Se não há métodos disponíveis para o tipo de pagamento, exibir mensagem
   if (availableMethods.length === 0) {
     return (
       <Card>

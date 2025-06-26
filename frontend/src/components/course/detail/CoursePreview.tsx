@@ -1,4 +1,4 @@
-﻿import { Button } from "../../ui/button";
+import { Button } from "../../ui/button";
 import { Play } from "lucide-react";
 
 interface CoursePreviewProps {

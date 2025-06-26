@@ -33,3 +33,4 @@ export function SettingsPage() {
     </div>
   );
 }
+

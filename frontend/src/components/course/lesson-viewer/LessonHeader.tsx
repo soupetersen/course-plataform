@@ -36,7 +36,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
         </div>
       </div>
 
-      {/* Metadados da Lição */}
+      
       <div className="flex items-center gap-6 pt-4 border-t border-gray-100">
         <div className="flex items-center gap-2 text-sm text-gray-500">
           <span className="w-5 h-5 flex items-center justify-center bg-blue-100 text-blue-600 rounded">
@@ -64,3 +64,4 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({
     </div>
   );
 };
+

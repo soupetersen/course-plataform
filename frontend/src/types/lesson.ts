@@ -102,3 +102,4 @@ export interface QuizAnswer {
   isCorrect: boolean;
   timeSpent: number;
 }
+

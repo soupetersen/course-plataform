@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -60,20 +60,14 @@ interface PaymentAnalytics {
 
 export const InstructorPaymentAnalytics: React.FC = () => {
   const { user } = useAuth();
-  const { data: coursesData } = useCoursesByInstructor(user?.id || "");
+  useCoursesByInstructor(user?.id || "");
   const [analytics, setAnalytics] = useState<PaymentAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<
     "7d" | "30d" | "90d" | "1y"
   >("30d");
 
-  const courses = coursesData?.data || [];
-
-  useEffect(() => {
-    fetchAnalytics();
-  }, [selectedPeriod]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -89,47 +83,20 @@ export const InstructorPaymentAnalytics: React.FC = () => {
         const result = await response.json();
         setAnalytics(result.data);
       } else {
-        setAnalytics(generateMockAnalytics());
+        console.error("Failed to fetch analytics");
+        setAnalytics(null);
       }
     } catch (error) {
       console.error("Failed to fetch analytics:", error);
-      setAnalytics(generateMockAnalytics());
+      setAnalytics(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [selectedPeriod]);
 
-  const generateMockAnalytics = (): PaymentAnalytics => {
-    const totalRevenue = courses.reduce(
-      (sum, course) => sum + course.price * (course.enrollments_count || 0),
-      0
-    );
-
-    return {
-      totalRevenue,
-      totalTransactions: courses.reduce(
-        (sum, course) => sum + (course.enrollments_count || 0),
-        0
-      ),
-      averageOrderValue: totalRevenue / Math.max(1, courses.length),
-      monthlyRevenue: totalRevenue * 0.3,
-      conversionRate: 15.5,
-      topCourses: courses.slice(0, 5).map((course) => ({
-        courseId: course.id,
-        courseTitle: course.title,
-        revenue: course.price * (course.enrollments_count || 0),
-        enrollments: course.enrollments_count || 0,
-      })),
-      recentTransactions: [],
-      monthlyData: [
-        { month: "Jan", revenue: totalRevenue * 0.1, transactions: 12 },
-        { month: "Feb", revenue: totalRevenue * 0.15, transactions: 18 },
-        { month: "Mar", revenue: totalRevenue * 0.2, transactions: 24 },
-        { month: "Abr", revenue: totalRevenue * 0.25, transactions: 30 },
-        { month: "Mai", revenue: totalRevenue * 0.3, transactions: 36 },
-      ],
-    };
-  };
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("pt-BR", {

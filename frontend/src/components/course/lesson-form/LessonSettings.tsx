@@ -62,3 +62,4 @@ export const LessonSettings: React.FC<LessonSettingsProps> = ({
     </div>
   );
 };
+

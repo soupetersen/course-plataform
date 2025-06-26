@@ -16,7 +16,7 @@ interface PaymentMethodsSectionProps {
   onNewCardSelected: () => void;
   isProcessingPayment: boolean;
   paymentType: "ONE_TIME" | "SUBSCRIPTION";
-  creditCardData?: CreditCardData | null; // Nova prop para dados existentes
+  creditCardData?: CreditCardData | null;
 }
 
 export function PaymentMethodsSection({

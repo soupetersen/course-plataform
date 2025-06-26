@@ -69,3 +69,4 @@ export const LessonActions: React.FC<LessonActionsProps> = ({
     </div>
   );
 };
+

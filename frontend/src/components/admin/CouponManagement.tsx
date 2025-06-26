@@ -519,7 +519,7 @@ export function CouponManagement() {
         </CardContent>
       </Card>
 
-      {/* Edit Dialog */}
+      
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -648,3 +648,4 @@ export function CouponManagement() {
     </div>
   );
 }
+

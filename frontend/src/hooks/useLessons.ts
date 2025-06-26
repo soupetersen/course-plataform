@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { CreateLessonData, CreateQuestionData } from '@/types/lesson';
 
-// Lesson CRUD hooks
 export const useLessons = (courseId: string) => {
   return useQuery({
     queryKey: ['lessons', courseId],
@@ -68,7 +67,6 @@ export const useDeleteLesson = () => {
   });
 };
 
-// Question management hooks
 export const useQuestions = (lessonId: string) => {
   return useQuery({
     queryKey: ['questions', lessonId],
@@ -122,7 +120,6 @@ export const useDeleteQuestion = () => {
   });
 };
 
-// Progress and Quiz hooks
 export const useUpdateVideoProgress = () => {
   return useMutation({
     mutationFn: async ({ userId, lessonId, courseId, watchTime }: {
@@ -232,3 +229,4 @@ export const useUploadVideo = () => {
     },
   });
 };
+
