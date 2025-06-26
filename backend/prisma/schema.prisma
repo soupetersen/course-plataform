@@ -7,6 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// User management and authentication
 model User {
   id                      String             @id @default(cuid())
   email                   String             @unique
@@ -15,18 +16,15 @@ model User {
   avatar                  String?
   role                    Role               @default(STUDENT)
   isActive                Boolean            @default(true)
-  paymentCustomerId       String? // ID do cliente no gateway (genérico)
-  paymentAccountId        String? // ID da conta de recebimento (genérico)
-  // Dados para recebimento de pagamentos (modelo simplificado)
-  pixKey                  String? // Chave PIX para receber pagamentos
-  bankData                Json? // Dados bancários completos (banco, agência, conta, tipo)
-  payoutPreference        PayoutMethod?      @default(PIX) // PIX, BANK_TRANSFER
-  // Dados fiscais/pessoais
-  documentType            String? // CPF ou CNPJ
-  documentNumber          String? // Número do documento
-  fullName                String? // Nome completo (pode ser diferente do nome de usuário)
-  // Status de verificação
-  isVerified              Boolean            @default(false) // Se os dados foram verificados
+  paymentCustomerId       String?
+  paymentAccountId        String?
+  pixKey                  String?
+  bankData                Json?
+  payoutPreference        PayoutMethod?      @default(PIX)
+  documentType            String?
+  documentNumber          String?
+  fullName                String?
+  isVerified              Boolean            @default(false)
   verifiedAt              DateTime?
   createdAt               DateTime           @default(now())
   updatedAt               DateTime           @updatedAt
@@ -40,26 +38,25 @@ model User {
   settingsUpdated         PlatformSetting[]
   refundRequests          RefundRequest[]
   refundsProcessed        RefundRequest[]    @relation("RefundProcessor")
-  // Novas relações para sistema de saldo
   instructorBalance       InstructorBalance? @relation("InstructorBalance")
   payoutRequestsProcessed PayoutRequest[]    @relation("PayoutProcessor")
   savedCards              SavedCard[]
-  // Novas relações para o sistema de lições
   lessonProgress          LessonProgress[]
   quizAttempts            QuizAttempt[]
 
   @@map("users")
 }
 
+// Saved payment cards for users
 model SavedCard {
   id                   String   @id @default(cuid())
   userId               String
   cardHolderName       String
-  cardNumberLast4      String // Últimos 4 dígitos do cartão
-  cardBrand            String // visa, mastercard, etc
+  cardNumberLast4      String
+  cardBrand            String
   expirationMonth      String
   expirationYear       String
-  identificationType   String // CPF ou CNPJ
+  identificationType   String
   identificationNumber String
   isDefault            Boolean  @default(false)
   createdAt            DateTime @default(now())
@@ -70,6 +67,7 @@ model SavedCard {
   @@map("saved_cards")
 }
 
+// Course categories
 model Category {
   id          String   @id @default(cuid())
   name        String   @unique
@@ -81,12 +79,13 @@ model Category {
   @@map("categories")
 }
 
+// Online courses
 model Course {
   id              String           @id @default(cuid())
   title           String
   description     String?
   imageUrl        String?
-  price           Float            @default(0) // Pode ser 0 para cursos gratuitos
+  price           Float            @default(0)
   isPublished     Boolean          @default(false)
   instructorId    String
   categoryId      String?
@@ -103,7 +102,6 @@ model Course {
   payments        Payment[]
   reviews         Review[]
   coupons         Coupon[]
-  // Novas relações para o sistema de lições
   lessonProgress  LessonProgress[]
   quizAttempts    QuizAttempt[]
 
@@ -113,6 +111,7 @@ model Course {
   @@map("courses")
 }
 
+// Course modules for organizing lessons
 model Module {
   id          String   @id @default(cuid())
   title       String
@@ -129,13 +128,14 @@ model Module {
   @@map("modules")
 }
 
+// Individual lessons within courses
 model Lesson {
   id                 String           @id @default(cuid())
   title              String
-  content            String? // Para lições de texto (markdown)
-  videoUrl           String? // Para lições de vídeo
-  videoDuration      Int? // Duração em segundos
-  duration           Int? // Duração estimada da lição
+  content            String?
+  videoUrl           String?
+  videoDuration      Int?
+  duration           Int?
   order              Int              @default(0)
   moduleId           String?
   isCompleted        Boolean          @default(false)
@@ -146,17 +146,15 @@ model Lesson {
   isLocked           Boolean          @default(false)
   isPreview          Boolean          @default(false)
   type               LessonType       @default(VIDEO)
-  // Campos específicos para quiz
-  quizPassingScore   Int? // Porcentagem mínima para passar (0-100)
-  quizAttempts       Int              @default(0) // Número de tentativas permitidas (0 = ilimitado)
-  allowReview        Boolean          @default(true) // Permitir revisar após concluir
-  // Relações
+  quizPassingScore   Int?
+  quizAttempts       Int              @default(0)
+  allowReview        Boolean          @default(true)
   comments           LessonComment[]
   course             Course           @relation(fields: [courseId], references: [id], onDelete: Cascade)
   module             Module?          @relation(fields: [moduleId], references: [id])
-  questions          Question[] // Perguntas do quiz
-  lessonProgress     LessonProgress[] // Progresso dos estudantes nesta lição
-  quizAttemptRecords QuizAttempt[] // Tentativas de quiz dos estudantes
+  questions          Question[]
+  lessonProgress     LessonProgress[]
+  quizAttemptRecords QuizAttempt[]
 
   @@index([moduleId])
   @@index([courseId])
@@ -164,14 +162,14 @@ model Lesson {
   @@map("lessons")
 }
 
-// Nova tabela para perguntas de múltipla escolha
+// Quiz questions for lessons
 model Question {
   id          String           @id @default(cuid())
   lessonId    String
-  question    String // Texto da pergunta
-  explanation String? // Explicação da resposta (opcional)
+  question    String
+  explanation String?
   order       Int              @default(0)
-  points      Int              @default(1) // Pontos que vale a questão
+  points      Int              @default(1)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @default(now())
   lesson      Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -182,11 +180,11 @@ model Question {
   @@map("questions")
 }
 
-// Opções de resposta para cada pergunta
+// Answer options for quiz questions
 model QuestionOption {
   id              String       @id @default(cuid())
   questionId      String
-  text            String // Texto da opção
+  text            String
   isCorrect       Boolean      @default(false)
   order           Int          @default(0)
   createdAt       DateTime     @default(now())
@@ -197,14 +195,14 @@ model QuestionOption {
   @@map("question_options")
 }
 
-// Registro de progresso por lição por usuário
+// Student progress tracking per lesson
 model LessonProgress {
   id           String    @id @default(cuid())
   userId       String
   lessonId     String
   courseId     String
   isCompleted  Boolean   @default(false)
-  watchTime    Int       @default(0) // Tempo assistido em segundos (para vídeos)
+  watchTime    Int       @default(0)
   completedAt  DateTime?
   lastAccessed DateTime  @default(now())
   createdAt    DateTime  @default(now())
@@ -218,18 +216,18 @@ model LessonProgress {
   @@map("lesson_progress")
 }
 
-// Tentativas de quiz
+// Quiz attempts by students
 model QuizAttempt {
   id             String       @id @default(cuid())
   userId         String
   lessonId       String
   courseId       String
-  score          Float // Pontuação obtida (0-100)
-  totalQuestions Int // Total de questões
-  correctAnswers Int // Respostas corretas
-  isPassing      Boolean // Se passou ou não
+  score          Float
+  totalQuestions Int
+  correctAnswers Int
+  isPassing      Boolean
   completedAt    DateTime     @default(now())
-  timeSpent      Int // Tempo gasto em segundos
+  timeSpent      Int
   lesson         Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   course         Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -240,14 +238,14 @@ model QuizAttempt {
   @@map("quiz_attempts")
 }
 
-// Respostas específicas do usuário para cada pergunta
+// Individual quiz answers by students
 model QuizAnswer {
   id               String          @id @default(cuid())
   attemptId        String
   questionId       String
-  selectedOptionId String? // Opção selecionada pelo usuário
+  selectedOptionId String?
   isCorrect        Boolean
-  timeSpent        Int             @default(0) // Tempo gasto nesta questão
+  timeSpent        Int             @default(0)
   createdAt        DateTime        @default(now())
   attempt          QuizAttempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
   question         Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
@@ -257,6 +255,7 @@ model QuizAnswer {
   @@map("quiz_answers")
 }
 
+// Course enrollments
 model Enrollment {
   id          String    @id @default(cuid())
   userId      String
@@ -276,6 +275,7 @@ model Enrollment {
   @@map("enrollments")
 }
 
+// Comments on lessons
 model LessonComment {
   id        String          @id @default(cuid())
   content   String
@@ -295,21 +295,22 @@ model LessonComment {
   @@map("lesson_comments")
 }
 
+// Payment transactions
 model Payment {
   id                  String               @id @default(cuid())
   userId              String
   courseId            String
-  externalPaymentId   String?              @unique // ID do pagamento no gateway (genérico)
-  externalOrderId     String?              @unique // ID da ordem no gateway (genérico)
-  paymentData         String? // JSON com dados específicos do gateway (QR code, etc.)
-  paymentMethod       String?              @default("PIX") // PIX, CREDIT_CARD, DEBIT_CARD, BOLETO
-  platformFeeAmount   Float? // Taxa da plataforma em valor absoluto
-  instructorAmount    Float? // Valor que o instrutor vai receber
+  externalPaymentId   String?              @unique
+  externalOrderId     String?              @unique
+  paymentData         String?
+  paymentMethod       String?              @default("PIX")
+  platformFeeAmount   Float?
+  instructorAmount    Float?
   amount              Float
   currency            String               @default("BRL")
   status              PaymentStatus        @default(PENDING)
   paymentType         PaymentType
-  gatewayProvider     String?              @default("MERCADOPAGO") // MERCADOPAGO, STRIPE, PAGSEGURO, etc.
+  gatewayProvider     String?              @default("MERCADOPAGO")
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   course              Course               @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -328,6 +329,7 @@ model Payment {
   @@map("payments")
 }
 
+// Subscription management
 model Subscription {
   id                   String             @id @default(cuid())
   paymentId            String             @unique
@@ -348,6 +350,7 @@ model Subscription {
   @@map("subscriptions")
 }
 
+// Course reviews and ratings
 model Review {
   id        String   @id @default(cuid())
   rating    Int
@@ -366,6 +369,7 @@ model Review {
   @@map("reviews")
 }
 
+// Discount coupons
 model Coupon {
   id            String        @id @default(cuid())
   code          String        @unique
@@ -392,6 +396,7 @@ model Coupon {
   @@map("coupons")
 }
 
+// Coupon usage tracking
 model CouponUsage {
   id             String   @id @default(cuid())
   couponId       String
@@ -410,6 +415,7 @@ model CouponUsage {
   @@map("coupon_usages")
 }
 
+// Platform configuration settings
 model PlatformSetting {
   id          String      @id @default(cuid())
   key         String      @unique
@@ -425,6 +431,7 @@ model PlatformSetting {
   @@map("platform_settings")
 }
 
+// Refund requests
 model RefundRequest {
   id             String       @id @default(cuid())
   paymentId      String
@@ -448,6 +455,7 @@ model RefundRequest {
   @@map("refund_requests")
 }
 
+// Password reset tokens
 model PasswordReset {
   id        String   @id @default(cuid())
   email     String
@@ -514,7 +522,7 @@ enum RefundStatus {
   REJECTED
 }
 
-// Sistema de saldo interno dos instrutores
+// Instructor balance management
 model InstructorBalance {
   id               String               @id @default(cuid())
   instructorId     String               @unique
@@ -532,20 +540,21 @@ model InstructorBalance {
   @@map("instructor_balances")
 }
 
+// Payout requests by instructors
 model PayoutRequest {
   id                String              @id @default(cuid())
   instructorId      String
   amount            Float
   status            PayoutStatus        @default(PENDING)
-  bankAccountType   String? // 'PIX', 'CONTA_CORRENTE', 'POUPANCA'
-  bankDetails       Json // Dados bancários (PIX, banco, agência, conta)
+  bankAccountType   String?
+  bankDetails       Json
   requestedAt       DateTime            @default(now())
   processedAt       DateTime?
   processedBy       String?
   notes             String?
   rejectionReason   String?
-  requestMonth      Int // Mês do saque (1-12)
-  requestYear       Int // Ano do saque
+  requestMonth      Int
+  requestYear       Int
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   instructorBalance InstructorBalance   @relation(fields: [instructorId], references: [instructorId], onDelete: Cascade)
@@ -558,6 +567,7 @@ model PayoutRequest {
   @@map("payout_requests")
 }
 
+// Balance transaction history
 model BalanceTransaction {
   id                String                 @id @default(cuid())
   instructorId      String
@@ -587,14 +597,14 @@ enum PayoutStatus {
 }
 
 enum BalanceTransactionType {
-  CREDIT // Ganho de venda
-  DEBIT // Saque processado
-  REFUND // Estorno
-  FEE // Taxa da plataforma
+  CREDIT
+  DEBIT
+  REFUND
+  FEE
 }
 
 enum PayoutMethod {
   PIX
   BANK_TRANSFER
-  PAYPAL // Para futuro
+  PAYPAL
 }
