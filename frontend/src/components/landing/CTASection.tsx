@@ -10,7 +10,8 @@ export const CTASection = () => {
           Pronto para começar sua jornada?
         </h2>
         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto fade-in-up">
-          Comece hoje mesmo e transforme sua carreira com nossos cursos especializados
+          Comece hoje mesmo e transforme sua carreira com nossos cursos
+          especializados
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center fade-in-up">
@@ -38,4 +39,3 @@ export const CTASection = () => {
     </section>
   );
 };
-

@@ -26,7 +26,6 @@ export function PublicHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {" "}
-          
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-[#FF204E] rounded-lg flex items-center justify-center">
               <BookOpen className="w-5 h-5 text-white" />
@@ -35,7 +34,6 @@ export function PublicHeader() {
               Guitar Academy
             </span>
           </Link>
-          
           <nav className="hidden lg:flex items-center space-x-8">
             {user && (
               <Link
@@ -58,13 +56,12 @@ export function PublicHeader() {
               Recursos
             </Link>
             <Link
-              to="/#testimonials"
+              to="/#benefits"
               className="text-gray-700 hover:text-[#FF204E] transition-colors"
             >
-              Depoimentos
+              Benefícios
             </Link>
           </nav>
-          
           <div className="lg:hidden">
             <DropdownMenu
               open={isMobileMenuOpen}
@@ -94,16 +91,15 @@ export function PublicHeader() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
-                    navigate("/#testimonials");
+                    navigate("/#benefits");
                     setIsMobileMenuOpen(false);
                   }}
                 >
-                  Depoimentos
+                  Benefícios
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>{" "}
-          
           <div className="flex items-center space-x-2 md:space-x-4">
             {user ? (
               <DropdownMenu>
@@ -159,4 +155,3 @@ export function PublicHeader() {
     </header>
   );
 }
-

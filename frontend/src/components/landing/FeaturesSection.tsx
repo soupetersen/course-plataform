@@ -5,7 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { BookOpen, Users, Clock, Award, Smartphone, HeadphonesIcon } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  Clock,
+  Award,
+  Smartphone,
+  HeadphonesIcon,
+} from "lucide-react";
 
 export const FeaturesSection = () => {
   const features = [

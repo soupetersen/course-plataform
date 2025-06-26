@@ -20,21 +20,19 @@ export const TestimonialsSection = () => {
     {
       icon: Trophy,
       title: "Metodologia Prática",
-      content:
-        "Aprenda fazendo com projetos reais e exercícios hands-on.",
+      content: "Aprenda fazendo com projetos reais e exercícios hands-on.",
       color: "text-yellow-500",
     },
     {
       icon: Users,
       title: "Suporte Dedicado",
-      content:
-        "Tire suas dúvidas diretamente com instrutores especializados.",
+      content: "Tire suas dúvidas diretamente com instrutores especializados.",
       color: "text-purple-500",
     },
   ];
 
   return (
-    <section id="beneficios" className="section-padding bg-card">
+    <section id="benefits" className="section-padding bg-card">
       <div className="container">
         <div className="text-center mb-16 fade-in">
           <h2 className="text-4xl font-bold text-foreground mb-4">
