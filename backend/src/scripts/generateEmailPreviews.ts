@@ -176,7 +176,7 @@ async function generateEmailPreviews() {
           description: 'Confirmação de pagamento para curso de música'
         },
         'enrollment-confirmation': {
-          title: '� Matrícula Confirmada',
+          title: '🎓 Matrícula Confirmada',
           description: 'Boas-vindas ao novo aluno de música'
         },
         'pix-payment': {
@@ -188,7 +188,7 @@ async function generateEmailPreviews() {
           description: 'Parabéns pela conclusão do curso de música'
         },
         'password-reset': {
-          title: '� Reset de Senha',
+          title: '🔑 Reset de Senha',
           description: 'Link para redefinir senha da conta'
         }
       };

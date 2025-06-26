@@ -20,7 +20,7 @@ export class CourseController {
       if (!userInfo) {
         return reply.status(401).send({
           success: false,
-          message: 'Voc� precisa estar logado para criar um curso.'
+          message: 'Você precisa estar logado para criar um curso.'
         });
       }
 
