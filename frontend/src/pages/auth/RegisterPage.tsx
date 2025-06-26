@@ -104,9 +104,7 @@ export const RegisterPage = () => {
             <CardTitle className="text-3xl font-bold text-quaternary">
               Criar Conta
             </CardTitle>
-            <CardDescription>
-              Junte-se à nossa plataforma de cursos
-            </CardDescription>
+            <CardDescription>Junte-se ao EduMy</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -293,4 +291,3 @@ export const RegisterPage = () => {
     </div>
   );
 };
-

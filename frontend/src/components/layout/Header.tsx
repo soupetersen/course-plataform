@@ -45,7 +45,7 @@ export function Header({ onMobileMenuClick }: HeaderProps = {}) {
               className="flex items-center animate-fade-in flex-shrink-0"
             >
               <div className="text-lg sm:text-xl md:text-2xl font-bold text-quaternary-500 truncate">
-                Guitar Academy
+                EduMy
               </div>
             </Link>
           </div>

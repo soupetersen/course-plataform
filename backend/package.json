@@ -1,7 +1,7 @@
 {
   "name": "course-platform-backend",
   "version": "1.0.0",
-  "description": "Course platform backend with Node.js, Fastify, Prisma, and Clean Architecture",
+  "description": "EduMy - Plataforma de cursos online com Node.js, Fastify, Prisma, e Clean Architecture",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",

@@ -113,9 +113,9 @@ async function buildApp() {
 
   fastify.get('/api', async () => {
     return {
-      name: 'Course Platform API',
+      name: 'EduMy API',
       version: '1.0.0',
-      description: 'A comprehensive course platform backend with user management, course creation, and payment processing',      endpoints: {
+      description: 'EduMy - Plataforma completa de cursos online com gerenciamento de usuários, criação de cursos e processamento de pagamentos',      endpoints: {
         auth: '/api/auth',
         courses: '/api/courses',
         modules: '/api/modules',

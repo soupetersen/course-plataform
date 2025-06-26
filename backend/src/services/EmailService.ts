@@ -162,7 +162,7 @@ export class EmailService {
     
     return this.sendEmail({
       to: email,
-      subject: `🔒 Código de redefinição de senha - Course Platform`,
+      subject: `🔒 Código de redefinição de senha - EduMy`,
       html,
     });
   }
