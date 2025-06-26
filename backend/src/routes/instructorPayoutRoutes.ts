@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { InstructorPayoutController } from '@/controllers/InstructorPayoutController';
+import { AuthMiddleware } from '@/middlewares/AuthMiddleware';
 import { DIContainer } from '@/shared/utils/DIContainer';
 import { InstructorPayoutService } from '@/services/InstructorPayoutService';
 
@@ -7,183 +8,186 @@ export async function instructorPayoutRoutes(fastify: FastifyInstance) {
   const container = (fastify as any).diContainer as DIContainer;
   const instructorPayoutService = container.resolve<InstructorPayoutService>('InstructorPayoutService');
   const instructorPayoutController = new InstructorPayoutController(instructorPayoutService);
+  const authMiddleware = new AuthMiddleware();
 
-  // Middleware de autenticação
-  fastify.addHook('preHandler', async (request) => {
-    await (request as any).jwtVerify();
+  // Registrar rotas com autenticação
+  fastify.register(async function(fastify) {
+    fastify.addHook('preHandler', authMiddleware.authenticate.bind(authMiddleware));
+    fastify.addHook('preHandler', authMiddleware.requireInstructor());
+
+    /**
+     * @swagger
+     * /instructor/payout/data:
+     *   put:
+     *     tags: [Instructor Payout]
+     *     summary: Atualizar dados de pagamento do instrutor
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - payoutPreference
+     *               - documentType
+     *               - documentNumber
+     *               - fullName
+     *             properties:
+     *               pixKey:
+     *                 type: string
+     *                 description: Chave PIX (CPF, email, telefone ou chave aleatória)
+     *               bankData:
+     *                 type: object
+     *                 properties:
+     *                   bank:
+     *                     type: string
+     *                   agency:
+     *                     type: string
+     *                   account:
+     *                     type: string
+     *                   accountType:
+     *                     type: string
+     *                     enum: [CORRENTE, POUPANCA]
+     *                   accountHolder:
+     *                     type: string
+     *               payoutPreference:
+     *                 type: string
+     *                 enum: [PIX, BANK_TRANSFER]
+     *               documentType:
+     *                 type: string
+     *                 enum: [CPF, CNPJ]
+     *               documentNumber:
+     *                 type: string
+     *               fullName:
+     *                 type: string
+     *     responses:
+     *       200:
+     *         description: Dados atualizados com sucesso
+     */
+    fastify.put('/instructor/payout/data', {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['payoutPreference', 'documentType', 'documentNumber', 'fullName'],
+          properties: {
+            pixKey: { type: 'string' },
+            bankData: {
+              type: 'object',
+              properties: {
+                bank: { type: 'string' },
+                agency: { type: 'string' },
+                account: { type: 'string' },
+                accountType: { type: 'string', enum: ['CORRENTE', 'POUPANCA'] },
+                accountHolder: { type: 'string' }
+              }
+            },
+            payoutPreference: { type: 'string', enum: ['PIX', 'BANK_TRANSFER'] },
+            documentType: { type: 'string', enum: ['CPF', 'CNPJ'] },
+            documentNumber: { type: 'string' },
+            fullName: { type: 'string' }
+          }
+        }
+      }
+    }, instructorPayoutController.updatePayoutData.bind(instructorPayoutController));
+
+    /**
+     * @swagger
+     * /instructor/payout/balance:
+     *   get:
+     *     tags: [Instructor Payout]
+     *     summary: Obter saldo atual do instrutor
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Saldo do instrutor
+     */
+    fastify.get('/instructor/payout/balance', instructorPayoutController.getBalance.bind(instructorPayoutController));
+
+    /**
+     * @swagger
+     * /instructor/payout/request:
+     *   post:
+     *     tags: [Instructor Payout]
+     *     summary: Solicitar saque
+     *     security:
+     *       - bearerAuth: []
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - amount
+     *               - method
+     *             properties:
+     *               amount:
+     *                 type: number
+     *                 minimum: 50
+     *               method:
+     *                 type: string
+     *                 enum: [PIX, BANK_TRANSFER]
+     *     responses:
+     *       200:
+     *         description: Solicitação criada com sucesso
+     */
+    fastify.post('/instructor/payout/request', {
+      schema: {
+        body: {
+          type: 'object',
+          required: ['amount', 'method'],
+          properties: {
+            amount: { type: 'number', minimum: 50 },
+            method: { type: 'string', enum: ['PIX', 'BANK_TRANSFER'] }
+          }
+        }
+      }
+    }, instructorPayoutController.requestPayout.bind(instructorPayoutController));
+
+    /**
+     * @swagger
+     * /instructor/payout/history:
+     *   get:
+     *     tags: [Instructor Payout]
+     *     summary: Histórico de saques
+     *     security:
+     *       - bearerAuth: []
+     *     responses:
+     *       200:
+     *         description: Lista de saques do instrutor
+     */
+    fastify.get('/instructor/payout/history', instructorPayoutController.getPayoutHistory.bind(instructorPayoutController));
+
+    /**
+     * @swagger
+     * /instructor/payout/transactions:
+     *   get:
+     *     tags: [Instructor Payout]
+     *     summary: Extrato de transações
+     *     security:
+     *       - bearerAuth: []
+     *     parameters:
+     *       - name: page
+     *         in: query
+     *         schema:
+     *           type: integer
+     *           default: 1
+     *       - name: limit
+     *         in: query
+     *         schema:
+     *           type: integer
+     *           default: 20
+     *     responses:
+     *       200:
+     *         description: Extrato de transações
+     */
+    fastify.get('/instructor/payout/transactions', instructorPayoutController.getTransactionHistory.bind(instructorPayoutController));
   });
 
-  /**
-   * @swagger
-   * /instructor/payout/data:
-   *   put:
-   *     tags: [Instructor Payout]
-   *     summary: Atualizar dados de pagamento do instrutor
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - payoutPreference
-   *               - documentType
-   *               - documentNumber
-   *               - fullName
-   *             properties:
-   *               pixKey:
-   *                 type: string
-   *                 description: Chave PIX (CPF, email, telefone ou chave aleatória)
-   *               bankData:
-   *                 type: object
-   *                 properties:
-   *                   bank:
-   *                     type: string
-   *                   agency:
-   *                     type: string
-   *                   account:
-   *                     type: string
-   *                   accountType:
-   *                     type: string
-   *                     enum: [CORRENTE, POUPANCA]
-   *                   accountHolder:
-   *                     type: string
-   *               payoutPreference:
-   *                 type: string
-   *                 enum: [PIX, BANK_TRANSFER]
-   *               documentType:
-   *                 type: string
-   *                 enum: [CPF, CNPJ]
-   *               documentNumber:
-   *                 type: string
-   *               fullName:
-   *                 type: string
-   *     responses:
-   *       200:
-   *         description: Dados atualizados com sucesso
-   */
-  fastify.put('/instructor/payout/data', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['payoutPreference', 'documentType', 'documentNumber', 'fullName'],
-        properties: {
-          pixKey: { type: 'string' },
-          bankData: {
-            type: 'object',
-            properties: {
-              bank: { type: 'string' },
-              agency: { type: 'string' },
-              account: { type: 'string' },
-              accountType: { type: 'string', enum: ['CORRENTE', 'POUPANCA'] },
-              accountHolder: { type: 'string' }
-            }
-          },
-          payoutPreference: { type: 'string', enum: ['PIX', 'BANK_TRANSFER'] },
-          documentType: { type: 'string', enum: ['CPF', 'CNPJ'] },
-          documentNumber: { type: 'string' },
-          fullName: { type: 'string' }
-        }
-      }
-    }
-  }, instructorPayoutController.updatePayoutData.bind(instructorPayoutController));
-
-  /**
-   * @swagger
-   * /instructor/payout/balance:
-   *   get:
-   *     tags: [Instructor Payout]
-   *     summary: Obter saldo atual do instrutor
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: Saldo do instrutor
-   */
-  fastify.get('/instructor/payout/balance', instructorPayoutController.getBalance.bind(instructorPayoutController));
-
-  /**
-   * @swagger
-   * /instructor/payout/request:
-   *   post:
-   *     tags: [Instructor Payout]
-   *     summary: Solicitar saque
-   *     security:
-   *       - bearerAuth: []
-   *     requestBody:
-   *       required: true
-   *       content:
-   *         application/json:
-   *           schema:
-   *             type: object
-   *             required:
-   *               - amount
-   *               - method
-   *             properties:
-   *               amount:
-   *                 type: number
-   *                 minimum: 50
-   *               method:
-   *                 type: string
-   *                 enum: [PIX, BANK_TRANSFER]
-   *     responses:
-   *       200:
-   *         description: Solicitação criada com sucesso
-   */
-  fastify.post('/instructor/payout/request', {
-    schema: {
-      body: {
-        type: 'object',
-        required: ['amount', 'method'],
-        properties: {
-          amount: { type: 'number', minimum: 50 },
-          method: { type: 'string', enum: ['PIX', 'BANK_TRANSFER'] }
-        }
-      }
-    }
-  }, instructorPayoutController.requestPayout.bind(instructorPayoutController));
-
-  /**
-   * @swagger
-   * /instructor/payout/history:
-   *   get:
-   *     tags: [Instructor Payout]
-   *     summary: Histórico de saques
-   *     security:
-   *       - bearerAuth: []
-   *     responses:
-   *       200:
-   *         description: Lista de saques do instrutor
-   */
-  fastify.get('/instructor/payout/history', instructorPayoutController.getPayoutHistory.bind(instructorPayoutController));
-
-  /**
-   * @swagger
-   * /instructor/payout/transactions:
-   *   get:
-   *     tags: [Instructor Payout]
-   *     summary: Extrato de transações
-   *     security:
-   *       - bearerAuth: []
-   *     parameters:
-   *       - name: page
-   *         in: query
-   *         schema:
-   *           type: integer
-   *           default: 1
-   *       - name: limit
-   *         in: query
-   *         schema:
-   *           type: integer
-   *           default: 20
-   *     responses:
-   *       200:
-   *         description: Extrato de transações
-   */
-  fastify.get('/instructor/payout/transactions', instructorPayoutController.getTransactionHistory.bind(instructorPayoutController));
-
+  // Rotas de cálculo de taxas (sem autenticação)
   /**
    * @swagger
    * /payment/fees/calculate:

@@ -16,6 +16,7 @@ import { adminCouponRoutes } from './routes/adminCouponRoutes';
 import { adminPlatformSettingsRoutes } from './routes/adminPlatformSettingsRoutes';
 import { instructorCouponRoutes } from './routes/instructorCouponRoutes';
 import { instructorAnalyticsRoutes } from './routes/instructorAnalyticsRoutes';
+import { instructorPayoutRoutes } from './routes/instructorPayoutRoutes';
 import { studentCouponRoutes } from './routes/studentCouponRoutes';
 import { createUploadRoutes } from './routes/uploadRoutes';
 import { savedCardRoutes } from './routes/savedCardRoutes';
@@ -84,6 +85,7 @@ async function buildApp() {
   await fastify.register(adminPlatformSettingsRoutes, { prefix: '/api/admin/settings' });  
   await fastify.register(instructorCouponRoutes, { prefix: '/api' });
   await fastify.register(instructorAnalyticsRoutes, { prefix: '/api/instructor/analytics' });
+  await fastify.register(instructorPayoutRoutes, { prefix: '/api' });
   await fastify.register(studentCouponRoutes, { prefix: '/api/coupons' });  await fastify.register(questionRoutes, { prefix: '/api' });
   await fastify.register(lessonProgressRoutes, { prefix: '/api' });
   

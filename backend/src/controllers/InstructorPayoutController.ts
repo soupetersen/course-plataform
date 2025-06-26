@@ -36,14 +36,14 @@ export class InstructorPayoutController {
       const userInfo = (req as any).userInfo;
       const data = req.body as UpdatePayoutDataRequest;
 
-      if (userInfo.role !== 'INSTRUCTOR') {
+      if (!['INSTRUCTOR', 'ADMIN'].includes(userInfo.role)) {
         return reply.status(403).send({
           success: false,
-          error: 'Apenas instrutores podem configurar dados de pagamento'
+          error: 'Apenas instrutores e administradores podem configurar dados de pagamento'
         });
       }
 
-      const result = await this.instructorPayoutService.updatePayoutData(userInfo.id, data);
+      const result = await this.instructorPayoutService.updatePayoutData(userInfo.userId, data);
 
       reply.send({
         success: true,
@@ -66,14 +66,14 @@ export class InstructorPayoutController {
     try {
       const userInfo = (req as any).userInfo;
 
-      if (userInfo.role !== 'INSTRUCTOR') {
+      if (!['INSTRUCTOR', 'ADMIN'].includes(userInfo.role)) {
         return reply.status(403).send({
           success: false,
-          error: 'Apenas instrutores podem ver o saldo'
+          error: 'Apenas instrutores e administradores podem ver o saldo'
         });
       }
 
-      const balance = await this.instructorPayoutService.getInstructorBalance(userInfo.id);
+      const balance = await this.instructorPayoutService.getInstructorBalance(userInfo.userId);
 
       reply.send({
         success: true,
@@ -96,14 +96,14 @@ export class InstructorPayoutController {
       const userInfo = (req as any).userInfo;
       const data = req.body as RequestPayoutRequest;
 
-      if (userInfo.role !== 'INSTRUCTOR') {
+      if (!['INSTRUCTOR', 'ADMIN'].includes(userInfo.role)) {
         return reply.status(403).send({
           success: false,
-          error: 'Apenas instrutores podem solicitar saques'
+          error: 'Apenas instrutores e administradores podem solicitar saques'
         });
       }
 
-      const result = await this.instructorPayoutService.requestPayout(userInfo.id, data);
+      const result = await this.instructorPayoutService.requestPayout(userInfo.userId, data);
 
       reply.send({
         success: true,
@@ -126,14 +126,14 @@ export class InstructorPayoutController {
     try {
       const userInfo = (req as any).userInfo;
 
-      if (userInfo.role !== 'INSTRUCTOR') {
+      if (!['INSTRUCTOR', 'ADMIN'].includes(userInfo.role)) {
         return reply.status(403).send({
           success: false,
-          error: 'Apenas instrutores podem ver histórico de saques'
+          error: 'Apenas instrutores e administradores podem ver histórico de saques'
         });
       }
 
-      const history = await this.instructorPayoutService.getPayoutHistory(userInfo.id);
+      const history = await this.instructorPayoutService.getPayoutHistory(userInfo.userId);
 
       reply.send({
         success: true,
@@ -156,15 +156,15 @@ export class InstructorPayoutController {
       const userInfo = (req as any).userInfo;
       const { page = 1, limit = 20 } = req.query as any;
 
-      if (userInfo.role !== 'INSTRUCTOR') {
+      if (!['INSTRUCTOR', 'ADMIN'].includes(userInfo.role)) {
         return reply.status(403).send({
           success: false,
-          error: 'Apenas instrutores podem ver extrato'
+          error: 'Apenas instrutores e administradores podem ver extrato'
         });
       }
 
       const history = await this.instructorPayoutService.getTransactionHistory(
-        userInfo.id,
+        userInfo.userId,
         parseInt(page),
         parseInt(limit)
       );
